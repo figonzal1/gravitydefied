@@ -54,7 +54,9 @@ public class MenuHelmetView extends View {
 		drawHelmet(canvas);
 
 		canvas.restore();
-		invalidate();
+		if (show) {
+			invalidate();
+		}
 	}
 
 	protected void drawHelmet(Canvas canvas) {
@@ -98,6 +100,7 @@ public class MenuHelmetView extends View {
 		}
 		this.show = show;
 		lastActive = this;
+		invalidate();
 	}
 
 	protected int getScaledHeight() {
