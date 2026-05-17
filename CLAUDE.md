@@ -8,14 +8,14 @@ A faithful Android port of the classic 2004 J2ME game **Gravity Defied** (a moto
 
 ## Build system
 
-This is a **legacy pre-Gradle Android project**. There is no `build.gradle`, no Gradle wrapper, and no `build.xml`. It is built by an IDE using the old Android SDK tooling:
+This is a **Gradle-based Android project** (AGP 8.13, Gradle 8.13):
 
-- IntelliJ IDEA legacy Android plugin (`.idea/`, `AGDTR.iml`), or Eclipse ADT (`.project`, `.classpath`).
-- Compile target **Android API 19**; `minSdkVersion=8`, `targetSdkVersion=19` (`AndroidManifest.xml`, `project.properties`).
-- Language level is Java 6/7 era — no lambdas, no streams, anonymous inner classes everywhere. Match this style.
-- Dependencies are plain jars / project libraries, not Maven coordinates: ACRA 4.5.0 (`libs/acra-4.5.0.jar`, crash reporting) and `android-support-v4`. Networking uses the legacy `org.apache.http` client that shipped with old Android.
+- `app/build.gradle`: `compileSdk 36`, `minSdk 21`, `targetSdk 36`, `versionCode 29`.
+- Language level Java 8 (`compileOptions JavaVersion.VERSION_1_8`), but the codebase style is Java 6/7 era — anonymous inner classes everywhere, no lambdas, no streams. Match this style in new code.
+- Dependencies: ACRA 4.5.0 (`libs/acra-4.5.0.jar`) as a local JAR. No AndroidX — uses plain `android.app.Activity`, `android.widget.*`, etc. Networking uses the legacy `org.apache.http` client.
+- Theme: `android:Theme.Material.Light.NoActionBar` (API 21 built-in, no Material Components library).
 
-There are **no tests, no lint config, and no CI**. Do not add a Gradle build or test harness unless explicitly asked — it would not match how this project is built.
+There are **no tests, no lint config, and no CI**.
 
 ## Architecture
 
@@ -40,4 +40,7 @@ Threading rule the codebase follows consistently: game logic runs on `game_threa
 - **Do not rename or "modernize" the cryptic identifiers** (`m_longI`, `_avJ()`, `_dovI()`, single-letter fields, class `k`) in `Game/`, `Levels/Loader`, and parts of `Menu/`. They are machine-decompiled from the original J2ME game and the goal is behavior parity with the 2004 original. Treat this like generated code.
 - **Leave the large blocks of commented-out code alone** unless the task is specifically about them. They are deliberate artifacts of the J2ME→Android porting process and serve as reference.
 - When changing gameplay/physics behavior, remember the reference is the original game's feel — prefer minimal, surgical changes over refactors.
-- All user-visible strings are in `res/values*/`. Resource qualifiers in use include tablet (`values-sw600dp`, `values-sw720dp-land`) and API-level (`values-v11`, `values-v14`) variants.
+- All user-visible strings are in `res/values*/`. Resource qualifiers in use: tablet (`values-sw600dp`, `values-sw720dp-land`). The `values-v11` and `values-v14` style overrides are intentionally empty (dead with minSdk 21).
+- UI colors are centralized in `res/values/colors.xml`; do not add hardcoded hex color literals. Spacing/typography lives in `res/values/dimens.xml`.
+- `Html.fromHtml()` must always be called via `Helpers.fromHtml()` — it handles the API 24 signature change.
+- `res/layout/` only contains `levels_list_item.xml`; the main view tree is built programmatically in `GDActivity.onCreate()`.
