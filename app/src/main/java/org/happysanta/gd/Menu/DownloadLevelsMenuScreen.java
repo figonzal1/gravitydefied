@@ -80,18 +80,14 @@ public class DownloadLevelsMenuScreen extends LevelsMenuScreen {
 
 					hideLoading();
 
-					addElements = new AsyncAddElements() {
-						@Override
-						protected void onPostExecute(Void v) {
-							logDebug("offset = " + offset + ", totalCount = " + levelsResponse.getTotalCount());
-							fullLoaded = offset >= levelsResponse.getTotalCount();
-							if (!fullLoaded)
-								showLoading();
+					addElements = submitAddElements(levelsResponse.getLevels(), () -> {
+						logDebug("offset = " + offset + ", totalCount = " + levelsResponse.getTotalCount());
+						fullLoaded = offset >= levelsResponse.getTotalCount();
+						if (!fullLoaded)
+							showLoading();
 
-							isLoading = false;
-						}
-					};
-					addElements.execute(levelsResponse.getLevels());
+						isLoading = false;
+					});
 				}
 
 				@Override
@@ -189,7 +185,7 @@ public class DownloadLevelsMenuScreen extends LevelsMenuScreen {
 			if (request != null) request.cancel();
 			// api.cancelRequest();
 			if (waitForNetworkConnection != null)
-				waitForNetworkConnection.cancel(true);
+				waitForNetworkConnection.cancel();
 		}
 
 		activity.titleLayout.removeView(sortImage);
