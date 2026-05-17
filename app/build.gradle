@@ -26,10 +26,7 @@ android {
         }
     }
 
-    // org.apache.http was removed from android.jar at API 23.
-    // This legacy shim keeps it on the compile classpath so Phase 1 compiles without
-    // touching the networking code. Phase 2 replaces it with HttpURLConnection.
-    useLibrary 'org.apache.http.legacy'
+
 }
 
 dependencies {
