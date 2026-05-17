@@ -45,6 +45,7 @@ public class GDActivity extends Activity implements Runnable {
 	public static final int MENU_TITLE_FONT_SIZE = 30;
 	public static final int GAME_MENU_BUTTON_LAYOUT_WIDTH = 40;
 	public static final int GAME_MENU_BUTTON_LAYOUT_HEIGHT = 56;
+	public static final int REQUEST_OPEN_MRG = 1001;
 
 	private static final long IMAGES_DELAY = 1000L;
 	private static final long IMAGES_DELAY_DEBUG = 100L;
@@ -1083,9 +1084,25 @@ public class GDActivity extends Activity implements Runnable {
 	private void doRestartApp() {
 		Intent mStartActivity = new Intent(this, GDActivity.class);
 		int mPendingIntentId = 123456;
-		PendingIntent mPendingIntent = PendingIntent.getActivity(this, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT);
+		PendingIntent mPendingIntent = PendingIntent.getActivity(this, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 		AlarmManager mgr = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
 		mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+	}
+
+	public void pickMrgFile() {
+		Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+		intent.addCategory(Intent.CATEGORY_OPENABLE);
+		intent.setType("*/*");
+		startActivityForResult(intent, REQUEST_OPEN_MRG);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (requestCode == REQUEST_OPEN_MRG && resultCode == RESULT_OK && data != null) {
+			Uri uri = data.getData();
+			if (uri != null) menu.installMrgFromUri(uri);
+		}
 	}
 
 	private void sendStats() {
