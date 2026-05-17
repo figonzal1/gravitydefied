@@ -5,12 +5,11 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.os.Environment;
+import android.net.Uri;
 import android.text.Html;
 import android.text.InputType;
 import android.widget.EditText;
 import org.happysanta.gd.Command;
-import org.happysanta.gd.FileDialog;
 import org.happysanta.gd.GDActivity;
 import org.happysanta.gd.Game.GameView;
 import org.happysanta.gd.Global;
@@ -24,6 +23,9 @@ import org.happysanta.gd.Storage.LevelsManager;
 import org.acra.ACRA;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import static org.happysanta.gd.Helpers.*;
@@ -1501,50 +1503,67 @@ public class Menu
 	}*/
 
 	public void installFromFileBrowse() {
-		if (!LevelsManager.isExternalStorageReadable()) {
-			showAlert(getString(R.string.error), getString(R.string.e_external_storage_is_not_readable), null);
+		getGDActivity().pickMrgFile();
+	}
+
+	public void installMrgFromUri(Uri uri) {
+		final GDActivity gd = getGDActivity();
+		final File tempFile;
+		try {
+			tempFile = copyUriToTempFile(uri);
+		} catch (Exception e) {
+			showAlert(getString(R.string.error), e.getMessage(), null);
 			return;
 		}
 
-		final GDActivity gd = getGDActivity();
-		FileDialog fileDialog = new FileDialog(gd, Environment.getExternalStorageDirectory(), ".mrg");
-		fileDialog.addFileListener(new FileDialog.FileSelectedListener() {
-			public void fileSelected(final File file) {
-				final EditText input = new EditText(gd);
-				input.setInputType(InputType.TYPE_CLASS_TEXT);
+		final EditText input = new EditText(gd);
+		input.setInputType(InputType.TYPE_CLASS_TEXT);
 
-				AlertDialog.Builder alert = new AlertDialog.Builder(gd)
-						.setTitle(getString(R.string.enter_levels_name_title))
-						.setMessage(getString(R.string.enter_levels_name))
-						.setView(input)
-						.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int whichButton) {
-								boolean ok = true;
-								String name = input.getText().toString();
-								if (name.equals("")) name = file.getName();
+		AlertDialog.Builder alert = new AlertDialog.Builder(gd)
+				.setTitle(getString(R.string.enter_levels_name_title))
+				.setMessage(getString(R.string.enter_levels_name))
+				.setView(input)
+				.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						boolean ok = true;
+						String name = input.getText().toString();
+						if (name.equals("")) name = "import.mrg";
+						ProgressDialog progressDialog = ProgressDialog.show(gd, getString(R.string.install), getString(R.string.installing), true);
+						try {
+							gd.levelsManager.install(tempFile, name, "", 0);
+						} catch (Exception e) {
+							ok = false;
+							showAlert(getString(R.string.error), e.getMessage(), null);
+						} finally {
+							progressDialog.dismiss();
+							tempFile.delete();
+						}
+						if (ok) {
+							gd.levelsManager.showSuccessfullyInstalledDialog();
+						}
+					}
+				})
+				.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						tempFile.delete();
+					}
+				});
+		alert.show();
+	}
 
-								ProgressDialog progressDialog = ProgressDialog.show(gd, getString(R.string.install), getString(R.string.installing), true);
-
-								try {
-									gd.levelsManager.install(file, name, "", 0);
-								} catch (Exception e) {
-									ok = false;
-									e.printStackTrace();
-									showAlert(getString(R.string.error), e.getMessage(), null);
-								} finally {
-									progressDialog.dismiss();
-								}
-
-								if (ok) {
-									gd.levelsManager.showSuccessfullyInstalledDialog();
-								}
-							}
-						})
-						.setNegativeButton(getString(R.string.cancel), null);
-				alert.show();
-			}
-		});
-		fileDialog.showDialog();
+	private File copyUriToTempFile(Uri uri) throws IOException {
+		File tempFile = new File(getGDActivity().getCacheDir(), "import_level.mrg");
+		InputStream in = getGDActivity().getContentResolver().openInputStream(uri);
+		FileOutputStream out = new FileOutputStream(tempFile);
+		try {
+			byte[] buf = new byte[4096];
+			int len;
+			while ((len = in.read(buf)) > 0) out.write(buf, 0, len);
+		} finally {
+			in.close();
+			out.close();
+		}
+		return tempFile;
 	}
 
 	public static boolean isNameCheat(byte[] chars) {

@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
-import android.os.Environment;
 import android.os.StatFs;
 import org.happysanta.gd.API.API;
 import org.happysanta.gd.API.DownloadFile;
@@ -420,24 +419,15 @@ public class LevelsManager {
 	}
 
 	public static boolean isExternalStorageWritable() {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state)) {
-			return true;
-		}
-		return false;
+		return getGDActivity().getExternalFilesDir(null) != null;
 	}
 
 	public static boolean isExternalStorageReadable() {
-		String state = Environment.getExternalStorageState();
-		if (Environment.MEDIA_MOUNTED.equals(state) ||
-				Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
-			return true;
-		}
-		return false;
+		return getGDActivity().getExternalFilesDir(null) != null;
 	}
 
 	public static File getLevelsDirectory() {
-		File file = new File(Environment.getExternalStorageDirectory(), "GDLevels");
+		File file = new File(getGDActivity().getExternalFilesDir(null), "GDLevels");
 		if (!file.mkdirs()) {
 			logDebug("LevelsManager.getLevelsDirectory: directory not created");
 		}
