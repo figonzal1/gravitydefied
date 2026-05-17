@@ -27,7 +27,6 @@ import org.happysanta.gd.Menu.Views.MenuTextView;
 import org.happysanta.gd.Menu.Views.MenuTitleLinearLayout;
 import org.happysanta.gd.Menu.Views.ObservableScrollView;
 import org.happysanta.gd.Storage.LevelsManager;
-import org.acra.util.Installation;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -1128,7 +1127,7 @@ public class GDActivity extends Activity implements Runnable {
 					HashMap<String, Double> stats = levelsManager.getLevelsStat();
 
 					JSONObject statsJSON = new JSONObject(stats);
-					String id = Installation.id(self);
+					String id = Helpers.getInstallationId(self);
 					int useCheats = org.happysanta.gd.Menu.Menu.isNameCheat(Settings.getName()) ? 1 : 0;
 
 					API.sendStats(statsJSON.toString(), id, useCheats, new ResponseHandler() {
