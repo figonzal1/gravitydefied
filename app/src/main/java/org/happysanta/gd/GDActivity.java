@@ -12,7 +12,6 @@ import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.*;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -21,6 +20,7 @@ import android.widget.TextView;
 import org.happysanta.gd.API.*;
 import org.happysanta.gd.Game.*;
 import org.happysanta.gd.Levels.Loader;
+import org.happysanta.gd.R;
 import org.happysanta.gd.Menu.Views.MenuHelmetView;
 import org.happysanta.gd.Menu.Views.MenuImageView;
 import org.happysanta.gd.Menu.Views.MenuLinearLayout;
@@ -183,7 +183,7 @@ public class GDActivity extends Activity implements Runnable {
 			gameView = new GameView(this);
 
 			scrollView = new ObservableScrollView(this);
-			scrollView.setBackgroundColor(0x00ffffff);
+			scrollView.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 			scrollView.setFillViewport(true);
 			scrollView.setOnScrollListener(new ObservableScrollView.OnScrollListener() {
 				@Override
@@ -201,17 +201,21 @@ public class GDActivity extends Activity implements Runnable {
 			scrollView.setVisibility(View.GONE);
 
 			frame = new FrameLayout(this);
-			frame.setBackgroundColor(0xffffffff);
+			frame.setBackgroundColor(getResources().getColor(R.color.menu_background));
 
 			titleLayout = new MenuTitleLinearLayout(this);
-			titleLayout.setBackgroundColor(0x00ffffff);
+			titleLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT);
 			titleLayout.setGravity(Gravity.TOP);
 			titleLayout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-			titleLayout.setPadding(Helpers.getDp(MENU_TITLE_LAYOUT_X_PADDING), Helpers.getDp(MENU_TITLE_LAYOUT_TOP_PADDING), Helpers.getDp(MENU_TITLE_LAYOUT_X_PADDING), Helpers.getDp(MENU_TITLE_LAYOUT_BOTTOM_PADDING));
+			titleLayout.setPadding(
+					getResources().getDimensionPixelSize(R.dimen.menu_layout_padding_horizontal),
+					getResources().getDimensionPixelSize(R.dimen.menu_title_padding_top),
+					getResources().getDimensionPixelSize(R.dimen.menu_layout_padding_horizontal),
+					getResources().getDimensionPixelSize(R.dimen.menu_title_padding_bottom));
 
 			menuTitleTextView = new TextView(this);
 			menuTitleTextView.setText(getString(R.string.main));
-			menuTitleTextView.setTextColor(0xff000000);
+			menuTitleTextView.setTextColor(getResources().getColor(R.color.title_text));
 			menuTitleTextView.setTypeface(Global.robotoCondensedTypeface);
 			menuTitleTextView.setTextSize(MENU_TITLE_FONT_SIZE);
 			menuTitleTextView.setLineSpacing(0f, 1.1f);
@@ -246,12 +250,12 @@ public class GDActivity extends Activity implements Runnable {
 				LinearLayout row = new LinearLayout(this);
 				row.setPadding(Helpers.getDp(KeyboardController.PADDING), i == 0 ? Helpers.getDp(KeyboardController.PADDING) : 0, Helpers.getDp(KeyboardController.PADDING), 0);
 				row.setOrientation(LinearLayout.HORIZONTAL);
-				row.setBackgroundColor(0xc6ffffff);
+				row.setBackgroundColor(getResources().getColor(R.color.keyboard_background));
 				for (int j = 0; j < 3; j++) {
 					LinearLayout btn = new LinearLayout(this);
 					TextView btnText = new TextView(this);
 					btnText.setText(String.valueOf(i * 3 + j + 1));
-					btnText.setTextColor(0xff000000);
+					btnText.setTextColor(getResources().getColor(R.color.keyboard_button_text));
 					btnText.setTextSize(17);
 					btn.setBackgroundResource(getResources().getIdentifier(buttonResources[i * 3 + j], "drawable", getPackageName()));
 					btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -296,7 +300,7 @@ public class GDActivity extends Activity implements Runnable {
 			portedTextView.setTypeface(Global.robotoCondensedTypeface);
 			portedTextView.setTextSize(15);
 			portedTextView.setLineSpacing(0f, 1.2f);
-			portedTextView.setText(Html.fromHtml(getString(R.string.ported_text)));
+			portedTextView.setText(Helpers.fromHtml(getString(R.string.ported_text)));
 			portedTextView.setGravity(Gravity.CENTER);
 			portedTextView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
 			portedTextView.setPadding(0, 0, 0, Helpers.getDp(10));
@@ -317,19 +321,37 @@ public class GDActivity extends Activity implements Runnable {
 			applyImmersiveMode();
 
 			frame.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+				@SuppressWarnings("deprecation")
 				@Override
 				public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-						android.view.DisplayCutout cutout = insets.getDisplayCutout();
-						if (cutout != null) {
-							menuLayout.setPadding(
-									cutout.getSafeInsetLeft(),
-									cutout.getSafeInsetTop(),
-									cutout.getSafeInsetRight(),
-									0
-							);
+					int top = 0, bottom = 0, left = 0, right = 0;
+
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+						android.graphics.Insets sysInsets = insets.getInsets(
+								WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+						top = sysInsets.top;
+						bottom = sysInsets.bottom;
+						left = sysInsets.left;
+						right = sysInsets.right;
+					} else {
+						top = insets.getSystemWindowInsetTop();
+						bottom = insets.getSystemWindowInsetBottom();
+						left = insets.getSystemWindowInsetLeft();
+						right = insets.getSystemWindowInsetRight();
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+							android.view.DisplayCutout cutout = insets.getDisplayCutout();
+							if (cutout != null) {
+								left = Math.max(left, cutout.getSafeInsetLeft());
+								top = Math.max(top, cutout.getSafeInsetTop());
+								right = Math.max(right, cutout.getSafeInsetRight());
+								bottom = Math.max(bottom, cutout.getSafeInsetBottom());
+							}
 						}
 					}
+
+					menuLayout.setPadding(left, top, right, 0);
+					scrollView.setPadding(0, 0, 0, bottom);
+
 					return insets;
 				}
 			});

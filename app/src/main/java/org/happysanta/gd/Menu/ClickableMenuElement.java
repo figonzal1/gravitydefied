@@ -3,6 +3,7 @@ package org.happysanta.gd.Menu;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,6 @@ import org.happysanta.gd.R;
 
 import static org.happysanta.gd.Helpers.getDp;
 import static org.happysanta.gd.Helpers.getGDActivity;
-import static org.happysanta.gd.Helpers.logDebug;
 
 public class ClickableMenuElement
 		implements MenuElement {
@@ -59,6 +59,7 @@ public class ClickableMenuElement
 		layout = new LinearLayout(context);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
 		layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		layout.setBackgroundResource(R.drawable.menu_item_ripple);
 
 		helmet = new MenuHelmetView(context);
 		helmet.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
@@ -75,6 +76,7 @@ public class ClickableMenuElement
 				switch (motionEvent.getAction()) {
 					case MotionEvent.ACTION_DOWN:
 						view.setSelected(true);
+						view.setPressed(true);
 						helmet.setShow(true);
 
 						if (onMenuElementHighlightListener != null)
@@ -86,6 +88,7 @@ public class ClickableMenuElement
 					case MotionEvent.ACTION_CANCEL:
 					case MotionEvent.ACTION_UP:
 						view.setSelected(false);
+						view.setPressed(false);
 
 						if (motionEvent.getAction() == MotionEvent.ACTION_UP && inViewBounds(view, (int) motionEvent.getRawX(), (int) motionEvent.getRawY())) {
 							performAction(MenuScreen.KEY_FIRE);
@@ -97,9 +100,11 @@ public class ClickableMenuElement
 					case MotionEvent.ACTION_MOVE:
 						if (!inViewBounds(view, (int) motionEvent.getRawX(), (int) motionEvent.getRawY())) {
 							view.setSelected(false);
+							view.setPressed(false);
 							setHighlighted(false);
 						} else {
 							view.setSelected(true);
+							view.setPressed(true);
 							setHighlighted(true);
 						}
 						break;
@@ -131,7 +136,12 @@ public class ClickableMenuElement
 		return mtv;
 	}
 
+	@SuppressWarnings("deprecation")
 	protected ColorStateList defaultColorStateList() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			return getGDActivity().getResources().getColorStateList(
+					R.drawable.menu_item_color, getGDActivity().getTheme());
+		}
 		return getGDActivity().getResources().getColorStateList(R.drawable.menu_item_color);
 	}
 

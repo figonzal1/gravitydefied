@@ -5,6 +5,7 @@ import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
 import org.happysanta.gd.GDActivity;
 import org.happysanta.gd.Menu.Views.MenuLinearLayout;
+import org.happysanta.gd.R;
 
 import java.util.Vector;
 
@@ -44,7 +45,11 @@ public class MenuScreen
 
 		layout = new MenuLinearLayout(context);
 		layout.setOrientation(LinearLayout.VERTICAL);
-		layout.setPadding(getDp(LAYOUT_LEFT_PADDING), getDp(LAYOUT_TOP_PADDING), getDp(LAYOUT_LEFT_PADDING), getDp(LAYOUT_BOTTOM_PADDING));
+		layout.setPadding(
+				context.getResources().getDimensionPixelSize(R.dimen.menu_layout_padding_horizontal),
+				getDp(LAYOUT_TOP_PADDING),
+				context.getResources().getDimensionPixelSize(R.dimen.menu_layout_padding_horizontal),
+				context.getResources().getDimensionPixelSize(R.dimen.menu_layout_padding_bottom));
 
 		// Disable multi-touch in menu
 		if (isSDK11OrHigher())

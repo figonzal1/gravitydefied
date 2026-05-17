@@ -15,7 +15,6 @@ public class ActionMenuElement
 		extends ClickableMenuElement
 		implements MenuHandler, MenuElement {
 
-	protected static final int DISABLED_COLOR = 0xff999999;
 	public static final int LOCK_IMAGE_MARGIN_RIGHT = 5;
 	public static final int locks[] = new int[]{
 			R.drawable.s_lock0,
@@ -132,7 +131,7 @@ public class ActionMenuElement
 		this.disabled = disabled;
 
 		if (disabled) {
-			((MenuTextView) textView).setTextColor(DISABLED_COLOR);
+			((MenuTextView) textView).setTextColor(getGDActivity().getResources().getColor(R.color.menu_text_disabled));
 		} else {
 			((MenuTextView) textView).setTextColor(defaultColorStateList());
 		}
