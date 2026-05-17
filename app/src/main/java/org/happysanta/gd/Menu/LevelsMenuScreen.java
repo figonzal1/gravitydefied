@@ -1,7 +1,8 @@
 package org.happysanta.gd.Menu;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -18,6 +19,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.happysanta.gd.Helpers.getGDActivity;
 import static org.happysanta.gd.Helpers.getGDView;
@@ -27,6 +31,9 @@ import static org.happysanta.gd.Helpers.getString;
 import static org.happysanta.gd.Helpers.logDebug;
 
 public class LevelsMenuScreen extends MenuScreen {
+
+	protected static final ExecutorService executor = Executors.newCachedThreadPool();
+	protected static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
 	enum Statuses {NORMAL, DOWNLOADING, ERROR}
 
@@ -43,7 +50,7 @@ public class LevelsMenuScreen extends MenuScreen {
 
 	protected MenuLinearLayout listLayout;
 	protected TextMenuElement errorText;
-	protected AsyncAddElements addElements = null;
+	protected Future<?> addElements = null;
 	protected boolean leftFromScreen = false;
 
 	public LevelsMenuScreen(String title, MenuScreen navTarget) {
@@ -362,11 +369,8 @@ public class LevelsMenuScreen extends MenuScreen {
 		scrollToItem(el);
 	}
 
-	protected class AsyncAddElements extends AsyncTask<Level[], Void, Void> {
-
-		@Override
-		protected Void doInBackground(Level[]... params) {
-			Level[] _levels = params[0];
+	protected Future<?> submitAddElements(Level[] _levels, Runnable onComplete) {
+		return executor.submit(() -> {
 			boolean checkInstalled = getThis() instanceof DownloadLevelsMenuScreen;
 			boolean checkActive = getThis() instanceof InstalledLevelsMenuScreen;
 
@@ -376,20 +380,18 @@ public class LevelsMenuScreen extends MenuScreen {
 
 			if (checkInstalled) {
 				ids = new ArrayList<>();
-
 				for (Level level : _levels) {
 					ids.add(level.getApiId());
 				}
-
 				installed = getGDActivity().levelsManager.findInstalledLevels(ids);
 			}
 
 			boolean alreadyHl = false;
 
 			for (Level level : _levels) {
-				if (isCancelled()) {
+				if (Thread.currentThread().isInterrupted()) {
 					clearList();
-					return null;
+					return;
 				}
 
 				LevelMenuElement el = new LevelMenuElement(level, getThis());
@@ -407,23 +409,22 @@ public class LevelsMenuScreen extends MenuScreen {
 					toHl = true;
 				}
 
-				if (!isCancelled()) {
+				if (!Thread.currentThread().isInterrupted()) {
 					int index = addListItem(el);
 					if (toHl && !alreadyHl) {
 						highlightElementAt(index);
-						// scrollToItem(index);
 						alreadyHl = true;
 					}
-
 					if (lastHighlighted == null)
 						highlightFirstElement();
 				}
 			}
 
 			levels.addAll(Arrays.asList(_levels));
-			return null;
-		}
-
+			mainHandler.post(() -> {
+				if (onComplete != null) onComplete.run();
+			});
+		});
 	}
 
 }

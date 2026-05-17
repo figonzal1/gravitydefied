@@ -1,22 +1,31 @@
 package org.happysanta.gd.API;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.happysanta.gd.Helpers.getGDActivity;
 
 public class DownloadFile {
 
+	private static final ExecutorService executor = Executors.newCachedThreadPool();
+	private static final Handler mainHandler = new Handler(Looper.getMainLooper());
+
 	private String urlString;
 	private DownloadHandler handler;
 	private FileOutputStream output;
-	private AsyncDownloadTask task;
+	private Future<?> task;
+	private PowerManager.WakeLock lock;
 
 	public DownloadFile(String url, FileOutputStream output) {
 		this.urlString = url;
@@ -33,8 +42,18 @@ public class DownloadFile {
 	}
 
 	public void start() {
-		task = new AsyncDownloadTask();
-		task.execute();
+		PowerManager pm = (PowerManager) getGDActivity().getSystemService(Context.POWER_SERVICE);
+		lock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+		lock.acquire();
+		handler.onStart();
+
+		task = executor.submit(() -> {
+			Throwable error = doDownload();
+			mainHandler.post(() -> {
+				lock.release();
+				handler.onFinish(error);
+			});
+		});
 	}
 
 	public void cancel() {
@@ -44,99 +63,53 @@ public class DownloadFile {
 		}
 	}
 
-	protected class AsyncDownloadTask extends AsyncTask<Void, Integer, Throwable> {
+	private Throwable doDownload() {
+		InputStream input = null;
+		HttpURLConnection connection = null;
 
-		private PowerManager.WakeLock lock;
+		try {
+			URL url = new URL(urlString);
+			connection = (HttpURLConnection) url.openConnection();
+			connection.connect();
 
-		@Override
-		protected Throwable doInBackground(Void... params) {
-			// OutputStream output = (FileOutputStream)params[1];
-			InputStream input = null;
-			HttpURLConnection connection = null;
-
-			try {
-				URL url = new URL(urlString);
-				connection = (HttpURLConnection) url.openConnection();
-				connection.connect();
-
-				// expect HTTP 200 OK, so we don't mistakenly save error report
-				// instead of the file
-				if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-					return new IOException("Server returned HTTP " + connection.getResponseCode()
-							+ " " + connection.getResponseMessage());
-				}
-
-				// this will be useful to display download percentage
-				// might be -1: server did not report the length
-				int fileLength = connection.getContentLength();
-
-				// download the file
-				input = connection.getInputStream();
-
-				byte data[] = new byte[4096];
-				long total = 0;
-				int count;
-				while ((count = input.read(data)) != -1) {
-					// allow canceling with back button
-					if (isCancelled()) {
-						input.close();
-						return null;
-					}
-
-					total += count;
-
-					// publishing the progress....
-					if (fileLength > 0) // only if total length is known
-						publishProgress((int) (total * 100 / fileLength));
-
-					output.write(data, 0, count);
-				}
-			} catch (Exception e) {
-				return e;
-			} finally {
-				try {
-					if (output != null)
-						output.close();
-					if (input != null)
-						input.close();
-				} catch (IOException ignored) {
-				}
-
-				if (connection != null)
-					connection.disconnect();
+			if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+				return new IOException("Server returned HTTP " + connection.getResponseCode()
+						+ " " + connection.getResponseMessage());
 			}
 
-			return null;
+			int fileLength = connection.getContentLength();
+			input = connection.getInputStream();
+
+			byte[] data = new byte[4096];
+			long total = 0;
+			int count;
+			while ((count = input.read(data)) != -1) {
+				if (Thread.currentThread().isInterrupted()) {
+					input.close();
+					return null;
+				}
+
+				total += count;
+
+				if (fileLength > 0) {
+					final int pr = (int) (total * 100 / fileLength);
+					mainHandler.post(() -> handler.onProgress(pr));
+				}
+
+				output.write(data, 0, count);
+			}
+		} catch (Exception e) {
+			return e;
+		} finally {
+			try {
+				if (output != null) output.close();
+				if (input != null) input.close();
+			} catch (IOException ignored) {
+			}
+			if (connection != null) connection.disconnect();
 		}
 
-		@Override
-		protected void onPreExecute() {
-			super.onPreExecute();
-
-			// take CPU lock to prevent CPU from going off if the user
-			// presses the power button during download
-			PowerManager pm = (PowerManager) getGDActivity().getSystemService(Context.POWER_SERVICE);
-			lock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-					getClass().getName());
-			lock.acquire();
-
-			handler.onStart();
-		}
-
-		@Override
-		protected void onProgressUpdate(Integer... progress) {
-			super.onProgressUpdate(progress);
-
-			handler.onProgress(progress[0]);
-		}
-
-		@Override
-		protected void onPostExecute(Throwable error) {
-			lock.release();
-			handler.onFinish(error);
-		}
-
+		return null;
 	}
-
 
 }
