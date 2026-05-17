@@ -1,8 +1,8 @@
 package org.happysanta.gd.Menu;
 
 import android.content.Context;
-import android.text.Html;
 import android.view.LayoutInflater;
+import org.happysanta.gd.Helpers;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -41,7 +41,7 @@ public class LevelsAdapter extends ArrayAdapter<Level> {
 			count.setTypeface(Global.robotoCondensedTypeface);
 
 			name.setText(level.getName());
-			count.setText(Html.fromHtml(String.format(getString(R.string.levels_count_tpl),
+			count.setText(Helpers.fromHtml(String.format(getString(R.string.levels_count_tpl),
 					level.getCountEasy() + " - " + level.getCountMedium() + " - " + level.getCountHard(), level.getShortAddedDate())));
 		}
 

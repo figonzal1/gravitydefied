@@ -1,8 +1,8 @@
 package org.happysanta.gd.Menu;
 
 import android.content.Context;
-import android.text.Html;
 import android.text.SpannableString;
+import org.happysanta.gd.Helpers;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -112,13 +112,13 @@ public class LevelMenuElement
 		ss.setSpan(new LevelNameLeadingMarginSpan2(1, installed || active ? getDp(margin) : 0), 0, ss.length(), 0);
 		textView.setTextOnUiThread(ss);
 		/*} else {
-			textView.setTextOnUiThread(Html.fromHtml(String.format(getString(R.string.active_name_tpl), name)));
+			textView.setTextOnUiThread(Helpers.fromHtml(String.format(getString(R.string.active_name_tpl), name)));
 		}*/
 	}
 
 	public void updateLevelsLine() {
 		if (showDate) {
-			tracksCountTextView.setText(Html.fromHtml(String.format(getString(R.string.levels_count_tpl),
+			tracksCountTextView.setText(Helpers.fromHtml(String.format(getString(R.string.levels_count_tpl),
 					level.getCountEasy() + " - " + level.getCountMedium() + " - " + level.getCountHard(), level.getShortAddedDate())));
 		} else {
 			tracksCountTextView.setText(level.getCountEasy() + " - " + level.getCountMedium() + " - " + level.getCountHard());
@@ -228,12 +228,12 @@ public class LevelMenuElement
 		screen.setTitle(level.getName());
 
 		if (!level.getAuthor().equals(""))
-			screen.addItem(new BigTextMenuElement(Html.fromHtml(String.format(getString(R.string.author_tpl), level.getAuthor()))));
+			screen.addItem(new BigTextMenuElement(Helpers.fromHtml(String.format(getString(R.string.author_tpl), level.getAuthor()))));
 		if (level.getInstalledTs() > 0)
-			screen.addItem(new BigTextMenuElement(Html.fromHtml(String.format(getString(R.string.installed_tpl), level.getFullInstalledDate()))));
+			screen.addItem(new BigTextMenuElement(Helpers.fromHtml(String.format(getString(R.string.installed_tpl), level.getFullInstalledDate()))));
 		else if (level.getAddedTs() > 0)
-			screen.addItem(new BigTextMenuElement(Html.fromHtml(String.format(getString(R.string.added_tpl), level.getFullAddedDate()))));
-		screen.addItem(new BigTextMenuElement(Html.fromHtml(String.format(getString(R.string.tracks_tpl), level.getCountEasy() + " / " + level.getCountMedium() + " / " + level.getCountHard()))));
+			screen.addItem(new BigTextMenuElement(Helpers.fromHtml(String.format(getString(R.string.added_tpl), level.getFullAddedDate()))));
+		screen.addItem(new BigTextMenuElement(Helpers.fromHtml(String.format(getString(R.string.tracks_tpl), level.getCountEasy() + " / " + level.getCountMedium() + " / " + level.getCountHard()))));
 		screen.addItem(menu.createEmptyLine(true));
 
 		if (!level.isInstalled()) {

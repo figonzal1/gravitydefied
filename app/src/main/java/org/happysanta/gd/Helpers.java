@@ -10,6 +10,8 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import org.happysanta.gd.Game.GameView;
 import org.happysanta.gd.Levels.Loader;
@@ -86,6 +88,15 @@ public class Helpers {
 
 	public static int getDp(float px) {
 		return Math.round(px * Global.density);
+	}
+
+	@SuppressWarnings("deprecation")
+	public static Spanned fromHtml(String html) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			return Html.fromHtml(html, Html.FROM_HTML_MODE_LEGACY);
+		} else {
+			return Html.fromHtml(html);
+		}
 	}
 
 	public static String getCurrentStackTrace() {

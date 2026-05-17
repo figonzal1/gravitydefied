@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.net.Uri;
-import android.text.Html;
 import android.text.InputType;
 import android.widget.EditText;
 import org.happysanta.gd.Command;
@@ -421,31 +420,31 @@ public class Menu
 				objectiveHelpScreen = new MenuScreen(getString(R.string.objective), helpMenu);
 				objectiveHelpScreen.setIsTextScreen(true);
 				objectiveHelpItem = new SimpleMenuElementNew(getString(R.string.objective), objectiveHelpScreen, this);
-				objectiveHelpScreen.addItem(new TextMenuElement(Html.fromHtml(getString(R.string.objective_text))));
+				objectiveHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.objective_text))));
 				objectiveHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				keysHelpScreen = new MenuScreen(getString(R.string.keys), helpMenu);
 				keysHelpScreen.setIsTextScreen(true);
 				keysHelpItem = new SimpleMenuElementNew(getString(R.string.keys), keysHelpScreen, this);
-				keysHelpScreen.addItem(new TextMenuElement(Html.fromHtml(getString(R.string.keyset_text))));
+				keysHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.keyset_text))));
 				keysHelpScreen.addItem(new ActionMenuElement(getString(R.string.back), ActionMenuElement.BACK, this));
 
 				unlockingHelpScreen = new MenuScreen(getString(R.string.unlocking), helpMenu);
 				unlockingHelpScreen.setIsTextScreen(true);
 				unlockingHelpItem = new SimpleMenuElementNew(getString(R.string.unlocking), unlockingHelpScreen, this);
-				unlockingHelpScreen.addItem(new TextMenuElement(Html.fromHtml(getString(R.string.unlocking_text))));
+				unlockingHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.unlocking_text))));
 				unlockingHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				highscoreHelpScreen = new MenuScreen(getString(R.string.highscores), helpMenu);
 				highscoreHelpScreen.setIsTextScreen(true);
 				highscoreHelpItem = new SimpleMenuElementNew(getString(R.string.highscores), highscoreHelpScreen, this);
-				highscoreHelpScreen.addItem(new TextMenuElement(Html.fromHtml(getString(R.string.highscore_text))));
+				highscoreHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.highscore_text))));
 				highscoreHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				optionsHelpScreen = new MenuScreen(getString(R.string.options), helpMenu);
 				optionsHelpScreen.setIsTextScreen(true);
 				optionsHelpItem = new SimpleMenuElementNew(getString(R.string.options), optionsHelpScreen, this);
-				optionsHelpScreen.addItem(new TextMenuElement(Html.fromHtml(getString(R.string.options_text))));
+				optionsHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.options_text))));
 				optionsHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				helpMenu.addItem(objectiveHelpItem);
@@ -456,7 +455,7 @@ public class Menu
 				helpMenu.addItem(createAction(ActionMenuElement.BACK));
 
 				aboutScreen.setIsTextScreen(true);
-				aboutScreen.addItem(new TextMenuElement(Html.fromHtml(getString(R.string.about_text))));
+				aboutScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.about_text))));
 				aboutScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				ingameScreen.addItem(continueAction);
@@ -609,7 +608,7 @@ public class Menu
 		leagueCompleted = false;
 
 		finishedMenu.clear();
-		finishedMenu.addItem(new TextMenuElement(Html.fromHtml("<b>" + getString(R.string.time) + "</b>: " + finishedTime)));
+		finishedMenu.addItem(new TextMenuElement(fromHtml("<b>" + getString(R.string.time) + "</b>: " + finishedTime)));
 
 		System.gc();
 		String[] as = currentScores.getScores(leagueSelector.getSelectedOption());
@@ -702,7 +701,7 @@ public class Menu
 
 		// int completedCount = _bbII(levelSelector.getSelectedOption());
 		int completedCount = level.getUnlocked(levelSelector.getSelectedOption()); // TODO test
-		finishedMenu.addItem(new TextMenuElement(Html.fromHtml(String.format(getString(R.string.tracks_completed_tpl),
+		finishedMenu.addItem(new TextMenuElement(fromHtml(String.format(getString(R.string.tracks_completed_tpl),
 				completedCount, trackNames[levelSelector.getSelectedOption()].length, difficultyLevels[levelSelector.getSelectedOption()]))));
 		System.gc();
 
@@ -1045,7 +1044,7 @@ public class Menu
 		highScoreMenu.clear();
 		highScoreMenu.setTitle(getString(R.string.highscores) + ": " + getLevelLoader().getLevelName(levelSelector.getSelectedOption(), trackSelector.getSelectedOption()));
 
-		HighScoreTextMenuElement subtitle = new HighScoreTextMenuElement(Html.fromHtml(getString(R.string.league) + ": " + leagueSelector.getOptions()[league]));
+		HighScoreTextMenuElement subtitle = new HighScoreTextMenuElement(fromHtml(getString(R.string.league) + ": " + leagueSelector.getOptions()[league]));
 		subtitle.setIsSubtitle(true);
 
 		highScoreMenu.addItem(subtitle);
