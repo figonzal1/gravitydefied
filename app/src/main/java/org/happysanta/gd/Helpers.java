@@ -16,8 +16,12 @@ import org.happysanta.gd.Levels.Loader;
 import org.happysanta.gd.Menu.Menu;
 import org.happysanta.gd.Storage.LevelsManager;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.UUID;
 
 public class Helpers {
 
@@ -270,6 +274,24 @@ public class Helpers {
 		} catch (PackageManager.NameNotFoundException e) {
 		}
 		return v;
+	}
+
+	public static String getInstallationId(Context context) {
+		File installation = new File(context.getFilesDir(), "INSTALLATION");
+		try {
+			if (!installation.exists()) {
+				FileOutputStream out = new FileOutputStream(installation);
+				out.write(UUID.randomUUID().toString().getBytes());
+				out.close();
+			}
+			RandomAccessFile f = new RandomAccessFile(installation, "r");
+			byte[] bytes = new byte[(int) f.length()];
+			f.readFully(bytes);
+			f.close();
+			return new String(bytes);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static String decodeCp1251(byte[] data) {
