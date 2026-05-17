@@ -3,8 +3,11 @@ package org.happysanta.gd.Storage;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.StatFs;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.happysanta.gd.API.API;
 import org.happysanta.gd.API.DownloadFile;
 import org.happysanta.gd.API.DownloadHandler;
@@ -37,6 +40,9 @@ import static org.happysanta.gd.Helpers.logDebug;
 import static org.happysanta.gd.Helpers.showAlert;
 
 public class LevelsManager {
+
+	private static final ExecutorService executor = Executors.newCachedThreadPool();
+	private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
 	private LevelsDataSource dataSource;
 	private boolean dbOK = false;
@@ -166,24 +172,28 @@ public class LevelsManager {
 		GDActivity gd = getGDActivity();
 		final ProgressDialog progressDialog = ProgressDialog.show(gd, getString(R.string.install), getString(R.string.installing), true);
 
-		new AsyncInstallLevel() {
-			@Override
-			protected void onPostExecute(Object result) {
+		executor.submit(() -> {
+			Object result;
+			try {
+				result = install(file, name, author, apiId);
+			} catch (Throwable e) {
+				result = e;
+			}
+			final Object finalResult = result;
+			mainHandler.post(() -> {
 				progressDialog.dismiss();
 
-				if (result instanceof Throwable) {
-					Throwable throwable = (Throwable) result;
+				if (finalResult instanceof Throwable) {
+					Throwable throwable = (Throwable) finalResult;
 					throwable.printStackTrace();
 					showAlert(getString(R.string.error), throwable.getMessage(), null);
-					if (callback != null)
-						callback.onFail();
+					if (callback != null) callback.onFail();
 					return;
 				}
 
-				if (callback != null)
-					callback.onDone((long) result);
-			}
-		}.execute(file, name, author, apiId);
+				if (callback != null) callback.onDone((long) finalResult);
+			});
+		});
 	}
 
 	public void load(Level level) throws RuntimeException {
@@ -255,14 +265,13 @@ public class LevelsManager {
 		GDActivity gd = getGDActivity();
 		final ProgressDialog progressDialog = ProgressDialog.show(gd, getString(R.string.delete), getString(R.string.deleting), true);
 
-		new AsyncDeleteLevel() {
-			@Override
-			protected void onPostExecute(Void v) {
+		executor.submit(() -> {
+			delete(level);
+			mainHandler.post(() -> {
 				progressDialog.dismiss();
-				if (callback != null)
-					callback.run();
-			}
-		}.execute(level);
+				if (callback != null) callback.run();
+			});
+		});
 	}
 
 	public void updateLevelSettings() {
@@ -456,33 +465,6 @@ public class LevelsManager {
 		StatFs stat = new StatFs(getLevelsDirectory().getPath());
 		long bytesAvailable = (long) stat.getBlockSize() * (long) stat.getAvailableBlocks();
 		return bytesAvailable >= bytes;
-	}
-
-	private class AsyncDeleteLevel extends AsyncTask<Level, Void, Void> {
-		@Override
-		protected Void doInBackground(Level... levels) {
-			delete(levels[0]);
-			return null;
-		}
-	}
-
-	private class AsyncInstallLevel extends AsyncTask<Object, Void, Object> {
-		@Override
-		protected Object doInBackground(Object... objects) {
-			File file = (File) objects[0];
-			String name = (String) objects[1];
-			String author = (String) objects[2];
-			long apiId = (long) objects[3];
-
-			long id = 0;
-			try {
-				id = install(file, name, author, apiId);
-			} catch (Throwable e) {
-				return e;
-			}
-
-			return id;
-		}
 	}
 
 }

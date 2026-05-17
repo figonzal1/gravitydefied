@@ -150,7 +150,7 @@ public class DownloadLevelsMenuScreen extends LevelsMenuScreen {
 				showError(getString(R.string.waiting_for_network));
 
 				if (waitForNetworkConnection != null)
-					waitForNetworkConnection.cancel(true);
+					waitForNetworkConnection.cancel();
 
 				waitForNetworkConnection = new WaitForNetworkConnection();
 				waitForNetworkConnection.execute(null, new Runnable() {

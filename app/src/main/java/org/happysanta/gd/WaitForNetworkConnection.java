@@ -1,34 +1,44 @@
 package org.happysanta.gd;
 
-import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.happysanta.gd.Helpers.isOnline;
 import static org.happysanta.gd.Helpers.logDebug;
 
-public class WaitForNetworkConnection extends AsyncTask<Object, Void, Void> {
+public class WaitForNetworkConnection {
 
-	protected Runnable callback;
+	private static final ExecutorService executor = Executors.newCachedThreadPool();
+	private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-	@Override
-	public Void doInBackground(Object... params) {
-		callback = (Runnable) params[1];
+	private Future<?> task;
 
-		while (!isOnline()) {
-			logDebug("Waiting for network...");
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				break;
+	public void execute(Object... params) {
+		final Runnable callback = (Runnable) params[1];
+		task = executor.submit(() -> {
+			while (!isOnline()) {
+				logDebug("Waiting for network...");
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					return;
+				}
 			}
-		}
-
-		return null;
+			logDebug("Network OK, callback.run() now...");
+			mainHandler.post(callback);
+		});
 	}
 
-	@Override
-	public void onPostExecute(Void v) {
-		logDebug("Network OK, callback.run() now...");
-		callback.run();
+	public void cancel() {
+		if (task != null) {
+			task.cancel(true);
+			task = null;
+		}
 	}
 
 }

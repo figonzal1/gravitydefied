@@ -1,7 +1,7 @@
 package org.happysanta.gd.Menu;
 
-import android.os.AsyncTask;
 import android.view.ViewTreeObserver;
+import java.util.concurrent.Future;
 import org.happysanta.gd.Storage.Level;
 import org.happysanta.gd.Storage.LevelsManager;
 
@@ -11,7 +11,7 @@ public class InstalledLevelsMenuScreen extends LevelsMenuScreen {
 
 	LevelsManager levelsManager;
 	protected boolean isLoading = false;
-	AsyncLoadLevels asyncLoadLevels = null;
+	Future<?> asyncLoadLevels = null;
 
 	public InstalledLevelsMenuScreen(String title, MenuScreen navTarget) {
 		super(title, navTarget);
@@ -23,46 +23,33 @@ public class InstalledLevelsMenuScreen extends LevelsMenuScreen {
 		showLoading();
 		isLoading = true;
 
-		asyncLoadLevels = new AsyncLoadLevels() {
-			@Override
-			public void onPostExecute(Level[] levels) {
+		asyncLoadLevels = executor.submit(() -> {
+			Level[] loadedLevels = levelsManager.getAllInstalledLevels();
+			mainHandler.post(() -> {
 				if (status != Statuses.NORMAL) {
 					clearList();
 					setStatus(Statuses.NORMAL);
 				}
 				hideLoading();
 
-				addElements = new AsyncAddElements() {
-					@Override
-					protected void onPostExecute(Void v) {
-						isLoading = false;
-						if (selectedIndex != -1) {
-							// listLayout.requestLayout();
-							// listLayout.invalidate();
-
-							// View someView = findViewById(R.id.someView);
-							final ViewTreeObserver obs = listLayout.getViewTreeObserver();
-							obs.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-
-								public boolean onPreDraw() {
-									scrollToItem(selectedIndex);
-									try {
-										obs.removeOnPreDrawListener(this);
-									} catch (IllegalStateException e) {
-									}
-
-									return true;
+				addElements = submitAddElements(loadedLevels, () -> {
+					isLoading = false;
+					if (selectedIndex != -1) {
+						final ViewTreeObserver obs = listLayout.getViewTreeObserver();
+						obs.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+							public boolean onPreDraw() {
+								scrollToItem(selectedIndex);
+								try {
+									obs.removeOnPreDrawListener(this);
+								} catch (IllegalStateException e) {
 								}
-							});
-
-							// scrollToItem(selectedIndex);
-						}
+								return true;
+							}
+						});
 					}
-				};
-				addElements.execute(levels);
-			}
-		};
-		asyncLoadLevels.execute();
+				});
+			});
+		});
 	}
 
 	@Override
@@ -89,15 +76,6 @@ public class InstalledLevelsMenuScreen extends LevelsMenuScreen {
 
 		isLoading = false;
 		super.reloadLevels();
-	}
-
-	private class AsyncLoadLevels extends AsyncTask<Void, Void, Level[]> {
-
-		@Override
-		protected Level[] doInBackground(Void... params) {
-			return levelsManager.getAllInstalledLevels();
-		}
-
 	}
 
 }
