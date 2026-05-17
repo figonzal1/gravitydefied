@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.view.*;
@@ -181,8 +182,6 @@ public class GDActivity extends Activity implements Runnable {
 		if (true) {
 			gameView = new GameView(this);
 
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
 			scrollView = new ObservableScrollView(this);
 			scrollView.setBackgroundColor(0x00ffffff);
 			scrollView.setFillViewport(true);
@@ -314,6 +313,26 @@ public class GDActivity extends Activity implements Runnable {
 			frame.addView(gameView, 0);
 
 			setContentView(frame);
+
+			applyImmersiveMode();
+
+			frame.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+				@Override
+				public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+						android.view.DisplayCutout cutout = insets.getDisplayCutout();
+						if (cutout != null) {
+							menuLayout.setPadding(
+									cutout.getSafeInsetLeft(),
+									cutout.getSafeInsetTop(),
+									cutout.getSafeInsetRight(),
+									0
+							);
+						}
+					}
+					return insets;
+				}
+			});
 
 			gameView._doIV(1); // flag for 1st image, as I understand..
 			thread = null;
@@ -664,6 +683,7 @@ public class GDActivity extends Activity implements Runnable {
 	protected void onResume() {
 		Helpers.logDebug("@@@ [GDActivity \"+hashCode()+\"] onResume()");
 		super.onResume();
+		applyImmersiveMode();
 		Helpers.logDebug("[GDActivity \"+hashCode()+\"] onResume(), inited = " + inited);
 		if (wasPaused && wasStarted) {
 			// logDebug("onResume(): wasPaused && wasResumed");
@@ -672,6 +692,39 @@ public class GDActivity extends Activity implements Runnable {
 			wasPaused = false;
 
 			// Menu.HelmetRotation.start();
+		}
+	}
+
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+		if (hasFocus) {
+			applyImmersiveMode();
+		}
+	}
+
+	private void applyImmersiveMode() {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+			WindowManager.LayoutParams params = getWindow().getAttributes();
+			params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+			getWindow().setAttributes(params);
+		}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			getWindow().setDecorFitsSystemWindows(false);
+			WindowInsetsController controller = getWindow().getInsetsController();
+			if (controller != null) {
+				controller.hide(WindowInsets.Type.systemBars());
+				controller.setSystemBarsBehavior(
+						WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+			}
+		} else {
+			getWindow().getDecorView().setSystemUiVisibility(
+					View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+					| View.SYSTEM_UI_FLAG_FULLSCREEN
+					| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+					| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+					| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+					| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
 		}
 	}
 

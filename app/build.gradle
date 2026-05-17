@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'org.happysanta.gd'
-    compileSdk 34
+    compileSdk 36
 
     defaultConfig {
         applicationId "org.happysanta.gd"
         minSdk 21
-        targetSdk 34
+        targetSdk 36
         versionCode 29
         versionName "1.1.1"
     }
