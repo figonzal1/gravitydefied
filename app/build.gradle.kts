@@ -10,11 +10,11 @@ val keystoreProperties = Properties().apply {
 }
 
 android {
-    namespace = "com.figonzal.gravitydefied"
+    namespace = "cl.figonzal.gravitydefied"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.figonzal.gravitydefied"
+        applicationId = "cl.figonzal.gravitydefied"
         minSdk = 21
         targetSdk = 36
         versionCode = 29
@@ -35,13 +35,27 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    buildFeatures {
+        resValues = true
+    }
+
     buildTypes {
-        release {
+        debug {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-debug"
+            isDebuggable = true
             isMinifyEnabled = false
+            resValue("string", "app_name", "Gravity Defied Classic-debug")
+        }
+        release {
+            isMinifyEnabled = true
+            isShrinkResources = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt")
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
+            resValue("string", "app_name", "Gravity Defied Classic")
         }
     }
 }

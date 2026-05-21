@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A faithful Android port of the classic 2004 J2ME game **Gravity Defied** (a motorcycle trial racing game), packaged as `org.happysanta.gd` (module name `AGDTR`). It also adds an online mod browser that downloads fan-made level packs from the gdtr.net backend.
+A faithful Android port of the classic 2004 J2ME game **Gravity Defied** (a motorcycle trial racing game), packaged as `cl.figonzal.gravitydefied`. It also adds an online mod browser that downloads fan-made level packs from the gdtr.net backend.
 
 ## Build system
 
