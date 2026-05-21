@@ -121,20 +121,30 @@
 		<b>Clear highscore</b><br/>
 		Lets you clear the highscores. Here you can also do a "Full Reset" which will reset the game to original state (clear settings, highscores, unlocked levels and leagues).
 	]]></string>
-	<string name="about_text"><![CDATA[
+
+	<!-- About screen credits — one string per entry, chronological order newest first -->
+	<string name="about_credit_figonzal"><![CDATA[
+		<b>Gravity Defied Classic</b><br/>
+		Modernized for Android 16 by Felipe Gonzalez<br/>
+		figonzal.cl · 2026
+	]]></string>
+	<string name="about_credit_happysanta"><![CDATA[
 		<b>Gravity Defied Classic</b> ported to Android by Gregory Klyushnikov and Eugene Zinoviev<br/>
 		Кузница винрара<br/>
 		Happy Santa LLC<br/>
-		http://gdtr.net \u00A9 2014<br/><br/>
-
+		http://gdtr.net © 2014
+	]]></string>
+	<string name="about_credit_codebrew"><![CDATA[
 		<b>Gravity Defied - Trial Racing</b> by Codebrew Software<br/>
-		http://codebrew.se \u00A9 2004
-		]]></string>
+		http://codebrew.se © 2004
+	]]></string>
+
 	<string name="ported_text"><![CDATA[
 		<font color="#999999">Ported by</font><br/>
 		<font color="#000000">Кузница винрара</font><br/>
 		<font color="#999999">and</font><br/>
-		<font color="#000000">Happy Santa LLC</font>
+		<font color="#000000">Happy Santa LLC</font><br/>
+		<font color="#999999">SDK 36 update · </font><font color="#000000">figonzal.cl</font>
 	]]></string>
 
 	<string name="crashed">Crashed</string>
