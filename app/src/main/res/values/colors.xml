@@ -7,4 +7,5 @@
     <color name="keyboard_background">#C6FFFFFF</color>
     <color name="keyboard_button_text">#FF000000</color>
     <color name="title_text">#FF000000</color>
+    <color name="ic_launcher_background">#FFFFFF</color>
 </resources>
