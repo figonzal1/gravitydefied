@@ -70,7 +70,6 @@ public class OptionsMenuElement
 		optionTextView = new MenuTextView(context);
 		optionTextView.setText(selectedOption);
 		optionTextView.setTextColor(getMenuTextView().getTextColors());
-		optionTextView.setTextSize(TEXT_SIZE);
 		optionTextView.setLayoutParams(new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT

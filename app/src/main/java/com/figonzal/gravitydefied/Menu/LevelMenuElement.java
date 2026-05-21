@@ -32,8 +32,6 @@ public class LevelMenuElement
 
 	protected static final int PADDING_TOP = 7;
 	protected static final int PADDING_BOTTOM = 7;
-	protected static final int LEVEL_TEXT_SIZE = 16;
-	protected static final int NAME_SIZE = 20;
 
 	protected static final int INSTALLED_MARGIN = 15;
 	protected static final int ACTIVE_MARGIN = 21;
@@ -77,7 +75,6 @@ public class LevelMenuElement
 		// textView.setText(level.getName());
 		updateNameLine();
 		textView.setTextColor(context.getResources().getColorStateList(R.drawable.menu_item_color));
-		textView.setTextSize(NAME_SIZE);
 		textView.setLineSpacing(0f, 1.1f);
 		textView.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,
@@ -86,7 +83,6 @@ public class LevelMenuElement
 		textView.setPadding(0, getDp(PADDING_TOP), 0, 0);
 
 		tracksCountTextView = new MenuTextView(context);
-		tracksCountTextView.setTextSize(LEVEL_TEXT_SIZE);
 		updateLevelsLine();
 
 		nameLayout.addView(textView);

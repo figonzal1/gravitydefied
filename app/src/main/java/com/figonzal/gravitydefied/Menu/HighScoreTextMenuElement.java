@@ -17,7 +17,6 @@ public class HighScoreTextMenuElement
 
 	protected static final int TEXT_LEFT_MARGIN = 5;
 	protected static final int SUBTITLE_MARGIN_BOTTOM = 8;
-	protected static final int SUBTITLE_TEXT_SIZE = 20;
 	protected static final int LAYOUT_PADDING = 3;
 	protected static int medals[] = new int[]{
 			R.drawable.s_medal_gold,
@@ -77,8 +76,6 @@ public class HighScoreTextMenuElement
 	}
 
 	public void setIsSubtitle(boolean is) {
-		textView.setTextSize(is ? SUBTITLE_TEXT_SIZE : TEXT_SIZE);
-
 		LinearLayout.LayoutParams textViewLayoutParams = (LinearLayout.LayoutParams) textView.getLayoutParams();
 		textViewLayoutParams.setMargins(!is && showMedal ? getDp(TEXT_LEFT_MARGIN) : 0, 0, 0, is ? getDp(SUBTITLE_MARGIN_BOTTOM) : 0);
 		textView.setLayoutParams(textViewLayoutParams);

@@ -13,6 +13,7 @@ public class MenuTextView extends TextView {
 	public MenuTextView(Context context) {
 		super(context);
 		super.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
+		super.setTextSize(15);
 	}
 
 	@Override

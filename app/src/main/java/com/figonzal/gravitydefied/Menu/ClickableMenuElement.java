@@ -18,7 +18,6 @@ import static com.figonzal.gravitydefied.Helpers.getGDActivity;
 public class ClickableMenuElement
 		implements MenuElement {
 
-	public static final int TEXT_SIZE = 20;
 	public static final int PADDING_TOP = 5;
 	protected View textView;
 	protected String text;
@@ -124,7 +123,6 @@ public class ClickableMenuElement
 		MenuTextView mtv = new MenuTextView(context);
 		mtv.setText(getTextForView());
 		mtv.setTextColor(defaultColorStateList());
-		mtv.setTextSize(TEXT_SIZE);
 		mtv.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT

@@ -63,7 +63,6 @@ public class SimpleMenuElement extends TimerTask
 		textView = new MenuTextView(getGDActivity());
 		textView.setText(text);
 		textView.setTextColor(getGDActivity().getResources().getColor(R.color.menu_text_primary));
-		textView.setTextSize(20);
 		textView.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,
 				ViewGroup.LayoutParams.WRAP_CONTENT

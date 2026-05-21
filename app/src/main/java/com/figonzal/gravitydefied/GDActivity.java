@@ -43,7 +43,6 @@ public class GDActivity extends Activity implements Runnable {
 	public static final int MENU_TITLE_LAYOUT_TOP_PADDING = 25;
 	public static final int MENU_TITLE_LAYOUT_BOTTOM_PADDING = 13;
 	public static final int MENU_TITLE_LAYOUT_X_PADDING = 30;
-	public static final int MENU_TITLE_FONT_SIZE = 30;
 	public static final int GAME_MENU_BUTTON_LAYOUT_WIDTH = 40;
 	public static final int GAME_MENU_BUTTON_LAYOUT_HEIGHT = 56;
 	public static final int REQUEST_OPEN_MRG = 1001;
@@ -218,7 +217,7 @@ public class GDActivity extends Activity implements Runnable {
 			menuTitleTextView.setText(getString(R.string.main));
 			menuTitleTextView.setTextColor(getResources().getColor(R.color.title_text));
 			menuTitleTextView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
-			menuTitleTextView.setTextSize(MENU_TITLE_FONT_SIZE);
+			menuTitleTextView.setTextSize(24);
 			menuTitleTextView.setLineSpacing(0f, 1.1f);
 			menuTitleTextView.setLayoutParams(new ViewGroup.LayoutParams(
 					ViewGroup.LayoutParams.MATCH_PARENT,

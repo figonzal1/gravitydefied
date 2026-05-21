@@ -70,7 +70,6 @@ public class NameInputMenuScreen extends MenuScreen {
 		Context context = getGDActivity();
 		MenuTextView textView = new MenuTextView(context);
 		textView.setTextColor(context.getResources().getColor(R.color.menu_text_primary));
-		textView.setTextSize(ClickableMenuElement.TEXT_SIZE);
 		textView.setLayoutParams(new LinearLayout.LayoutParams(
 				wordWidth,
 				ViewGroup.LayoutParams.WRAP_CONTENT
@@ -83,7 +82,6 @@ public class NameInputMenuScreen extends MenuScreen {
 
 		String text = "W";
 		TextView textView = new TextView(context);
-		textView.setTextSize(ClickableMenuElement.TEXT_SIZE);
 		textView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
 
 		Rect bounds = new Rect();

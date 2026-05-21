@@ -19,8 +19,6 @@ import static com.figonzal.gravitydefied.Helpers.getGDActivity;
 public class TextMenuElement
 		implements MenuElement {
 
-	protected static final int TEXT_SIZE = 15;
-
 	protected Spanned spanned;
 	protected MenuTextView textView;
 
@@ -40,7 +38,6 @@ public class TextMenuElement
 		MenuTextView textView = new MenuTextView(activity);
 		textView.setText(spanned);
 		textView.setTextColor(activity.getResources().getColor(R.color.menu_text_primary));
-		textView.setTextSize(TEXT_SIZE);
 		textView.setLineSpacing(0f, 1.5f);
 		textView.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,
