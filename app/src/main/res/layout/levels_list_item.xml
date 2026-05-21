@@ -7,7 +7,7 @@
 		android:paddingTop="7dp"
 		android:paddingBottom="7dp">
 
-	<org.happysanta.gd.Menu.Views.MenuHelmetView
+	<com.figonzal.gravitydefied.Menu.Views.MenuHelmetView
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent" />
 
