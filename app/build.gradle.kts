@@ -1,17 +1,33 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
 }
 
+val keystorePropertiesFile = rootProject.file("keys/keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) load(keystorePropertiesFile.inputStream())
+}
+
 android {
-    namespace = "org.happysanta.gd"
+    namespace = "com.figonzal.gravitydefied"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "org.happysanta.gd"
+        applicationId = "com.figonzal.gravitydefied"
         minSdk = 21
         targetSdk = 36
         versionCode = 29
         versionName = "1.1.1"
+    }
+
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String
+            keyPassword = keystoreProperties["keyPassword"] as String
+            storeFile = file(keystoreProperties["storeFile"] as String)
+            storePassword = keystoreProperties["storePassword"] as String
+        }
     }
 
     compileOptions {
@@ -22,6 +38,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt")
             )
