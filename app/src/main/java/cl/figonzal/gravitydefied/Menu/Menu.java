@@ -973,7 +973,7 @@ public class Menu
 			getGDActivity().menuToGame();
 			return;
 		}
-		if (currentMenu != null)
+		if (currentMenu != null && currentMenu.getNavTarget() != null)
 			setCurrentMenu(currentMenu.getNavTarget(), true);
 	}
 
