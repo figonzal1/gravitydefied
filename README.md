@@ -5,15 +5,21 @@ Codebrew has launched an Android version of the game in 2012, though it was tota
 
 This port includes all features of the original Gravity Defied. In addition, we have collected more than 1000 levels mods made by fans since 2007. You can install any mod and switch between mods directly from the game menu.
 
+> This repository is a maintained fork by [Felipe González Alarcón](https://github.com/figonzal1), updated for modern Android.
+
 ***We are not associated with Codebrew Software in any fashion. All rights to the original Gravity Defied, it's name, logotype, brand and all that stuff belongs to Codebrew Software.***
 
 # Download
-You can download the last version from:
+You can download the latest version from:
 
-* [Google Play](https://play.google.com/store/apps/details?id=org.happysanta.gd). Please note, that this (package name *org.happysanta.gd*) is **the only real** Gravity Defied at Google Play, and it's ads-free. Previously it has package name *com.ch1p.gd*, but unfortunately my developer account was suspended due to USA Crimea-related sanctions and the game with almost 1 million downloads disappeared from Google Play.
-* Our official site [gdtr.net](http://gdtr.net)
+* [Google Play](https://play.google.com/store/apps/details?id=cl.figonzal.gravitydefied)
+* Official site of the original port: [gdtr.net](http://gdtr.net)
 
 # Authors
+### Fork maintainer
+
+* **[Felipe González Alarcón](https://github.com/figonzal1)** - Android modernization and maintenance
+
 ### Port authors
 
 * **[Gregory Klushnikov](https://vk.com/grishka)** - idea and the original J2ME to Android port.
@@ -26,4 +32,3 @@ You can download the last version from:
 * **Per David Jacobsson** - physics programming, game graphics, levels design
 
 For more information, please visit official site of Codebrew Software: [codebrew.se](http://codebrew.se)
-
