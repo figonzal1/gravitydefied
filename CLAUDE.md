@@ -10,7 +10,7 @@ A faithful Android port of the classic 2004 J2ME game **Gravity Defied** (a moto
 
 This is a **Gradle-based Android project** (AGP 8.13, Gradle 8.13):
 
-- `app/build.gradle`: `compileSdk 36`, `minSdk 21`, `targetSdk 36`, `versionCode 29`.
+- `app/build.gradle`: `compileSdk 36`, `minSdk 23`, `targetSdk 36`, `versionCode 1`.
 - Language level Java 8 (`compileOptions JavaVersion.VERSION_1_8`), but the codebase style is Java 6/7 era — anonymous inner classes everywhere, no lambdas, no streams. Match this style in new code.
 - Dependencies: ACRA 4.5.0 (`libs/acra-4.5.0.jar`) as a local JAR. No AndroidX — uses plain `android.app.Activity`, `android.widget.*`, etc. Networking uses the legacy `org.apache.http` client.
 - Theme: `android:Theme.Material.Light.NoActionBar` (API 21 built-in, no Material Components library).
