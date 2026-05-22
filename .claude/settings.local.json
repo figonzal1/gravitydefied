@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem \"D:\\\\figon\\\\Proyectos\\\\figonzal\\\\gravitydefied\\\\app\\\\src\\\\main\\\\res\\\\mipmap-mdpi\")",
+      "Bash(Select-Object Name)",
+      "WebFetch(domain:docs.fastlane.tools)"
+    ]
+  }
+}
