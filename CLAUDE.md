@@ -8,11 +8,35 @@ A faithful Android port of the classic 2004 J2ME game **Gravity Defied** (a moto
 
 ## Build system
 
-This is a **Gradle-based Android project** (AGP 8.13, Gradle 8.13):
+This is a **Gradle-based Android project** (AGP 8.13, Gradle 8.13).
 
-- `app/build.gradle`: `compileSdk 36`, `minSdk 23`, `targetSdk 36`, `versionCode 1`.
+### Build commands
+
+```bash
+./gradlew assembleDebug          # debug APK → app/build/outputs/apk/debug/
+./gradlew assembleRelease        # release APK (requires keys/keystore.properties)
+./gradlew bundleRelease          # release AAB for Play Store
+```
+
+### Deployment (Fastlane)
+
+```bash
+fastlane beta                    # build release AAB
+fastlane beta_googleplay         # upload AAB to Play Store beta track (draft)
+fastlane prod                    # build release AAB
+fastlane prod_googleplay         # upload AAB to Play Store production track (draft)
+```
+
+Signing env vars required: `STORE_FILE`, `STORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
+Credentials file (gitignored): `keys/keystore.properties`.
+
+### Dependencies and config
+
+- `app/build.gradle.kts`: `compileSdk 36`, `minSdk 23`, `targetSdk 36`, `versionCode 1`.
 - Language level Java 8 (`compileOptions JavaVersion.VERSION_1_8`), but the codebase style is Java 6/7 era — anonymous inner classes everywhere, no lambdas, no streams. Match this style in new code.
-- Dependencies: ACRA 4.5.0 (`libs/acra-4.5.0.jar`) as a local JAR. No AndroidX — uses plain `android.app.Activity`, `android.widget.*`, etc. Networking uses the legacy `org.apache.http` client.
+- No AndroidX — uses plain `android.app.Activity`, `android.widget.*`, etc.
+- Firebase: Crashlytics + Analytics, both declared in `app/build.gradle.kts`. They auto-initialize from `google-services.json` — `GDApplication.onCreate()` is intentionally empty.
+- **`google-services.json` must be present in `app/`** for Firebase to work (gitignored, not in repo).
 - Theme: `android:Theme.Material.Light.NoActionBar` (API 21 built-in, no Material Components library).
 
 There are **no tests, no lint config, and no CI**.
@@ -25,15 +49,15 @@ There are **no tests, no lint config, and no CI**.
 Threading rule the codebase follows consistently: game logic runs on `game_thread`; any UI mutation is wrapped in `runOnUiThread()` and marked with a `// @UiThread` comment. Preserve this when editing.
 
 ### Global singleton access
-`GDActivity.shared` is a public static set in `onCreate`. Almost everything reaches shared state through `Helpers.getGDActivity()` and from there `menu`, `physEngine`, `levelLoader`, `levelsManager`, `gameView`. `Global` holds compile-time flags (`DEBUG`, `ACRA_ENABLED`) and shared state (screen `density`, the Roboto Condensed typeface).
+`GDActivity.shared` is a public static set in `onCreate`. Almost everything reaches shared state through `Helpers.getGDActivity()` and from there `menu`, `physEngine`, `levelLoader`, `levelsManager`, `gameView`.
 
 ### Package map
 - `Game/` — the physics and rendering core. `Physics` is a **fixed-point math** trial-bike simulator (`FPMath` = fixed-point helpers); `GameView` is a custom `View` rendering frames with `Canvas`. This package is **decompiled from the original J2ME jar** (Jad). See the obfuscation note below.
 - `Levels/` — binary track loading. `Loader` parses `.mrg` level-pack files; `Reader`/`Level`/`LevelHeader` decode the format. The bundled original packs are `assets/levels.mrg`; downloaded mods are `.mrg` files fetched from `http://gdtr.net/mrg/<id>.mrg`. `Levels/Level` is an in-memory parsed track — **not** the same type as `Storage/Level`.
 - `Storage/` — SQLite persistence. `LevelsSQLiteOpenHelper` defines `levels.db` (tables `levels`, `highscores`; schema version 1, no migrations in `onUpgrade`). `LevelsDataSource` is the DAO; `LevelsManager` is the high-level controller for installing/switching mods and computing stats; `HighScores` and `Storage/Level` are entities.
 - `Menu/` — a custom menu framework rendered as real Android Views inside `GDActivity`'s `ScrollView` (the original J2ME canvas menu was replaced; `MenuElementOld`/`SimpleMenuElement` are leftover remnants). `Menu` is the controller, `MenuScreen` a screen, `MenuElement` subclasses are rows, `Menu/Views/` holds custom `View` subclasses. The mod browser/manager screens are `LevelsMenuScreen`, `InstalledLevelsMenuScreen`, `DownloadLevelsMenuScreen`.
-- `API/` — gdtr.net backend client. Endpoint `http://gdtr.net/api.php` (API `VERSION = 2`), requests run on `AsyncTask` via Apache `HttpClient`. Calls: `getLevels`, `getNotifications` (shown as an `AlertDialog` on launch), `sendStats`, `sendKeyboardLogs`, `downloadMrg`. Callback style: `Request` + `ResponseHandler` with typed `LevelsResponse`/`NotificationsResponse`.
-- `Helpers.java` — static utilities, including a **Windows-1251 (CP1251) translation table**: level and menu strings use CP1251 (Russian text), not UTF-8. `Settings.java` wraps `SharedPreferences`. `KeyboardController` drives the on-screen 3×3 numeric control pad. `GDApplication` initializes ACRA (crash reports POST to `http://gdtr.net/report.php`).
+- `API/` — gdtr.net backend client. Endpoint `http://gdtr.net/api.php` (API `VERSION = 2`), requests run on a thread pool (`ExecutorService`) via `HttpURLConnection`. **Active calls: `getLevels`** (mod browser listing) and **`downloadMrg`** (level pack download). Methods `sendStats`, `sendKeyboardLogs`, `getNotifications` exist in the class but are not invoked — removed from call sites for privacy reasons. Callback style: `Request` + `ResponseHandler` with typed `LevelsResponse`/`NotificationsResponse`.
+- `Helpers.java` — static utilities, including a **Windows-1251 (CP1251) translation table**: level and menu strings use CP1251 (Russian text), not UTF-8. `Settings.java` wraps `SharedPreferences`. `KeyboardController` drives the on-screen 3×3 numeric control pad. `GDApplication.onCreate()` is empty — crash reporting is handled by Firebase Crashlytics.
 
 ## Working in this codebase
 
