@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,7 +17,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import cl.figonzal.gravitydefied.API.*;
 import cl.figonzal.gravitydefied.Game.*;
 import cl.figonzal.gravitydefied.Levels.Loader;
 import cl.figonzal.gravitydefied.R;
@@ -104,80 +102,6 @@ public class GDActivity extends Activity implements Runnable {
 		if (Helpers.isSDK10OrLower()) {
 			isNormalAndroid = false;
 		}
-
-		final GDActivity self = this;
-		Request request = API.getNotifications(true, new ResponseHandler() {
-			@Override
-			public void onResponse(final Response apiResponse) {
-				try {
-					final NotificationsResponse response = new NotificationsResponse(apiResponse);
-					if (!response.isEmpty()) {
-						final Runnable onOk = new Runnable() {
-							@Override
-							public void run() {
-								if (response.hasURL()) {
-									String url = response.getURL();
-									try {
-										Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-										startActivity(browserIntent);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							}
-						};
-
-						if (response.hasTwoButtons()) {
-							AlertDialog.Builder alert = new AlertDialog.Builder(self)
-									.setTitle(response.getTitle())
-									.setMessage(response.getMessage())
-									.setPositiveButton(response.getOKButton(), new DialogInterface.OnClickListener() {
-										@Override
-										public void onClick(DialogInterface dialog, int which) {
-											onOk.run();
-										}
-									})
-									.setNegativeButton(response.getCancelButton(), new DialogInterface.OnClickListener() {
-										@Override
-										public void onClick(DialogInterface dialog, int which) {
-										}
-									})
-									.setOnCancelListener(new DialogInterface.OnCancelListener() {
-										@Override
-										public void onCancel(DialogInterface dialog) {
-
-										}
-									});
-							alert.show();
-						} else {
-							AlertDialog alertDialog = new AlertDialog.Builder(self)
-									.setTitle(response.getTitle())
-									.setMessage(response.getMessage())
-									.setPositiveButton(response.getOKButton(), new DialogInterface.OnClickListener() {
-										@Override
-										public void onClick(DialogInterface dialog, int which) {
-											onOk.run();
-										}
-									})
-									.setOnCancelListener(new DialogInterface.OnCancelListener() {
-										@Override
-										public void onCancel(DialogInterface dialog) {
-										}
-									})
-									.create();
-							alertDialog.show();
-						}
-					}
-				} catch (Exception e) {
-					// e.printStackTrace();
-				}
-			}
-
-			@Override
-			public void onError(APIException error) {
-
-			}
-		});
 
 		if (true) {
 			gameView = new GameView(this);
@@ -498,8 +422,6 @@ public class GDActivity extends Activity implements Runnable {
 				physEngine = new Physics(levelLoader);
 				gameView.setPhysicsEngine(physEngine);
 
-				// logDebug(levelsManager.getLevelsStat());
-				sendStats();
 
 				/* synchronized (Thread.currentThread()) {
 					Thread.currentThread().notify();
@@ -1052,8 +974,6 @@ public class GDActivity extends Activity implements Runnable {
 		// menu.showKeyboard();
 
 		menuToGameUpdateUi();
-
-		keyboardController.clearLogBuffer();
 	}
 
 	// @UiThread
@@ -1176,73 +1096,6 @@ public class GDActivity extends Activity implements Runnable {
 			Uri uri = data.getData();
 			if (uri != null) menu.installMrgFromUri(uri);
 		}
-	}
-
-	private void sendStats() {
-		long lastTs = Settings.getLastSendStats();
-		Helpers.logDebug("sendStats: lastTs = " + lastTs);
-		if (lastTs == 0) {
-			Helpers.logDebug("sendStats: set it to current ts and return");
-			Settings.setLastSendStats(Helpers.getTimestamp());
-			return;
-		}
-
-		// if (Helpers.getTimestamp() < lastTs + 3600 * 8) {
-		if (Helpers.getTimestamp() < lastTs + 10) {
-			Helpers.logDebug("sendStats: just return");
-			return;
-		}
-
-		final GDActivity self = this;
-		Thread statsThread = new Thread() {
-			@Override
-			public void run() {
-				try {
-					HashMap<String, Double> stats = levelsManager.getLevelsStat();
-
-					JSONObject statsJSON = new JSONObject(stats);
-					String id = Helpers.getInstallationId(self);
-					int useCheats = cl.figonzal.gravitydefied.Menu.Menu.isNameCheat(Settings.getName()) ? 1 : 0;
-
-					API.sendStats(statsJSON.toString(), id, useCheats, new ResponseHandler() {
-						@Override
-						public void onResponse(Response response) {
-							Helpers.logDebug("send stats OK");
-							Settings.setLastSendStats(Helpers.getTimestamp());
-						}
-
-						@Override
-						public void onError(APIException error) {
-							Helpers.logDebug("send stats error: " + error.getMessage());
-							// logDebug(error);
-							// error.printStackTrace();
-						}
-					});
-				} catch (Exception e) {
-					Helpers.logDebug("send stats exception: " + e.getMessage());
-					// e.printStackTrace();
-				}
-			}
-		};
-		statsThread.start();
-	}
-
-	public void sendKeyboardLogs() {
-		final ProgressDialog progressDialog = ProgressDialog.show(this, getString(R.string.please_wait), getString(R.string.please_wait), true);
-		API.sendKeyboardLogs(keyboardController.getLog(), new ResponseHandler() {
-			@Override
-			public void onResponse(Response response) {
-				progressDialog.dismiss();
-				keyboardController.clearLogBuffer();
-				Helpers.showAlert(getString(R.string.ok), "Done", null);
-			}
-
-			@Override
-			public void onError(APIException error) {
-				progressDialog.dismiss();
-				Helpers.showAlert(getString(R.string.error), "Unable to send logs. Maybe log is empty?", null);
-			}
-		});
 	}
 
 	private class ButtonCoords {

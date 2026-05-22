@@ -1176,9 +1176,6 @@ public class Menu
 					long nextId = manager.getCurrentId() == 1 ? 2 : 1;
 					gd.levelsManager.load(manager.getLeveL(nextId));
 				}
-				if (((ActionMenuElement) item).getActionValue() == ActionMenuElement.SEND_LOGS) {
-					gd.sendKeyboardLogs();
-				}
 				if (((ActionMenuElement) item).getActionValue() == ActionMenuElement.SELECT_FILE) {
 					installFromFileBrowse();
 					return;
