@@ -1,5 +1,7 @@
 plugins {
-    id("com.android.application") version "8.13.0" apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.ben.manes.versions)
+    alias(libs.plugins.version.catalog.update)
 }
 
 tasks.register<Delete>("clean") {

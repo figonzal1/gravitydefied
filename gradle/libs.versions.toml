@@ -1,0 +1,9 @@
+[versions]
+agp = "8.13.0"
+ben-manes-versions = "0.54.0"
+version-catalog-update = "1.1.0"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+ben-manes-versions = { id = "com.github.ben-manes.versions", version.ref = "ben-manes-versions" }
+version-catalog-update = { id = "nl.littlerobots.version-catalog-update", version.ref = "version-catalog-update" }

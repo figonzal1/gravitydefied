@@ -1,7 +1,7 @@
 import java.util.Properties
 
 plugins {
-    id("com.android.application")
+    alias(libs.plugins.android.application)
 }
 
 val keystorePropertiesFile = rootProject.file("keys/keystore.properties")
@@ -17,8 +17,8 @@ android {
         applicationId = "cl.figonzal.gravitydefied"
         minSdk = 21
         targetSdk = 36
-        versionCode = 29
-        versionName = "1.1.1"
+        versionCode = 1
+        versionName = "1.0.0"
     }
 
     signingConfigs {
