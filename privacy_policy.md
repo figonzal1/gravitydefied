@@ -11,6 +11,8 @@ Personal Data processed for the following purposes and using the following servi
 
 * Platform services and hosting:
     * __Google Play Store__: Usage Data
+* Content delivery:
+    * __gdtr.net Mod Backend__: application version; device language
 * Analytics:
     * __Google Analytics for Firebase__: Application opens; Application updates; device information;
       geography/region; launches; number of sessions; number of Users; operating systems; session
@@ -120,6 +122,18 @@ Personal Data is collected for the following purposes and using the following se
       settings. Personal Data processed: Usage Data. Place of processing: United States –
       [Privacy Policy](https://policies.google.com/privacy); Ireland –
       [Privacy Policy](https://policies.google.com/privacy).
+
+* **Content delivery:**
+
+  This service provides community-made level packs (mods) that Users can browse and download
+  from within the Application.
+
+    * __gdtr.net Mod Backend__: When the User opens the mod browser or downloads a level pack,
+      the Application contacts the gdtr.net server to retrieve the list of available mods and to
+      download `.mrg` level files. Requests include the application version and device language as
+      technical parameters. No personal identifiers, installation IDs, gameplay data, or user
+      account information are transmitted. Personal Data processed: application version; device
+      language. Place of processing: gdtr.net servers.
 
 * **Analytics:**
 
@@ -274,4 +288,4 @@ Art. 13/14 of Regulation (EU) 2016/679 (General Data Protection Regulation).
 This privacy policy relates solely to this Application, if not stated otherwise within this
 document.
 
-*Latest update: May 22, 2026*
+*Latest update: May 23, 2026*
