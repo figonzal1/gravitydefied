@@ -1,0 +1,2 @@
+json_key_file("fastlane/google-play-fastlane.json")
+package_name("cl.figonzal.gravitydefied")
