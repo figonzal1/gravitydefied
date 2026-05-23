@@ -1,1 +1,4 @@
-- Bug fixes and performance improvements
+- New: manual dark mode toggle
+- Fixed back gesture behavior on Android 13+
+- Removed telemetry data collection
+- Stability and performance improvements
