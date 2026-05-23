@@ -47,6 +47,7 @@
 	<string name="look_ahead">Look ahead</string>
 	<string name="vibrate_on_touch">Vibrate on touch</string>
 	<string name="keyboard_in_menu">Keyboard in menu</string>
+	<string name="night_mode">Night mode</string>
 	<string name="clear_highscore">Clear highscore</string>
 	<string name="full_reset">Full Reset</string>
 	<string name="reset">Reset</string>
