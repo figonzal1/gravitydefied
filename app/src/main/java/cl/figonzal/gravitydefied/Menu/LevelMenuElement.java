@@ -74,7 +74,7 @@ public class LevelMenuElement
 		textView = new MenuTextView(context);
 		// textView.setText(level.getName());
 		updateNameLine();
-		textView.setTextColor(context.getResources().getColorStateList(R.drawable.menu_item_color));
+		textView.setTextColor(defaultColorStateList());
 		textView.setLineSpacing(0f, 1.1f);
 		textView.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,
@@ -83,6 +83,7 @@ public class LevelMenuElement
 		textView.setPadding(0, getDp(PADDING_TOP), 0, 0);
 
 		tracksCountTextView = new MenuTextView(context);
+		tracksCountTextView.setTextColor(defaultColorStateList());
 		updateLevelsLine();
 
 		nameLayout.addView(textView);
