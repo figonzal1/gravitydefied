@@ -46,6 +46,12 @@ public class Settings {
 	private static final String LEVELS_SORT = "level_sort"; // in download list
 	private static final int LEVELS_SORT_DEFAULT = 0;
 
+	private static final String THEME_MODE = "theme_mode";
+	public static final int THEME_MODE_SYSTEM = 0;
+	public static final int THEME_MODE_LIGHT = 1;
+	public static final int THEME_MODE_DARK = 2;
+	private static final int THEME_MODE_DEFAULT = THEME_MODE_SYSTEM;
+
 	private static SharedPreferences preferences;
 
 	static {
@@ -63,6 +69,7 @@ public class Settings {
 		setInputOption(INPUT_OPTION_DEFAULT);
 		setLevelsSort(LEVELS_SORT_DEFAULT);
 		setName(NAME_CHARS_DEFALUT);
+		setThemeMode(THEME_MODE_DEFAULT);
 	}
 
 	public static long getLevelId() {
@@ -155,6 +162,14 @@ public class Settings {
 
 	public static void setLevelsSort(int type) {
 		setInt(LEVELS_SORT, type);
+	}
+
+	public static int getThemeMode() {
+		return preferences.getInt(THEME_MODE, THEME_MODE_DEFAULT);
+	}
+
+	public static void setThemeMode(int mode) {
+		setInt(THEME_MODE, mode);
 	}
 
 	public static byte[] getName() {

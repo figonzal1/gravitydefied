@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="menu_background">#FF121212</color>
+    <color name="menu_text_primary">#FFEDEDED</color>
+    <color name="menu_text_disabled">#FF6E6E6E</color>
+    <color name="menu_highlight">#FF66D266</color>
+    <color name="keyboard_background">#C6121212</color>
+    <color name="keyboard_button_text">#FFEDEDED</color>
+    <color name="title_text">#FFEDEDED</color>
+    <color name="menu_text_error">#FFB87575</color>
+    <color name="menu_icon_tint">#FFEDEDED</color>
+</resources>

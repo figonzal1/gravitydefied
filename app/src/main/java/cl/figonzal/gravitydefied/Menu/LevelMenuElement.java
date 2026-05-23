@@ -121,10 +121,22 @@ public class LevelMenuElement
 	@Override
 	protected void onHighlightChanged() {
 		if (installed && installedIcon != null) {
-			installedIcon.setImageResource(isHighlighted ? R.drawable.ic_downloaded_selected : R.drawable.ic_downloaded);
+			if (isHighlighted) {
+				installedIcon.setImageResource(R.drawable.ic_downloaded_selected);
+				installedIcon.clearColorFilter();
+			} else {
+				installedIcon.setImageResource(R.drawable.ic_downloaded);
+				installedIcon.setColorFilter(getGDActivity().getResources().getColor(R.color.menu_icon_tint), android.graphics.PorterDuff.Mode.SRC_IN);
+			}
 		}
 		if (active && activeIcon != null) {
-			activeIcon.setImageResource(isHighlighted ? R.drawable.ic_installed_selected : R.drawable.ic_installed);
+			if (isHighlighted) {
+				activeIcon.setImageResource(R.drawable.ic_installed_selected);
+				activeIcon.clearColorFilter();
+			} else {
+				activeIcon.setImageResource(R.drawable.ic_installed);
+				activeIcon.setColorFilter(getGDActivity().getResources().getColor(R.color.menu_icon_tint), android.graphics.PorterDuff.Mode.SRC_IN);
+			}
 		}
 	}
 
@@ -157,6 +169,7 @@ public class LevelMenuElement
 				installedIcon = new MenuImageView(getGDActivity());
 				installedIcon.setLayoutParams(params);
 				installedIcon.setImageResource(R.drawable.ic_downloaded);
+				installedIcon.setColorFilter(getGDActivity().getResources().getColor(R.color.menu_icon_tint), android.graphics.PorterDuff.Mode.SRC_IN);
 			}
 
 			if (installedIcon.getParent() != nameLayout) {
@@ -183,6 +196,7 @@ public class LevelMenuElement
 				activeIcon = new MenuImageView(getGDActivity());
 				activeIcon.setLayoutParams(params);
 				activeIcon.setImageResource(R.drawable.ic_installed);
+				activeIcon.setColorFilter(getGDActivity().getResources().getColor(R.color.menu_icon_tint), android.graphics.PorterDuff.Mode.SRC_IN);
 			}
 
 			if (activeIcon.getParent() != nameLayout) {

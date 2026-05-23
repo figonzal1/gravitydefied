@@ -14,9 +14,10 @@ dependencyResolutionManagement {
     }
 }
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
-}
+// foojay toolchain resolver removed — using system JDK 21
+// plugins {
+//     id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
+// }
 
 rootProject.name = "GravityDefied"
 include(":app")

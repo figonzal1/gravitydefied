@@ -8,4 +8,6 @@
     <color name="keyboard_button_text">#FF000000</color>
     <color name="title_text">#FF000000</color>
     <color name="ic_launcher_background">#FFFFFF</color>
+    <color name="menu_text_error">#FF777777</color>
+    <color name="menu_icon_tint">#FF000000</color>
 </resources>

@@ -42,6 +42,7 @@ public class DownloadLevelsMenuScreen extends LevelsMenuScreen {
 		// Sort icon
 		sortImage = new MenuImageView(context);
 		sortImage.setImageResource(R.drawable.ic_sort);
+		sortImage.setColorFilter(context.getResources().getColor(R.color.menu_icon_tint), android.graphics.PorterDuff.Mode.SRC_IN);
 		sortImage.setAdjustViewBounds(true);
 		sortImage.setOnClickListener(new View.OnClickListener() {
 			@Override

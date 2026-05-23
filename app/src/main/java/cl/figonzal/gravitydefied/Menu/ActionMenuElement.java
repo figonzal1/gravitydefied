@@ -92,6 +92,11 @@ public class ActionMenuElement
 
 		lockImage.setVisibility(isLocked ? View.VISIBLE : View.GONE);
 		lockImage.setImageResource(locks[isBlackLock ? 0 : 1]);
+		if (isBlackLock) {
+			lockImage.setColorFilter(getGDActivity().getResources().getColor(R.color.menu_icon_tint), android.graphics.PorterDuff.Mode.SRC_IN);
+		} else {
+			lockImage.clearColorFilter();
+		}
 	}
 
 	@Override
@@ -112,6 +117,11 @@ public class ActionMenuElement
 	@Override
 	protected void onHighlightChanged() {
 		lockImage.setImageResource(locks[isHighlighted ? 2 : (isBlackLock ? 0 : 1)]);
+		if (!isHighlighted && isBlackLock) {
+			lockImage.setColorFilter(getGDActivity().getResources().getColor(R.color.menu_icon_tint), android.graphics.PorterDuff.Mode.SRC_IN);
+		} else {
+			lockImage.clearColorFilter();
+		}
 	}
 
 	@Override

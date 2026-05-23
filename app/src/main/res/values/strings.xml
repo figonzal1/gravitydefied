@@ -47,6 +47,7 @@
 	<string name="look_ahead">Look ahead</string>
 	<string name="vibrate_on_touch">Vibrate on touch</string>
 	<string name="keyboard_in_menu">Keyboard in menu</string>
+	<string name="theme">Theme</string>
 	<string name="clear_highscore">Clear highscore</string>
 	<string name="full_reset">Full Reset</string>
 	<string name="reset">Reset</string>
@@ -164,6 +165,12 @@
 		<item>First place!</item>
 		<item>Second place!</item>
 		<item>Third place!</item>
+	</string-array>
+
+	<string-array name="theme_modes">
+		<item>System</item>
+		<item>Light</item>
+		<item>Dark</item>
 	</string-array>
 
 	<string-array name="on_off">

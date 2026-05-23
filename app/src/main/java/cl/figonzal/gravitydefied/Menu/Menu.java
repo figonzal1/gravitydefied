@@ -81,6 +81,7 @@ public class Menu
 	private OptionsMenuElement lookAheadOptionItem;
 	private OptionsMenuElement keyboardInMenuOptionItem;
 	private OptionsMenuElement vibrateOnTouchOptionItem;
+	private OptionsMenuElement themeOptionItem;
 	private SimpleMenuElementNew clearHighscoreOptionItem;
 	private SimpleMenuElementNew fullResetItem;
 	// private ActionMenuElement yesAction;
@@ -386,6 +387,7 @@ public class Menu
 				lookAheadOptionItem = new OptionsMenuElement(getString(R.string.look_ahead), Settings.isLookAheadEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
+				themeOptionItem = new OptionsMenuElement(getString(R.string.theme), Settings.getThemeMode(), this, getStringArray(R.array.theme_modes), false, optionsMenu);
 				clearHighscoreOptionItem = new SimpleMenuElementNew(getString(R.string.clear_highscore), eraseScreen, this);
 
 				// if (hasPointer)
@@ -398,6 +400,7 @@ public class Menu
 				optionsMenu.addItem(lookAheadOptionItem);
 				optionsMenu.addItem(vibrateOnTouchOptionItem);
 				optionsMenu.addItem(keyboardInMenuOptionItem);
+				optionsMenu.addItem(themeOptionItem);
 				optionsMenu.addItem(clearHighscoreOptionItem);
 				optionsMenu.addItem(createAction(ActionMenuElement.BACK));
 
@@ -1163,6 +1166,13 @@ public class Menu
 					inputOptionItem.setSelectedOption(inputOptionItem.getSelectedOption() + 1);
 				getGDView().setInputOption(inputOptionItem.getSelectedOption());
 				Settings.setInputOption(inputOptionItem.getSelectedOption());
+				return;
+			}
+			if (item == themeOptionItem) {
+				if (themeOptionItem._charvZ())
+					themeOptionItem.setSelectedOption(themeOptionItem.getSelectedOption() + 1);
+				Settings.setThemeMode(themeOptionItem.getSelectedOption());
+				gd.doRestartApp();
 				return;
 			}
 			if (item == lookAheadOptionItem) {

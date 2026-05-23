@@ -1,0 +1,11 @@
+<resources>
+
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">@color/menu_highlight</item>
+        <item name="android:colorPrimaryDark">@color/menu_highlight</item>
+        <item name="android:colorAccent">@color/menu_highlight</item>
+        <item name="android:windowBackground">@color/menu_background</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+</resources>

@@ -52,6 +52,7 @@ public class LevelsCountTextMenuElement
 		}
 
 		tracksImages[0].setImageResource(R.drawable.levels_wheel0);
+		tracksImages[0].setColorFilter(context.getResources().getColor(R.color.menu_icon_tint), android.graphics.PorterDuff.Mode.SRC_IN);
 		tracksImages[1].setImageResource(R.drawable.levels_wheel1);
 		tracksImages[2].setImageResource(R.drawable.levels_wheel2);
 

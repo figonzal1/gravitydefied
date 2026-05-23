@@ -37,7 +37,6 @@ public class LevelsMenuScreen extends MenuScreen {
 
 	enum Statuses {NORMAL, DOWNLOADING, ERROR}
 
-	protected final static int ERROR_COLOR = 0xff777777;
 
 	protected Statuses status = Statuses.NORMAL;
 	protected int savedScrollY = 0;
@@ -75,7 +74,7 @@ public class LevelsMenuScreen extends MenuScreen {
 		errorText = new TextMenuElement(getString(R.string.download_error));
 		TextView errorTextView = (TextView) errorText.getView();
 
-		errorTextView.setTextColor(ERROR_COLOR);
+		errorTextView.setTextColor(getGDActivity().getResources().getColor(R.color.menu_text_error));
 		errorTextView.setLayoutParams(new LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.MATCH_PARENT,
 				LinearLayout.LayoutParams.MATCH_PARENT

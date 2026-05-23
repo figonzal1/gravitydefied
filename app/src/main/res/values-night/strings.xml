@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- In night mode, replace black (#000000) HTML colors with near-white so text stays visible. -->
+    <string name="ported_text"><![CDATA[
+        <font color="#999999">Ported by</font><br/>
+        <font color="#EDEDED">&#1050;&#1091;&#1079;&#1085;&#1080;&#1094;&#1072; &#1074;&#1080;&#1085;&#1088;&#1072;&#1088;&#1072;</font><br/>
+        <font color="#999999">and</font><br/>
+        <font color="#EDEDED">Happy Santa LLC</font><br/>
+        <font color="#999999">SDK 36 update · </font><font color="#EDEDED">figonzal.cl</font>
+    ]]></string>
+
+    <string name="active_name_tpl"><![CDATA[%1$s <font color="#66D266">(Active)</font>]]></string>
+
+</resources>

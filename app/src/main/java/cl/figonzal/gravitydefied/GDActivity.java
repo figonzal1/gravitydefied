@@ -94,6 +94,23 @@ public class GDActivity extends Activity implements Runnable {
 	public LevelsManager levelsManager;
 
 	@Override
+	protected void attachBaseContext(Context base) {
+		int mode = base.getSharedPreferences("GDSettings", Context.MODE_PRIVATE)
+				.getInt("theme_mode", Settings.THEME_MODE_SYSTEM);
+		if (mode == Settings.THEME_MODE_SYSTEM) {
+			super.attachBaseContext(base);
+			return;
+		}
+		android.content.res.Configuration cfg = new android.content.res.Configuration(
+				base.getResources().getConfiguration());
+		int nightFlag = (mode == Settings.THEME_MODE_DARK)
+				? android.content.res.Configuration.UI_MODE_NIGHT_YES
+				: android.content.res.Configuration.UI_MODE_NIGHT_NO;
+		cfg.uiMode = (cfg.uiMode & ~android.content.res.Configuration.UI_MODE_NIGHT_MASK) | nightFlag;
+		super.attachBaseContext(base.createConfigurationContext(cfg));
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -1074,7 +1091,7 @@ public class GDActivity extends Activity implements Runnable {
 		}
 	}
 
-	private void doRestartApp() {
+	public void doRestartApp() {
 		Intent mStartActivity = new Intent(this, GDActivity.class);
 		int mPendingIntentId = 123456;
 		PendingIntent mPendingIntent = PendingIntent.getActivity(this, mPendingIntentId, mStartActivity, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
