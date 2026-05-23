@@ -46,6 +46,9 @@ public class Settings {
 	private static final String LEVELS_SORT = "level_sort"; // in download list
 	private static final int LEVELS_SORT_DEFAULT = 0;
 
+	private static final String NIGHT_MODE_ENABLED = "night_mode";
+	private static final boolean NIGHT_MODE_ENABLED_DEFAULT = false;
+
 	private static SharedPreferences preferences;
 
 	static {
@@ -63,6 +66,7 @@ public class Settings {
 		setInputOption(INPUT_OPTION_DEFAULT);
 		setLevelsSort(LEVELS_SORT_DEFAULT);
 		setName(NAME_CHARS_DEFALUT);
+		setNightModeEnabled(NIGHT_MODE_ENABLED_DEFAULT);
 	}
 
 	public static long getLevelId() {
@@ -179,6 +183,14 @@ public class Settings {
 			}
 			setString(NAME, name);
 		}
+	}
+
+	public static boolean isNightModeEnabled() {
+		return preferences.getBoolean(NIGHT_MODE_ENABLED, NIGHT_MODE_ENABLED_DEFAULT);
+	}
+
+	public static void setNightModeEnabled(boolean enabled) {
+		setBoolean(NIGHT_MODE_ENABLED, enabled);
 	}
 
 	private static void setLong(String key, long value) {

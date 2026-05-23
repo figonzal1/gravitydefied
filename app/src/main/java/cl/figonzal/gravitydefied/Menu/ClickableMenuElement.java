@@ -3,7 +3,6 @@ package cl.figonzal.gravitydefied.Menu;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Rect;
-import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +10,7 @@ import android.widget.LinearLayout;
 import cl.figonzal.gravitydefied.Menu.Views.MenuHelmetView;
 import cl.figonzal.gravitydefied.Menu.Views.MenuTextView;
 import cl.figonzal.gravitydefied.R;
+import cl.figonzal.gravitydefied.Settings;
 
 import static cl.figonzal.gravitydefied.Helpers.getDp;
 import static cl.figonzal.gravitydefied.Helpers.getGDActivity;
@@ -134,11 +134,17 @@ public class ClickableMenuElement
 
 	@SuppressWarnings("deprecation")
 	protected ColorStateList defaultColorStateList() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-			return getGDActivity().getResources().getColorStateList(
-					R.drawable.menu_item_color, getGDActivity().getTheme());
-		}
-		return getGDActivity().getResources().getColorStateList(R.drawable.menu_item_color);
+		boolean night = Settings.isNightModeEnabled();
+		int textColor = getGDActivity().getResources().getColor(
+				night ? R.color.menu_text_primary_night : R.color.menu_text_primary);
+		int highlight = getGDActivity().getResources().getColor(R.color.menu_highlight);
+		int[][] states = new int[][]{
+				new int[]{android.R.attr.state_pressed},
+				new int[]{android.R.attr.state_focused},
+				new int[]{android.R.attr.state_selected},
+				new int[]{}
+		};
+		return new ColorStateList(states, new int[]{highlight, highlight, highlight, textColor});
 	}
 
 	@Override

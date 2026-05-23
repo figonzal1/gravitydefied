@@ -4,6 +4,7 @@ import android.graphics.*;
 import android.view.View;
 import cl.figonzal.gravitydefied.Command;
 import cl.figonzal.gravitydefied.GDActivity;
+import cl.figonzal.gravitydefied.Settings;
 import cl.figonzal.gravitydefied.Menu.Menu;
 import cl.figonzal.gravitydefied.Menu.MenuScreen;
 import cl.figonzal.gravitydefied.Menu.SimpleMenuElement;
@@ -46,6 +47,7 @@ public class GameView extends View {
 	private Paint timerFont;
 	private boolean m_ahZ;
 	private int m_oI;
+	private boolean nightMode;
 	private boolean m_AZ;
 	private int m_OI;
 	private android.graphics.Bitmap m_MBitmap;
@@ -212,6 +214,7 @@ public class GameView extends View {
 		invalidate();
 		m_KZ = false;
 		activity = micro;
+		nightMode = Settings.isNightModeEnabled();
 		_ifvV();
 
 		Typeface condensed = Typeface.create("sans-serif-condensed", Typeface.NORMAL);
@@ -224,6 +227,7 @@ public class GameView extends View {
 		timerFont.setTextSize(18);
 		timerFont.setAntiAlias(true);
 		timerFont.setTypeface(condensed);
+		timerFont.setColor(nightMode ? 0xFFE0E0E0 : 0xFF000000);
 
 		m_XI = 0;
 		m_BI = m_dI;
@@ -415,7 +419,7 @@ public class GameView extends View {
 	}
 
 	public void _newvV() {
-		paint.setColor(0xFFFFFFFF);
+		paint.setColor(nightMode ? 0xFF383838 : 0xFFFFFFFF);
 		paint.setStyle(Paint.Style.FILL);
 		canvas.drawRect(0, m_dI, m_abI, 80, paint);
 		byte byte0 = 35;
@@ -629,7 +633,7 @@ public class GameView extends View {
 	}
 
 	public void _tryvV() {
-		paint.setColor(0xFFFFFFFF);
+		paint.setColor(nightMode ? 0xFF383838 : 0xFFFFFFFF);
 		canvas.drawRect(0, 0, m_abI, m_dI, paint);
 	}
 
@@ -707,8 +711,12 @@ public class GameView extends View {
 				drawTimer(time);
 			}
 			if (infoMessage != null) {
-				setColor(0, 0, 0);
-				infoFont.setColor(paint.getColor());
+				if (nightMode) {
+					infoFont.setColor(0xFFE0E0E0);
+				} else {
+					setColor(0, 0, 0);
+					infoFont.setColor(paint.getColor());
+				}
 				/*if (m_dI <= 128)
 					canvas.drawText(infoMessage, m_abI / 2 - infoFont.measureText(infoMessage) / 2, 1, infoFont);
 				else*/
@@ -732,7 +740,7 @@ public class GameView extends View {
 	public void drawProgress(int j, boolean flag) {
 		double progr = j / (double) 0xFFFF;
 
-		paint.setColor(0xffc4c4c4);
+		paint.setColor(nightMode ? 0xff333333 : 0xffc4c4c4);
 		canvas.drawRect(0, 0, getScaledWidth(), 3, paint);
 
 		paint.setColor(0xff29aa27);

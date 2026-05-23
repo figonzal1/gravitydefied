@@ -27,6 +27,7 @@ import cl.figonzal.gravitydefied.Menu.Views.MenuTextView;
 import cl.figonzal.gravitydefied.Menu.Views.MenuTitleLinearLayout;
 import cl.figonzal.gravitydefied.Menu.Views.ObservableScrollView;
 import cl.figonzal.gravitydefied.Storage.LevelsManager;
+import cl.figonzal.gravitydefied.Settings;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -124,8 +125,10 @@ public class GDActivity extends Activity implements Runnable {
 			});
 			scrollView.setVisibility(View.GONE);
 
+			boolean night = Settings.isNightModeEnabled();
+
 			frame = new FrameLayout(this);
-			frame.setBackgroundColor(getResources().getColor(R.color.menu_background));
+			frame.setBackgroundColor(getResources().getColor(night ? R.color.menu_background_night : R.color.menu_background));
 
 			titleLayout = new MenuTitleLinearLayout(this);
 			titleLayout.setBackgroundColor(android.graphics.Color.TRANSPARENT);
@@ -139,7 +142,7 @@ public class GDActivity extends Activity implements Runnable {
 
 			menuTitleTextView = new TextView(this);
 			menuTitleTextView.setText(getString(R.string.main));
-			menuTitleTextView.setTextColor(getResources().getColor(R.color.title_text));
+			menuTitleTextView.setTextColor(getResources().getColor(night ? R.color.title_text_night : R.color.title_text));
 			menuTitleTextView.setTypeface(Typeface.create("sans-serif-condensed", Typeface.NORMAL));
 			menuTitleTextView.setTextSize(24);
 			menuTitleTextView.setLineSpacing(0f, 1.1f);
@@ -174,12 +177,12 @@ public class GDActivity extends Activity implements Runnable {
 				LinearLayout row = new LinearLayout(this);
 				row.setPadding(Helpers.getDp(KeyboardController.PADDING), i == 0 ? Helpers.getDp(KeyboardController.PADDING) : 0, Helpers.getDp(KeyboardController.PADDING), 0);
 				row.setOrientation(LinearLayout.HORIZONTAL);
-				row.setBackgroundColor(getResources().getColor(R.color.keyboard_background));
+				row.setBackgroundColor(getResources().getColor(night ? R.color.keyboard_background_night : R.color.keyboard_background));
 				for (int j = 0; j < 3; j++) {
 					LinearLayout btn = new LinearLayout(this);
 					TextView btnText = new TextView(this);
 					btnText.setText(String.valueOf(i * 3 + j + 1));
-					btnText.setTextColor(getResources().getColor(R.color.keyboard_button_text));
+					btnText.setTextColor(getResources().getColor(night ? R.color.keyboard_button_text_night : R.color.keyboard_button_text));
 					btnText.setTextSize(17);
 					btn.setBackgroundResource(getResources().getIdentifier(buttonResources[i * 3 + j], "drawable", getPackageName()));
 					btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));

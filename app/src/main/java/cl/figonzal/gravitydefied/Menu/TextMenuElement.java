@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import cl.figonzal.gravitydefied.Menu.Views.MenuTextView;
 import cl.figonzal.gravitydefied.R;
+import cl.figonzal.gravitydefied.Settings;
 
 import static cl.figonzal.gravitydefied.Helpers.getGDActivity;
 
@@ -37,7 +38,8 @@ public class TextMenuElement
 
 		MenuTextView textView = new MenuTextView(activity);
 		textView.setText(spanned);
-		textView.setTextColor(activity.getResources().getColor(R.color.menu_text_primary));
+		textView.setTextColor(activity.getResources().getColor(
+				Settings.isNightModeEnabled() ? R.color.menu_text_primary_night : R.color.menu_text_primary));
 		textView.setLineSpacing(0f, 1.5f);
 		textView.setLayoutParams(new ViewGroup.LayoutParams(
 				ViewGroup.LayoutParams.MATCH_PARENT,

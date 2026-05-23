@@ -81,6 +81,7 @@ public class Menu
 	private OptionsMenuElement lookAheadOptionItem;
 	private OptionsMenuElement keyboardInMenuOptionItem;
 	private OptionsMenuElement vibrateOnTouchOptionItem;
+	private OptionsMenuElement nightModeOptionItem;
 	private SimpleMenuElementNew clearHighscoreOptionItem;
 	private SimpleMenuElementNew fullResetItem;
 	// private ActionMenuElement yesAction;
@@ -156,7 +157,7 @@ public class Menu
 	public Menu() {
 		// Background color (instead of raster.png)
 		bgPaint = new Paint();
-		bgPaint.setColor(0x80FFFFFF);
+		bgPaint.setColor(Settings.isNightModeEnabled() ? 0x80383838 : 0x80FFFFFF);
 	}
 
 	public void load(int step) {
@@ -386,6 +387,7 @@ public class Menu
 				lookAheadOptionItem = new OptionsMenuElement(getString(R.string.look_ahead), Settings.isLookAheadEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
+				nightModeOptionItem = new OptionsMenuElement(getString(R.string.night_mode), Settings.isNightModeEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				clearHighscoreOptionItem = new SimpleMenuElementNew(getString(R.string.clear_highscore), eraseScreen, this);
 
 				// if (hasPointer)
@@ -398,6 +400,7 @@ public class Menu
 				optionsMenu.addItem(lookAheadOptionItem);
 				optionsMenu.addItem(vibrateOnTouchOptionItem);
 				optionsMenu.addItem(keyboardInMenuOptionItem);
+				optionsMenu.addItem(nightModeOptionItem);
 				optionsMenu.addItem(clearHighscoreOptionItem);
 				optionsMenu.addItem(createAction(ActionMenuElement.BACK));
 
@@ -1135,6 +1138,11 @@ public class Menu
 			Settings.setKeyboardInMenuEnabled(enabled);
 			if (enabled) gd.showKeyboardLayout();
 			else gd.hideKeyboardLayout();
+		}
+		if (item == nightModeOptionItem) {
+			Settings.setNightModeEnabled(nightModeOptionItem.getSelectedOption() == 0);
+			gd.restartApp();
+			return;
 		}
 		if (item == perspectiveOptionItem) {
 			gd.physEngine._aZV(perspectiveOptionItem.getSelectedOption() == 0);
