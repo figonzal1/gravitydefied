@@ -650,7 +650,11 @@ public class GDActivity extends Activity implements Runnable {
 	}
 
 	private void applyImmersiveMode() {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+			WindowManager.LayoutParams params = getWindow().getAttributes();
+			params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+			getWindow().setAttributes(params);
+		} else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 			WindowManager.LayoutParams params = getWindow().getAttributes();
 			params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 			getWindow().setAttributes(params);
