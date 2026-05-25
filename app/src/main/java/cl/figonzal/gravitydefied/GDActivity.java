@@ -157,10 +157,10 @@ public class GDActivity extends Activity implements Runnable {
 			scrollView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
 			// Keyboard
-			String[] buttonResources = {
-					"btn_br", "btn_br", "btn_b",
-					"btn_br", "btn_br", "btn_b",
-					"btn_r", "btn_r", "btn_n"
+			int[] buttonResources = {
+					R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
+					R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
+					R.drawable.btn_r, R.drawable.btn_r, R.drawable.btn_n
 			};
 			if (getString(R.string.screen_type).equals("tablet")) {
 				buttonHeight = 85;
@@ -184,7 +184,7 @@ public class GDActivity extends Activity implements Runnable {
 					btnText.setText(String.valueOf(i * 3 + j + 1));
 					btnText.setTextColor(getResources().getColor(night ? R.color.keyboard_button_text_night : R.color.keyboard_button_text));
 					btnText.setTextSize(17);
-					btn.setBackgroundResource(getResources().getIdentifier(buttonResources[i * 3 + j], "drawable", getPackageName()));
+					btn.setBackgroundResource(buttonResources[i * 3 + j]);
 					btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 					btn.setGravity(Gravity.CENTER);
 					btn.setWeightSum(1);
