@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/btn_b_up,@drawable/btn_b_down,@drawable/btn_br_up,@drawable/btn_br_down,@drawable/btn_r_up,@drawable/btn_r_down,@drawable/btn_n_up,@drawable/btn_n_down"
+    tools:shrinkMode="safe" />
