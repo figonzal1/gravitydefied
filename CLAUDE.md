@@ -32,9 +32,9 @@ Credentials file (gitignored): `keys/keystore.properties`.
 
 ### Dependencies and config
 
-- `app/build.gradle.kts`: `compileSdk 36`, `minSdk 23`, `targetSdk 36`, `versionCode 1`.
+- `app/build.gradle.kts`: `compileSdk 36`, `minSdk 23`, `targetSdk 36`.
 - Language level Java 8 (`compileOptions JavaVersion.VERSION_1_8`), but the codebase style is Java 6/7 era — anonymous inner classes everywhere, no lambdas, no streams. Match this style in new code.
-- No AndroidX — uses plain `android.app.Activity`, `android.widget.*`, etc.
+- **AndroidX: in the build, not in our source.** Our own Java under `app/src/main/java/` deliberately uses framework classes only — `android.app.Activity`, `android.widget.*`, no `androidx.*` imports — and new code should match that style for parity with the J2ME-era port. The **built APK does contain AndroidX**, however: `gradle.properties` sets `android.useAndroidX=true` + `android.enableJetifier=true`, and `firebase-analytics` transitively pulls `androidx.fragment`, `androidx.activity`, `androidx.core`, etc. A couple are pinned explicitly in `gradle/libs.versions.toml` (`androidx-fragment`, `androidx-activity`) to override outdated transitive versions Play Console flagged — that's a build-time override, not a license to start importing AndroidX from app code. If a platform/Play Console issue genuinely requires an AndroidX API to fix (e.g. `WindowInsetsControllerCompat` for the immersive-mode migration on API 23–29), reach for it deliberately and call it out in the commit.
 - Firebase: Crashlytics + Analytics, both declared in `app/build.gradle.kts`. They auto-initialize from `google-services.json` — `GDApplication.onCreate()` is intentionally empty.
 - **`google-services.json` must be present in `app/`** for Firebase to work (gitignored, not in repo).
 - Theme: `android:Theme.Material.Light.NoActionBar` (API 21 built-in, no Material Components library).
