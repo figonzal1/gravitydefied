@@ -73,4 +73,6 @@ dependencies {
     // play-services-measurement (Play Console flagged fragment 1.1.0 / activity 1.0.0).
     implementation(libs.androidx.fragment)
     implementation(libs.androidx.activity)
+    // Direct dep for WindowCompat / WindowInsetsControllerCompat used in GDActivity.applyImmersiveMode().
+    implementation(libs.androidx.core)
 }
