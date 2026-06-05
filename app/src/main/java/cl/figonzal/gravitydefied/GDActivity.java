@@ -94,11 +94,20 @@ public class GDActivity extends Activity implements Runnable {
 	private int buttonHeight = 60;
 	public LevelsManager levelsManager;
 
+	// android.window.OnBackInvokedCallback when registered on API 33+, null otherwise.
+	// Typed as Object so verifying GDActivity on pre-Tiramisu devices doesn't try to
+	// resolve the API-33 framework class at class load.
+	private Object onBackInvokedCallback;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		shared = this;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			registerOnBackInvokedCallback33();
+		}
 
 		if (Helpers.isSDK10OrLower()) {
 			isNormalAndroid = false;
@@ -724,12 +733,31 @@ public class GDActivity extends Activity implements Runnable {
 
 	@Override
 	public void onBackPressed() {
+		// On API 33+ the OnBackInvokedCallback registered in onCreate handles back
+		// instead — this override only runs on API < 33.
+		handleBack();
+	}
+
+	private void handleBack() {
 		if (gameView != null && menu != null && inited) {
 			if (menuShown)
 				menu.back();
 			else
 				gameView.showMenu();
 		}
+	}
+
+	@android.annotation.TargetApi(Build.VERSION_CODES.TIRAMISU)
+	private void registerOnBackInvokedCallback33() {
+		android.window.OnBackInvokedCallback cb = new android.window.OnBackInvokedCallback() {
+			@Override
+			public void onBackInvoked() {
+				handleBack();
+			}
+		};
+		onBackInvokedCallback = cb;
+		getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+				android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, cb);
 	}
 
 	@Override
