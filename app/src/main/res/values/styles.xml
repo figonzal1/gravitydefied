@@ -6,6 +6,11 @@
         <item name="android:colorAccent">@color/menu_highlight</item>
         <item name="android:windowBackground">@color/menu_background</item>
         <item name="android:windowContentOverlay">@null</item>
+        <!-- Edge-to-edge migration (Android 15 / API 35+): system bars are always
+             hidden via immersive mode, so transparent here is purely declarative
+             to opt out of the deprecated opaque-bar defaults of Theme.Material. -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
 </resources>

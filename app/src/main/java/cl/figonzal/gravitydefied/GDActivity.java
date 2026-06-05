@@ -17,6 +17,12 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import cl.figonzal.gravitydefied.Game.*;
 import cl.figonzal.gravitydefied.Levels.Loader;
 import cl.figonzal.gravitydefied.R;
@@ -94,11 +100,20 @@ public class GDActivity extends Activity implements Runnable {
 	private int buttonHeight = 60;
 	public LevelsManager levelsManager;
 
+	// android.window.OnBackInvokedCallback when registered on API 33+, null otherwise.
+	// Typed as Object so verifying GDActivity on pre-Tiramisu devices doesn't try to
+	// resolve the API-33 framework class at class load.
+	private Object onBackInvokedCallback;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		shared = this;
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			registerOnBackInvokedCallback33();
+		}
 
 		if (Helpers.isSDK10OrLower()) {
 			isNormalAndroid = false;
@@ -246,38 +261,13 @@ public class GDActivity extends Activity implements Runnable {
 
 			applyImmersiveMode();
 
-			frame.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
-				@SuppressWarnings("deprecation")
+			ViewCompat.setOnApplyWindowInsetsListener(frame, new OnApplyWindowInsetsListener() {
 				@Override
-				public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
-					int top = 0, bottom = 0, left = 0, right = 0;
-
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-						android.graphics.Insets sysInsets = insets.getInsets(
-								WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
-						top = sysInsets.top;
-						bottom = sysInsets.bottom;
-						left = sysInsets.left;
-						right = sysInsets.right;
-					} else {
-						top = insets.getSystemWindowInsetTop();
-						bottom = insets.getSystemWindowInsetBottom();
-						left = insets.getSystemWindowInsetLeft();
-						right = insets.getSystemWindowInsetRight();
-						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-							android.view.DisplayCutout cutout = insets.getDisplayCutout();
-							if (cutout != null) {
-								left = Math.max(left, cutout.getSafeInsetLeft());
-								top = Math.max(top, cutout.getSafeInsetTop());
-								right = Math.max(right, cutout.getSafeInsetRight());
-								bottom = Math.max(bottom, cutout.getSafeInsetBottom());
-							}
-						}
-					}
-
-					menuLayout.setPadding(left, top, right, 0);
-					scrollView.setPadding(0, 0, 0, bottom);
-
+				public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
+					Insets sys = insets.getInsets(
+							WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+					menuLayout.setPadding(sys.left, sys.top, sys.right, 0);
+					scrollView.setPadding(0, 0, 0, sys.bottom);
 					return insets;
 				}
 			});
@@ -659,23 +649,12 @@ public class GDActivity extends Activity implements Runnable {
 			params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 			getWindow().setAttributes(params);
 		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			getWindow().setDecorFitsSystemWindows(false);
-			WindowInsetsController controller = getWindow().getInsetsController();
-			if (controller != null) {
-				controller.hide(WindowInsets.Type.systemBars());
-				controller.setSystemBarsBehavior(
-						WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-			}
-		} else {
-			getWindow().getDecorView().setSystemUiVisibility(
-					View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-					| View.SYSTEM_UI_FLAG_FULLSCREEN
-					| View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-					| View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-					| View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-					| View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-		}
+		WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
+		WindowInsetsControllerCompat controller =
+				WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
+		controller.hide(WindowInsetsCompat.Type.systemBars());
+		controller.setSystemBarsBehavior(
+				WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
 	}
 
 	@Override
@@ -724,12 +703,31 @@ public class GDActivity extends Activity implements Runnable {
 
 	@Override
 	public void onBackPressed() {
+		// On API 33+ the OnBackInvokedCallback registered in onCreate handles back
+		// instead — this override only runs on API < 33.
+		handleBack();
+	}
+
+	private void handleBack() {
 		if (gameView != null && menu != null && inited) {
 			if (menuShown)
 				menu.back();
 			else
 				gameView.showMenu();
 		}
+	}
+
+	@android.annotation.TargetApi(Build.VERSION_CODES.TIRAMISU)
+	private void registerOnBackInvokedCallback33() {
+		android.window.OnBackInvokedCallback cb = new android.window.OnBackInvokedCallback() {
+			@Override
+			public void onBackInvoked() {
+				handleBack();
+			}
+		};
+		onBackInvokedCallback = cb;
+		getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+				android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, cb);
 	}
 
 	@Override

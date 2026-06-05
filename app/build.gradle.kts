@@ -19,8 +19,8 @@ android {
         applicationId = "cl.figonzal.gravitydefied"
         minSdk = 23
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.0.3"
+        versionCode = 5
+        versionName = "1.0.4"
     }
 
     signingConfigs {
@@ -68,4 +68,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+
+    // Override outdated transitive AndroidX deps pulled in by firebase-analytics →
+    // play-services-measurement (Play Console flagged fragment 1.1.0 / activity 1.0.0).
+    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.activity)
+    // Direct dep for WindowCompat / WindowInsetsControllerCompat used in GDActivity.applyImmersiveMode().
+    implementation(libs.androidx.core)
 }
