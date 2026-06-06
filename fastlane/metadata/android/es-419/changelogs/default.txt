@@ -1,4 +1,4 @@
 - Nuevo: modo oscuro activable manualmente
-- Corregido el gesto de retroceso en Android 13+
+- Mejor compatibilidad con Android 13, 14 y 15 (gesto de retroceso y pantalla completa)
 - Se eliminó la recopilación de datos de telemetría
 - Mejoras de estabilidad y rendimiento

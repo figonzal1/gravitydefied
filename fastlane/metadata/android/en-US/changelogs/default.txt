@@ -1,4 +1,4 @@
 - New: manual dark mode toggle
-- Fixed back gesture behavior on Android 13+
+- Better support for Android 13, 14 and 15 (back gesture and full-screen display)
 - Removed telemetry data collection
 - Stability and performance improvements
