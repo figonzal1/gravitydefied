@@ -19,8 +19,8 @@ android {
         applicationId = "cl.figonzal.gravitydefied"
         minSdk = 23
         targetSdk = 36
-        versionCode = 5
-        versionName = "1.0.4"
+        versionCode = 6
+        versionName = "1.0.5"
     }
 
     signingConfigs {
@@ -58,6 +58,16 @@ android {
                 "proguard-rules.pro"
             )
             resValue("string", "app_name", "Gravity Defied Classic")
+        }
+    }
+
+    bundle {
+        // Keep all density resources in the base install instead of density
+        // config splits. Prevents Resources$NotFoundException ("Unable to find
+        // resource ID") on devices where the density split is not installed
+        // (sideloaded base APK / split delivery failures).
+        density {
+            enableSplit = false
         }
     }
 }
