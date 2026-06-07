@@ -60,6 +60,16 @@ android {
             resValue("string", "app_name", "Gravity Defied Classic")
         }
     }
+
+    bundle {
+        // Keep all density resources in the base install instead of density
+        // config splits. Prevents Resources$NotFoundException ("Unable to find
+        // resource ID") on devices where the density split is not installed
+        // (sideloaded base APK / split delivery failures).
+        density {
+            enableSplit = false
+        }
+    }
 }
 
 dependencies {
