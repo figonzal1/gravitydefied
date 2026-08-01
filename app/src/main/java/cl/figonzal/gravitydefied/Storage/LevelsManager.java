@@ -31,10 +31,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static cl.figonzal.gravitydefied.Helpers.dismissDialog;
 import static cl.figonzal.gravitydefied.Helpers.getGDActivity;
 import static cl.figonzal.gravitydefied.Helpers.getGameMenu;
 import static cl.figonzal.gravitydefied.Helpers.getString;
 import static cl.figonzal.gravitydefied.Helpers.getTimestamp;
+import static cl.figonzal.gravitydefied.Helpers.isActivityAlive;
 import static cl.figonzal.gravitydefied.Helpers.isOnline;
 import static cl.figonzal.gravitydefied.Helpers.logDebug;
 import static cl.figonzal.gravitydefied.Helpers.showAlert;
@@ -169,8 +171,13 @@ public class LevelsManager {
 	}
 
 	public void installAsync(File file, String name, String author, long apiId, final DoubleCallback callback) {
-		GDActivity gd = getGDActivity();
-		final ProgressDialog progressDialog = ProgressDialog.show(gd, getString(R.string.install), getString(R.string.installing), true);
+		final ProgressDialog progressDialog;
+		if (isActivityAlive()) {
+			GDActivity gd = getGDActivity();
+			progressDialog = ProgressDialog.show(gd, getString(R.string.install), getString(R.string.installing), true);
+		} else {
+			progressDialog = null;
+		}
 
 		executor.submit(() -> {
 			Object result;
@@ -181,7 +188,7 @@ public class LevelsManager {
 			}
 			final Object finalResult = result;
 			mainHandler.post(() -> {
-				progressDialog.dismiss();
+				dismissDialog(progressDialog);
 
 				if (finalResult instanceof Throwable) {
 					Throwable throwable = (Throwable) finalResult;
@@ -262,13 +269,18 @@ public class LevelsManager {
 	}
 
 	public void deleteAsync(Level level, final Runnable callback) {
-		GDActivity gd = getGDActivity();
-		final ProgressDialog progressDialog = ProgressDialog.show(gd, getString(R.string.delete), getString(R.string.deleting), true);
+		final ProgressDialog progressDialog;
+		if (isActivityAlive()) {
+			GDActivity gd = getGDActivity();
+			progressDialog = ProgressDialog.show(gd, getString(R.string.delete), getString(R.string.deleting), true);
+		} else {
+			progressDialog = null;
+		}
 
 		executor.submit(() -> {
 			delete(level);
 			mainHandler.post(() -> {
-				progressDialog.dismiss();
+				dismissDialog(progressDialog);
 				if (callback != null) callback.run();
 			});
 		});
@@ -311,9 +323,14 @@ public class LevelsManager {
 			progress.setCancelable(true);
 
 			final DownloadHandler handler = new DownloadHandler() {
+				private boolean finished = false;
+
 				@Override
 				public void onFinish(Throwable error) {
-					progress.dismiss();
+					if (finished) return;
+					finished = true;
+
+					dismissDialog(progress);
 
 					if (error != null) {
 						// error.printStackTrace();
@@ -344,7 +361,7 @@ public class LevelsManager {
 
 				@Override
 				public void onStart() {
-					progress.show();
+					if (isActivityAlive()) progress.show();
 				}
 
 				@Override
@@ -370,6 +387,8 @@ public class LevelsManager {
 	}
 
 	public void showSuccessfullyInstalledDialog() {
+		if (!isActivityAlive()) return;
+
 		GDActivity gd = getGDActivity();
 		AlertDialog success = new AlertDialog.Builder(gd)
 				.setTitle(getString(R.string.installed))

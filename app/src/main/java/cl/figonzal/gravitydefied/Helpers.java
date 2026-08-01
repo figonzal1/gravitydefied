@@ -1,6 +1,7 @@
 package cl.figonzal.gravitydefied;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageInfo;
@@ -64,6 +65,20 @@ public class Helpers {
 
 	public static GDActivity getGDActivity() {
 		return GDActivity.shared;
+	}
+
+	public static boolean isActivityAlive() {
+		GDActivity gd = GDActivity.shared;
+		return gd != null && !gd.isFinishing() && !gd.isDestroyed();
+	}
+
+	public static void dismissDialog(Dialog dialog) {
+		if (dialog == null) return;
+		try {
+			dialog.dismiss();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static GameView getGDView() {
@@ -223,6 +238,8 @@ public class Helpers {
 	}
 
 	public static void showAlert(String title, String message, final Runnable listener) {
+		if (!isActivityAlive()) return;
+
 		Context context = getGDActivity();
 		AlertDialog alertDialog = new AlertDialog.Builder(context)
 				.setTitle(title)
@@ -244,6 +261,8 @@ public class Helpers {
 	}
 
 	public static void showConfirm(String title, String message, final Runnable onOk, final Runnable onCancel) {
+		if (!isActivityAlive()) return;
+
 		Context context = getGDActivity();
 		AlertDialog.Builder alert = new AlertDialog.Builder(context)
 				.setTitle(title)

@@ -279,6 +279,9 @@ public class LevelsMenuScreen extends MenuScreen {
 
 	public LevelMenuElement getElementByLevelId(long id, long apiId) {
 		for (Object _el : elements) {
+			if (!(_el instanceof LevelMenuElement))
+				continue;
+
 			LevelMenuElement el = (LevelMenuElement) _el;
 
 			if ((id > 0 && el.level.getId() == id) || apiId > 0 && el.level.getApiId() == apiId)
@@ -364,7 +367,11 @@ public class LevelsMenuScreen extends MenuScreen {
 	}
 
 	protected void scrollToItem(int index) {
-		LevelMenuElement el = (LevelMenuElement) elements.elementAt(index);
+		Object _el = elements.elementAt(index);
+		if (!(_el instanceof LevelMenuElement))
+			return;
+
+		LevelMenuElement el = (LevelMenuElement) _el;
 		// logDebug(el);
 		scrollToItem(el);
 	}

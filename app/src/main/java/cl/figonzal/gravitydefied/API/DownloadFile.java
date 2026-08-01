@@ -50,7 +50,7 @@ public class DownloadFile {
 		task = executor.submit(() -> {
 			Throwable error = doDownload();
 			mainHandler.post(() -> {
-				lock.release();
+				if (lock != null && lock.isHeld()) lock.release();
 				handler.onFinish(error);
 			});
 		});
@@ -61,6 +61,10 @@ public class DownloadFile {
 			task.cancel(true);
 			task = null;
 		}
+		if (lock != null && lock.isHeld()) {
+			lock.release();
+		}
+		lock = null;
 	}
 
 	private Throwable doDownload() {
