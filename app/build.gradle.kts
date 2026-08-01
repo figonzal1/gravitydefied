@@ -1,3 +1,4 @@
+import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import java.util.Properties
 
 plugins {
@@ -58,6 +59,9 @@ android {
                 "proguard-rules.pro"
             )
             resValue("string", "app_name", "Gravity Defied Classic")
+            configure<CrashlyticsExtension> {
+                mappingFileUploadEnabled = true
+            }
         }
     }
 
