@@ -44,7 +44,7 @@ public class DownloadFile {
 	public void start() {
 		PowerManager pm = (PowerManager) getGDActivity().getSystemService(Context.POWER_SERVICE);
 		lock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
-		lock.acquire();
+		lock.acquire(10 * 60 * 1000L);
 		handler.onStart();
 
 		task = executor.submit(() -> {

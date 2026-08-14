@@ -702,6 +702,7 @@ public class GDActivity extends Activity implements Runnable {
 	}
 
 	@Override
+	@android.annotation.SuppressLint("GestureBackNavigation")
 	public void onBackPressed() {
 		// On API 33+ the OnBackInvokedCallback registered in onCreate handles back
 		// instead — this override only runs on API < 33.

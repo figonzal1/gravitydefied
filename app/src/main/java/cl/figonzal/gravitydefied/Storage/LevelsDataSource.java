@@ -242,37 +242,37 @@ public class LevelsDataSource {
 
 	private Level cursorToLevel(Cursor cursor) {
 		Level level = new Level();
-		level.setId(cursor.getLong(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_ID)));
-		level.setName(cursor.getString(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_NAME)));
-		level.setAuthor(cursor.getString(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_AUTHOR)));
+		level.setId(cursor.getLong(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_ID)));
+		level.setName(cursor.getString(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_NAME)));
+		level.setAuthor(cursor.getString(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_AUTHOR)));
 		level.setCount(
-				cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_COUNT_EASY)),
-				cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_COUNT_MEDIUM)),
-				cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_COUNT_HARD)));
-		level.setAddedTs(cursor.getLong(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_ADDED)));
-		level.setInstalledTs(cursor.getLong(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_INSTALLED)));
-		level.setIsDefault(cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_IS_DEFAULT)) == 1);
-		level.setApiId(cursor.getLong(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_API_ID)));
+				cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_COUNT_EASY)),
+				cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_COUNT_MEDIUM)),
+				cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_COUNT_HARD)));
+		level.setAddedTs(cursor.getLong(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_ADDED)));
+		level.setInstalledTs(cursor.getLong(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_INSTALLED)));
+		level.setIsDefault(cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_IS_DEFAULT)) == 1);
+		level.setApiId(cursor.getLong(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_API_ID)));
 		level.setUnlocked(
-				cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_EASY)),
-				cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_MEDIUM)),
-				cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_HARD)));
-		level.setSelectedLevel(cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_SELECTED_LEVEL)));
-		level.setSelectedTrack(cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_SELECTED_TRACK)));
-		level.setSelectedLeague(cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_SELECTED_LEAGUE)));
-		level.setUnlockedLevels(cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_LEVELS)));
-		level.setUnlockedLeagues(cursor.getInt(cursor.getColumnIndex(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_LEAGUES)));
+				cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_EASY)),
+				cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_MEDIUM)),
+				cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_HARD)));
+		level.setSelectedLevel(cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_SELECTED_LEVEL)));
+		level.setSelectedTrack(cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_SELECTED_TRACK)));
+		level.setSelectedLeague(cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_SELECTED_LEAGUE)));
+		level.setUnlockedLevels(cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_LEVELS)));
+		level.setUnlockedLeagues(cursor.getInt(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_LEAGUES)));
 
 		return level;
 	}
 
 	private void fillHighScoresFromCursor(Cursor cursor, HighScores highScores) {
-		highScores.setId(cursor.getLong(cursor.getColumnIndex(LevelsSQLiteOpenHelper.HIGHSCORES_COLUMN_ID)));
+		highScores.setId(cursor.getLong(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.HIGHSCORES_COLUMN_ID)));
 
 		for (int league = 0; league < 4; league++) {
 			for (int place = 0; place < 3; place++) {
-				highScores.setTime(league, place, cursor.getLong(cursor.getColumnIndex(LevelsSQLiteOpenHelper.getHighscoresTimeColumn(league, place))));
-				highScores.setName(league, place, cursor.getString(cursor.getColumnIndex(LevelsSQLiteOpenHelper.getHighscoresNameColumn(league, place))));
+				highScores.setTime(league, place, cursor.getLong(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.getHighscoresTimeColumn(league, place))));
+				highScores.setName(league, place, cursor.getString(cursor.getColumnIndexOrThrow(LevelsSQLiteOpenHelper.getHighscoresNameColumn(league, place))));
 			}
 		}
 	}
