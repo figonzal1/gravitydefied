@@ -14,12 +14,12 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "cl.figonzal.gravitydefied"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "cl.figonzal.gravitydefied"
         minSdk = 23
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 7
         versionName = "1.0.6"
     }
