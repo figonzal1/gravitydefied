@@ -34,8 +34,11 @@ fastlane prod_googleplay         # upload AAB to Play Store production track (dr
 
 All six lanes upload as **draft**; the `*_googleplay` lanes only upload — they do not build, so run the matching build lane first.
 
-Signing env vars required: `STORE_FILE`, `STORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
-Credentials file (gitignored): `keys/keystore.properties`.
+Signing comes entirely from `keys/keystore.properties` (gitignored), read by the `release`
+`signingConfig` in `app/build.gradle.kts`. Fastlane deliberately does **not** inject
+`android.injected.signing.*` — a second copy of the keystore path drifted per-machine once already,
+and `-P` properties leak the passwords into the build log. The only property fastlane passes is
+`uploadMapping`.
 
 ### Dependencies and config
 
