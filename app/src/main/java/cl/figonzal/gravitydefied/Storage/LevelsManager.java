@@ -258,12 +258,14 @@ public class LevelsManager {
 
 	public void delete(Level level) {
 		dataSource.deleteLevel(level);
+		// getMrgFileById returns null for the built-in levels.mrg (id == 1)
 		File file = getMrgFileById(level.getId());
 		try {
-			if (file.exists()) {
+			if (file != null && file.exists()) {
 				file.delete();
 			}
 		} catch (Exception e) {
+			logDebug("LevelsManager.delete: " + e);
 			e.printStackTrace();
 		}
 	}
