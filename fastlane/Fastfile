@@ -13,6 +13,7 @@ platform :android do
         "android.injected.signing.store.password" => ENV['STORE_PASSWORD'],
         "android.injected.signing.key.alias"      => ENV['KEY_ALIAS'],
         "android.injected.signing.key.password"   => ENV['KEY_PASSWORD'],
+        "uploadMapping"                           => "true",
       }
     )
   end
@@ -39,6 +40,7 @@ platform :android do
         "android.injected.signing.store.password" => ENV['STORE_PASSWORD'],
         "android.injected.signing.key.alias"      => ENV['KEY_ALIAS'],
         "android.injected.signing.key.password"   => ENV['KEY_PASSWORD'],
+        "uploadMapping"                           => "true",
       }
     )
   end
@@ -65,6 +67,7 @@ platform :android do
         "android.injected.signing.store.password" => ENV['STORE_PASSWORD'],
         "android.injected.signing.key.alias"      => ENV['KEY_ALIAS'],
         "android.injected.signing.key.password"   => ENV['KEY_PASSWORD'],
+        "uploadMapping"                           => "true",
       }
     )
   end

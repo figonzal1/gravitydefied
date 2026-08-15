@@ -60,7 +60,10 @@ android {
             )
             resValue("string", "app_name", "Gravity Defied Classic")
             configure<CrashlyticsExtension> {
-                mappingFileUploadEnabled = true
+                // Only deploy builds upload the mapping (fastlane passes
+                // -PuploadMapping); local release builds would otherwise keep
+                // overwriting the mapping of the same versionCode in Firebase.
+                mappingFileUploadEnabled = project.hasProperty("uploadMapping")
             }
         }
     }
