@@ -1,4 +1,4 @@
-- Nuevo: modo oscuro activable manualmente
-- Mejor compatibilidad con Android 13, 14 y 15 (gesto de retroceso y pantalla completa)
-- Se eliminó la recopilación de datos de telemetría
+- Se corrigieron cierres inesperados al abrir y cerrar ventanas del juego
+- Se corrigió un error al eliminar packs de niveles descargados
+- Compatibilidad con las versiones más recientes de Android
 - Mejoras de estabilidad y rendimiento
