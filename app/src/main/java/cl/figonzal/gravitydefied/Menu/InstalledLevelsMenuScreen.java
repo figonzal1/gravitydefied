@@ -42,6 +42,7 @@ public class InstalledLevelsMenuScreen extends LevelsMenuScreen {
 								try {
 									obs.removeOnPreDrawListener(this);
 								} catch (IllegalStateException e) {
+									// Observer is no longer alive — nothing to remove.
 								}
 								return true;
 							}

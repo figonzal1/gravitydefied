@@ -129,6 +129,7 @@ public class Request {
 			try {
 				if (is != null) is.close();
 			} catch (IOException e) {
+				logDebug("API request: closing stream failed: " + e.getMessage());
 			}
 			if (connection != null) connection.disconnect();
 		}
