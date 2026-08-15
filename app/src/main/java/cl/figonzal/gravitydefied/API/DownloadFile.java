@@ -32,11 +32,6 @@ public class DownloadFile {
 		this.output = output;
 	}
 
-	public DownloadFile(String url, FileOutputStream output, DownloadHandler handler) {
-		this(url, output);
-		this.handler = handler;
-	}
-
 	public void setDownloadHandler(DownloadHandler handler) {
 		this.handler = handler;
 	}

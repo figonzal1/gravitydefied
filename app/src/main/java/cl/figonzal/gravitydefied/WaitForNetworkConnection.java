@@ -17,8 +17,7 @@ public class WaitForNetworkConnection {
 
 	private Future<?> task;
 
-	public void execute(Object... params) {
-		final Runnable callback = (Runnable) params[1];
+	public void execute(final Runnable callback) {
 		task = executor.submit(() -> {
 			while (!isOnline()) {
 				logDebug("Waiting for network...");

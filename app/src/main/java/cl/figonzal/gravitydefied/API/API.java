@@ -1,15 +1,11 @@
 package cl.figonzal.gravitydefied.API;
 
-import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
-
-import static cl.figonzal.gravitydefied.Helpers.getDeviceName;
 
 public class API {
 
 	public static final String URL = "http://gdtr.net/api.php";
-	public static final String DEBUG_URL = "http://dev.gdtr.net/api.php";
 	public static final String MRG_URL = "http://gdtr.net/mrg/%d.mrg";
 	public static final int VERSION = 2;
 
@@ -21,31 +17,6 @@ public class API {
 		params.add(new String[]{"limit", String.valueOf(limit)});
 
 		return new Request("getLevels", params, handler);
-	}
-
-	public static Request getNotifications(boolean installedFromAPK, ResponseHandler handler) {
-		List<String[]> params = new LinkedList<String[]>();
-		params.add(new String[]{"apk", String.valueOf(installedFromAPK ? 1 : 0)});
-		return new Request("getNotifications", params, handler);
-	}
-
-	public static Request sendStats(String statsJSON, String installationID, int useCheats, ResponseHandler handler) {
-		List<String[]> params = new LinkedList<String[]>();
-		params.add(new String[]{"stats", statsJSON});
-		params.add(new String[]{"id", installationID});
-		params.add(new String[]{"use_cheats", String.valueOf(useCheats)});
-		return new Request("sendStats", params, handler);
-	}
-
-	public static Request sendKeyboardLogs(String log, ResponseHandler handler) {
-		List<String[]> params = new LinkedList<String[]>();
-		params.add(new String[]{"log", log});
-		params.add(new String[]{"device", getDeviceName()});
-		return new Request("sendKeyboardLogs", params, handler, true);
-	}
-
-	public static DownloadFile downloadMrg(long id, FileOutputStream output, DownloadHandler handler) {
-		return new DownloadFile(String.format(MRG_URL, id), output, handler);
 	}
 
 	public static String getMrgURL(long id) {

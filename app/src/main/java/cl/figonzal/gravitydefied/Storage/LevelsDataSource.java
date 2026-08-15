@@ -67,12 +67,6 @@ public class LevelsDataSource {
 		db.delete(LevelsSQLiteOpenHelper.TABLE_HIGHSCORES, LevelsSQLiteOpenHelper.HIGHSCORES_COLUMN_LEVEL_ID + " = " + id, null);
 	}
 
-	// This will also reset auto increment counter
-	public synchronized void deleteAllLevels() {
-		db.delete(LevelsSQLiteOpenHelper.TABLE_LEVELS, null, null);
-		db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" + LevelsSQLiteOpenHelper.TABLE_LEVELS + "'");
-	}
-
 	public synchronized void resetAllLevelsSettings() {
 		ContentValues values = new ContentValues();
 		values.put(LevelsSQLiteOpenHelper.LEVELS_COLUMN_UNLOCKED_EASY, 0);
@@ -128,15 +122,6 @@ public class LevelsDataSource {
 
 	public synchronized List<Level> getAllLevels() {
 		Cursor cursor = db.query(LevelsSQLiteOpenHelper.TABLE_LEVELS, null, null, null, null, null, null);
-
-		List<Level> levels = levelsFromCursor(cursor);
-		cursor.close();
-
-		return levels;
-	}
-
-	public synchronized List<Level> getLevels(int offset, int count) {
-		Cursor cursor = db.query(LevelsSQLiteOpenHelper.TABLE_LEVELS, null, null, null, null, LevelsSQLiteOpenHelper.LEVELS_COLUMN_ID + " ASC", offset + ", " + count);
 
 		List<Level> levels = levelsFromCursor(cursor);
 		cursor.close();

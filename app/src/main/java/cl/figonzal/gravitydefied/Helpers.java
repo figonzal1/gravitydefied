@@ -126,11 +126,6 @@ public class Helpers {
 	}
 
 	public static Bitmap loadBitmapFromDrawable(int id) {
-		BitmapFactory.Options options = null;
-		if (!isSDK11OrHigher()) {
-			options = new BitmapFactory.Options();
-			options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-		}
 		return BitmapFactory.decodeResource(getGDActivity().getResources(), id);
 	}
 

@@ -40,10 +40,6 @@ public class HighScores {
 		this.level = level;
 	}
 
-	public long getTrack() {
-		return track;
-	}
-
 	public void setTrack(int track) {
 		this.track = track;
 	}

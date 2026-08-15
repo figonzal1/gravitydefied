@@ -147,7 +147,7 @@ public class DownloadLevelsMenuScreen extends LevelsMenuScreen {
 					waitForNetworkConnection.cancel();
 
 				waitForNetworkConnection = new WaitForNetworkConnection();
-				waitForNetworkConnection.execute(null, new Runnable() {
+				waitForNetworkConnection.execute(new Runnable() {
 					@Override
 					public void run() {
 						reloadLevels();

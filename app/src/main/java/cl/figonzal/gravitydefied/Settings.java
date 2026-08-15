@@ -2,7 +2,6 @@ package cl.figonzal.gravitydefied;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 import cl.figonzal.gravitydefied.API.API;
 
 import static cl.figonzal.gravitydefied.Helpers.getGDActivity;
@@ -35,9 +34,6 @@ public class Settings {
 
 	private static final String KEYBOARD_IN_MENU_ENABLED = "keyboard_enabled";
 	private static final boolean KEYBOARD_IN_MENU_ENABLED_DEFAULT = true;
-
-	private static final String LAST_SEND_STATS = "last_send_stats";
-	private static final long LAST_SEND_STATS_DEFAULT = 0;
 
 	private static final String NAME = "name";
 	public static final String NAME_DEFAULT = "AAA";
@@ -141,14 +137,6 @@ public class Settings {
 		setInt(INPUT_OPTION, value);
 	}
 
-	public static long getLastSendStats() {
-		return preferences.getLong(LAST_SEND_STATS, LAST_SEND_STATS_DEFAULT);
-	}
-
-	public static void setLastSendStats(long value) {
-		setLong(LAST_SEND_STATS, value);
-	}
-
 	public static API.LevelsSortType getLevelsSort() {
 		return API.getSortTypeById(preferences.getInt(LEVELS_SORT, LEVELS_SORT_DEFAULT));
 	}
@@ -218,10 +206,7 @@ public class Settings {
 	}
 
 	private static void editorApply(SharedPreferences.Editor editor) {
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD)
-			editor.apply();
-		else
-			editor.commit();
+		editor.apply();
 	}
 
 }

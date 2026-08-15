@@ -30,16 +30,12 @@ public class Request {
 	private Future<?> task;
 	private String apiURL;
 
-	public Request(String method, List<String[]> params, ResponseHandler handler, boolean useDebugURL) {
-		construct(method, params, handler, useDebugURL ? API.DEBUG_URL : API.URL);
-	}
-
 	public Request(String method, List<String[]> params, ResponseHandler handler) {
-		construct(method, params, handler, API.URL);
+		construct(method, params, handler);
 	}
 
-	private void construct(String method, List<String[]> params, ResponseHandler handler, String apiURL) {
-		this.apiURL = apiURL;
+	private void construct(String method, List<String[]> params, ResponseHandler handler) {
+		this.apiURL = API.URL;
 
 		params.add(new String[]{"v", String.valueOf(API.VERSION)});
 		params.add(new String[]{"method", method});
@@ -80,10 +76,7 @@ public class Request {
 			return;
 		}
 
-		if (response != null)
-			handler.onResponse(response);
-		else
-			handler.onError(new APIException("JSON parsing error"));
+		handler.onResponse(response);
 	}
 
 	private String doRequest() {

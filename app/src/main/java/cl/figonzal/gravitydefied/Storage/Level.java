@@ -50,10 +50,6 @@ public class Level {
 		return id;
 	}
 
-	public long getAnyId() {
-		return id > 0 ? id : apiId;
-	}
-
 	public void setId(long id) {
 		this.id = id;
 	}
@@ -162,10 +158,6 @@ public class Level {
 
 	public String getFullAddedDate() {
 		return getFullDate(addedTs);
-	}
-
-	public String getShortInstalledDate() {
-		return getShortDate(installedTs);
 	}
 
 	public String getFullInstalledDate() {
