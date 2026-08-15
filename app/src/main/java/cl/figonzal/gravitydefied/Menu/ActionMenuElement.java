@@ -131,7 +131,7 @@ public class ActionMenuElement
 		this.disabled = disabled;
 
 		if (disabled) {
-			((MenuTextView) textView).setTextColor(getGDActivity().getResources().getColor(R.color.menu_text_disabled));
+			((MenuTextView) textView).setTextColor(getGDActivity().getColor(R.color.menu_text_disabled));
 		} else {
 			((MenuTextView) textView).setTextColor(defaultColorStateList());
 		}
