@@ -12,7 +12,6 @@ import cl.figonzal.gravitydefied.R;
 import static cl.figonzal.gravitydefied.Helpers.getDp;
 import static cl.figonzal.gravitydefied.Helpers.getGDActivity;
 import static cl.figonzal.gravitydefied.Helpers.getString;
-import static cl.figonzal.gravitydefied.Helpers.logDebug;
 
 public class OptionsMenuElement
 		extends ClickableMenuElement

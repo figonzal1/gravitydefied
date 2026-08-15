@@ -10,12 +10,10 @@ import cl.figonzal.gravitydefied.API.*;
 import cl.figonzal.gravitydefied.GDActivity;
 import cl.figonzal.gravitydefied.Menu.Views.MenuImageView;
 import cl.figonzal.gravitydefied.R;
-import cl.figonzal.gravitydefied.API.Response;
 import cl.figonzal.gravitydefied.Settings;
 import cl.figonzal.gravitydefied.WaitForNetworkConnection;
 
 import static cl.figonzal.gravitydefied.Helpers.*;
-import static cl.figonzal.gravitydefied.Helpers.getDp;
 
 public class DownloadLevelsMenuScreen extends LevelsMenuScreen {
 

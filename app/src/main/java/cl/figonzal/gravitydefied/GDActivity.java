@@ -736,7 +736,7 @@ public class GDActivity extends Activity implements Runnable {
 		menu.clear();
 		int id = 1;
 		for (Command cmd : commands) {
-			MenuItem item = menu.add(0, id, 0, cmd.title);
+			menu.add(0, id, 0, cmd.title);
 			id++;
 		}
 		return true;
