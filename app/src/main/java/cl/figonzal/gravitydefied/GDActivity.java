@@ -111,6 +111,10 @@ public class GDActivity extends Activity implements Runnable {
 
 		shared = this;
 
+		if ((getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+			Ghost.selfCheck();
+		}
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 			registerOnBackInvokedCallback33();
 		}
@@ -564,6 +568,7 @@ public class GDActivity extends Activity implements Runnable {
 					goalLoop();
 					// menu.setLastTrackTime(seconds / 10L);
 					menu.setLastTrackTime((finishedTime - startedTime) / 10);
+					Ghost.onFinish((finishedTime - startedTime) / 10);
 					menu.showMenu(2);
 
 					if (menu.canStartTrack())
@@ -587,6 +592,7 @@ public class GDActivity extends Activity implements Runnable {
 			//try {
 			/*if (physEngine != null)*/
 			physEngine._charvV();
+			Ghost.tick(physEngine);
 			long l;
 			if ((l = System.currentTimeMillis()) - l1 < 30L) {
 				try {
@@ -826,6 +832,8 @@ public class GDActivity extends Activity implements Runnable {
 		finishedTime = 0;
 		pausedTime = 0;
 		m_byteJ = 0;
+		Ghost.reset();
+		Ghost.load(levelsManager.getCurrentId(), menu.getSelectedLevel(), menu.getSelectedTrack(), menu.getSelectedLeague());
 		if (flag)
 			gameView.showInfoMessage(levelLoader.getLevelName(menu.getSelectedLevel(), menu.getSelectedTrack()), 3000);
 		// logDebug("[GDActivity] restart(): 2");

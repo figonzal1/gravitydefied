@@ -637,6 +637,14 @@ public class GameView extends View {
 		canvas.drawRect(0, 0, m_abI, m_dI, paint);
 	}
 
+	// Forces every paint-based (line) draw to a flat grey, used for the ghost overlay. A colour
+	// filter is applied after the paint colour, so it also overrides the setColor() calls the
+	// bike/rider drawing routines make internally. Sprite draws bypass this paint entirely
+	// (see drawBitmap), which is why the ghost is drawn through the line-art path only.
+	public void setGhostTint(boolean on) {
+		paint.setColorFilter(on ? new PorterDuffColorFilter(0xFF9E9E9E, PorterDuff.Mode.SRC_IN) : null);
+	}
+
 	public void setColor(int r, int g, int b) {
 		GDActivity _tmp = activity;
 		if (getGDActivity().isMenuShown()) {
@@ -699,6 +707,7 @@ public class GameView extends View {
 			physEngine._voidvV();
 			_doIIV(-physEngine._elsevI() + m_TI + m_abI / 2, physEngine._ifvI() + m_QI + m_dI / 2);
 			physEngine._ifiV(this);
+			cl.figonzal.gravitydefied.Ghost.draw(this);
 			if (drawTimer) {
 				long time = 0, finished;
 				if (gd.startedTime > 0) {

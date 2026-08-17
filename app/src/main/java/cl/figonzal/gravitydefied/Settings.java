@@ -45,6 +45,9 @@ public class Settings {
 	private static final String NIGHT_MODE_ENABLED = "night_mode";
 	private static final boolean NIGHT_MODE_ENABLED_DEFAULT = false;
 
+	private static final String GHOST_ENABLED = "ghost_enabled";
+	private static final boolean GHOST_ENABLED_DEFAULT = true;
+
 	private static SharedPreferences preferences;
 
 	static {
@@ -63,6 +66,7 @@ public class Settings {
 		setLevelsSort(LEVELS_SORT_DEFAULT);
 		setName(NAME_CHARS_DEFALUT);
 		setNightModeEnabled(NIGHT_MODE_ENABLED_DEFAULT);
+		setGhostEnabled(GHOST_ENABLED_DEFAULT);
 	}
 
 	public static long getLevelId() {
@@ -179,6 +183,14 @@ public class Settings {
 
 	public static void setNightModeEnabled(boolean enabled) {
 		setBoolean(NIGHT_MODE_ENABLED, enabled);
+	}
+
+	public static boolean isGhostEnabled() {
+		return preferences.getBoolean(GHOST_ENABLED, GHOST_ENABLED_DEFAULT);
+	}
+
+	public static void setGhostEnabled(boolean enabled) {
+		setBoolean(GHOST_ENABLED, enabled);
 	}
 
 	private static void setLong(String key, long value) {

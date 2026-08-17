@@ -1333,4 +1333,86 @@ public class Physics {
 		m_lf._aiV(j);
 	}
 
+	// Ghost replay support. m_TI is the rider lean (0..0x10000, neutral 32768) and drives the
+	// rider pose tables, so a replay has to record it alongside the node positions.
+	public int getRiderLean() {
+		return m_TI;
+	}
+
+	// Ghost replay support. Draws one recorded frame as a grey line-art bike + rider, reusing the
+	// game's own drawing routines. Unlike _ifiV() this never calls _tryvV() (screen clear),
+	// _aiV() (wheel sprites) or m_lf._aiV/_aiIV (terrain), so it composites over the live frame.
+	//
+	// m_aaan is only the render snapshot -- _voidvV() rebuilds it from m_Hak at the start of every
+	// drawGame() -- so it is swapped in and restored here rather than kept in a second Physics
+	// instance. A second instance is not usable: its constructor runs _doZV(true), which mutates
+	// the shared Loader's visible range (see _doZV).
+	//
+	// Layout of buf at off: 6 nodes x (x, y), then m_aaan[1].m_bI, m_aaan[2].m_bI, m_TI.
+	// UI thread only -- same thread that runs _voidvV()/_ifiV().
+	public void drawGhostFrame(GameView view, int buf[], int off) {
+		int saved[] = new int[12];
+		for (int j = 0; j < 6; j++) {
+			saved[j * 2] = m_aaan[j].x;
+			saved[j * 2 + 1] = m_aaan[j].y;
+		}
+		int savedWheel1 = m_aaan[1].m_bI;
+		int savedWheel2 = m_aaan[2].m_bI;
+		int savedLean = m_TI;
+		boolean savedBikeSprite = m_UZ;
+		boolean savedDriverSprite = m_elseZ;
+		boolean savedBroken = m_IZ;
+
+		try {
+			for (int j = 0; j < 6; j++) {
+				m_aaan[j].x = buf[off + j * 2];
+				m_aaan[j].y = buf[off + j * 2 + 1];
+			}
+			m_aaan[1].m_bI = buf[off + 12];
+			m_aaan[2].m_bI = buf[off + 13];
+			m_TI = buf[off + 14];
+
+			// Force the line-art path: sprites ignore the paint and so cannot be tinted grey.
+			m_UZ = false;
+			m_elseZ = false;
+			m_IZ = false;
+
+			// Bike orientation, same derivation as _ifiV().
+			int i1 = m_aaan[3].x - m_aaan[4].x;
+			int j1 = m_aaan[3].y - m_aaan[4].y;
+			int k1;
+			if ((k1 = _doIII(i1, j1)) != 0) {
+				i1 = (int) (((long) i1 << 32) / (long) k1 >> 16);
+				j1 = (int) (((long) j1 << 32) / (long) k1 >> 16);
+			}
+			int l1 = -j1;
+			int i2 = i1;
+
+			view.setGhostTint(true);
+
+			// _doiV() only draws the rims while the menu is up; in game they come from the wheel
+			// sprites, which the ghost does not use. Draw them explicitly.
+			int radius = m_Hak[1].m_aI;
+			view.drawLineWheel((m_aaan[1].x << 2) >> 16, (m_aaan[1].y << 2) >> 16, (radius + radius << 2) >> 16);
+			view.drawLineWheel((m_aaan[2].x << 2) >> 16, (m_aaan[2].y << 2) >> 16, (radius + radius << 2) >> 16);
+
+			_doiV(view);
+			_laiV(view);
+			_ifiIIV(view, i1, j1, l1, i2);
+			_aiIIV(view, i1, j1, l1, i2);
+		} finally {
+			view.setGhostTint(false);
+			for (int j = 0; j < 6; j++) {
+				m_aaan[j].x = saved[j * 2];
+				m_aaan[j].y = saved[j * 2 + 1];
+			}
+			m_aaan[1].m_bI = savedWheel1;
+			m_aaan[2].m_bI = savedWheel2;
+			m_TI = savedLean;
+			m_UZ = savedBikeSprite;
+			m_elseZ = savedDriverSprite;
+			m_IZ = savedBroken;
+		}
+	}
+
 }

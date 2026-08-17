@@ -10,6 +10,7 @@ import android.text.InputType;
 import android.widget.EditText;
 import cl.figonzal.gravitydefied.Command;
 import cl.figonzal.gravitydefied.GDActivity;
+import cl.figonzal.gravitydefied.Ghost;
 import cl.figonzal.gravitydefied.Game.GameView;
 import cl.figonzal.gravitydefied.Levels.InvalidTrackException;
 import cl.figonzal.gravitydefied.Levels.Loader;
@@ -82,6 +83,7 @@ public class Menu
 	private OptionsMenuElement keyboardInMenuOptionItem;
 	private OptionsMenuElement vibrateOnTouchOptionItem;
 	private OptionsMenuElement nightModeOptionItem;
+	private OptionsMenuElement ghostOptionItem;
 	private SimpleMenuElementNew clearHighscoreOptionItem;
 	private SimpleMenuElementNew fullResetItem;
 	// private ActionMenuElement yesAction;
@@ -384,6 +386,7 @@ public class Menu
 				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				nightModeOptionItem = new OptionsMenuElement(getString(R.string.night_mode), Settings.isNightModeEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
+				ghostOptionItem = new OptionsMenuElement(getString(R.string.ghost), Settings.isGhostEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				clearHighscoreOptionItem = new SimpleMenuElementNew(getString(R.string.clear_highscore), eraseScreen, this);
 
 				// if (hasPointer)
@@ -397,6 +400,7 @@ public class Menu
 				optionsMenu.addItem(vibrateOnTouchOptionItem);
 				optionsMenu.addItem(keyboardInMenuOptionItem);
 				optionsMenu.addItem(nightModeOptionItem);
+				optionsMenu.addItem(ghostOptionItem);
 				optionsMenu.addItem(clearHighscoreOptionItem);
 				optionsMenu.addItem(createAction(ActionMenuElement.BACK));
 
@@ -576,6 +580,10 @@ public class Menu
 
 	public int getSelectedTrack() {
 		return trackSelector.getSelectedOption();
+	}
+
+	public int getSelectedLeague() {
+		return leagueSelector.getSelectedOption();
 	}
 
 	// not sure about this name
@@ -1136,6 +1144,9 @@ public class Menu
 			gd.restartApp();
 			return;
 		}
+		if (item == ghostOptionItem) {
+			Settings.setGhostEnabled(ghostOptionItem.getSelectedOption() == 0);
+		}
 		if (item == perspectiveOptionItem) {
 			gd.physEngine._aZV(perspectiveOptionItem.getSelectedOption() == 0);
 			getLevelLoader().setPerspectiveEnabled(perspectiveOptionItem.getSelectedOption() == 0);
@@ -1442,6 +1453,7 @@ public class Menu
 		Settings.resetAll();
 		getLevelsManager().resetAllLevelsSettings();
 		getLevelsManager().clearAllHighScores();
+		Ghost.clearAll();
 
 		getGDActivity().fullResetting = true;
 		getGDActivity().destroyApp(true);
