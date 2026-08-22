@@ -17,9 +17,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import androidx.core.graphics.Insets;
-import androidx.core.view.OnApplyWindowInsetsListener;
-import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -261,13 +258,25 @@ public class GDActivity extends Activity implements Runnable {
 
 			applyImmersiveMode();
 
-			ViewCompat.setOnApplyWindowInsetsListener(frame, new OnApplyWindowInsetsListener() {
+			frame.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
 				@Override
-				public WindowInsetsCompat onApplyWindowInsets(View v, WindowInsetsCompat insets) {
-					Insets sys = insets.getInsets(
-							WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
-					menuLayout.setPadding(sys.left, sys.top, sys.right, 0);
-					scrollView.setPadding(0, 0, 0, sys.bottom);
+				public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+					int left, top, right, bottom;
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+						android.graphics.Insets sys = insets.getInsets(
+								WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+						left = sys.left;
+						top = sys.top;
+						right = sys.right;
+						bottom = sys.bottom;
+					} else {
+						left = insets.getSystemWindowInsetLeft();
+						top = insets.getSystemWindowInsetTop();
+						right = insets.getSystemWindowInsetRight();
+						bottom = insets.getSystemWindowInsetBottom();
+					}
+					menuLayout.setPadding(left, top, right, 0);
+					scrollView.setPadding(0, 0, 0, bottom);
 					return insets;
 				}
 			});
