@@ -1,4 +1,3 @@
-- Fixed unexpected crashes when opening and closing in-game dialogs
-- Fixed an error when deleting downloaded level packs
-- Support for the latest Android versions
-- Stability and performance improvements
+- Your progress is now restored automatically: unlocked leagues no longer show as locked
+- Fixed unexpected crashes when switching screens or returning to the game
+- Stability improvements across different Android devices

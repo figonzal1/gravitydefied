@@ -1,4 +1,3 @@
-- Se corrigieron cierres inesperados al abrir y cerrar ventanas del juego
-- Se corrigió un error al eliminar packs de niveles descargados
-- Compatibilidad con las versiones más recientes de Android
-- Mejoras de estabilidad y rendimiento
+- Se recupera automáticamente tu progreso: las ligas ya desbloqueadas dejan de aparecer bloqueadas
+- Se corrigieron cierres inesperados al cambiar de pantalla o volver al juego
+- Mejoras de estabilidad en distintos modelos de Android
