@@ -10,7 +10,6 @@
 	<string name="on">On</string>
 	<string name="off">Off</string>
 
-<string name="action_settings">Settings</string>
 	<string name="exit">Exit Game</string>
 	<string name="main">Main</string>
 	<string name="play_menu">Play Menu</string>
@@ -33,7 +32,6 @@
 	<string name="league">League</string>
 	<string name="restart">Restart</string>
 	<string name="restart_with_new_level">Restart with new level</string>
-	<string name="send_logs">Send logs</string>
 	<string name="next">Next</string>
 	<string name="_continue">Continue</string>
 	<string name="name">Name</string>
@@ -55,10 +53,7 @@
 
 	<string name="installed_mods">Installed mods</string>
 	<string name="download_mods">Download mods</string>
-	<string name="download_options">Download options</string>
 	<string name="install_mrg">Install levels.mrg</string>
-	<string name="installed_levels_text">Here you can manage installed levels.</string>
-	<string name="download_levels_text">Here you can download and install new levels.</string>
 
 	<string name="cleared">Cleared</string>
 	<string name="cleared_text">Highscores have been cleared</string>
@@ -159,8 +154,6 @@
 	<string name="complete_to_unlock">Complete more tracks to unlock this track/league combo.</string>
 	<string name="tracks_completed_tpl"><![CDATA[%1$d of %2$d tracks in <b>%3$s</b> completed.]]></string>
 
-	<string name="LEAGUE">LEAGUE</string>
-
 	<string-array name="finished_places">
 		<item>First place!</item>
 		<item>Second place!</item>
@@ -201,7 +194,6 @@
 	<string name="no_internet_connection">No internet connection</string>
 	<string name="waiting_for_network">Waiting for network connection&#8230;</string>
 	<string name="levels_count_tpl"><![CDATA[%1$s <font color="#909090">(%2$s)</font>]]></string>
-	<string name="active_name_tpl"><![CDATA[%1$s <font color="#00a000">(Active)</font>]]></string>
 
 	<string name="sort_by">Sort by:</string>
 	<string-array name="sort_variants">
@@ -223,8 +215,6 @@
 	<string name="enter_levels_name">Enter levels pack name:</string>
 	<string name="error">Error</string>
 	<string name="oops">Oops..</string>
-	<string name="please_wait">Please wait..</string>
-	<string name="success">Success</string>
 	<string name="successfully_installed">Levels successfully installed.</string>
 	<string name="open_installed">Open installed</string>
 	<string name="installed">Installed</string>
@@ -234,7 +224,6 @@
 	<string name="delete_levels">Delete levels</string>
 	<string name="delete_levels_confirmation">Are you sure you want to delete these levels? This action cannot be undone.</string>
 	<string name="active">Active</string>
-	<string name="unlock_next">Unlock next level</string>
 
 	<string name="e_external_storage_is_not_readable">External storage is not readable.</string>
 	<string name="e_downloading_was_interrupted">Downloading was interrupted</string>

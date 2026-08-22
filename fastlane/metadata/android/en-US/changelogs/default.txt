@@ -1,4 +1,4 @@
-- New: manual dark mode toggle
-- Better support for Android 13, 14 and 15 (back gesture and full-screen display)
-- Removed telemetry data collection
+- Fixed unexpected crashes when opening and closing in-game dialogs
+- Fixed an error when deleting downloaded level packs
+- Support for the latest Android versions
 - Stability and performance improvements

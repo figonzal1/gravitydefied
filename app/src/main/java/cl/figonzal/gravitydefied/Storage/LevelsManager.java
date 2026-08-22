@@ -47,7 +47,6 @@ public class LevelsManager {
 	private static final Handler mainHandler = new Handler(Looper.getMainLooper());
 
 	private LevelsDataSource dataSource;
-	private boolean dbOK = false;
 	private Level currentLevel;
 
 	public LevelsManager() {
@@ -83,7 +82,6 @@ public class LevelsManager {
 		}
 
 		reload();
-		dbOK = true;
 	}
 
 	public void resetId() {
@@ -136,10 +134,6 @@ public class LevelsManager {
 
 		File file = getMrgFileById(id);
 		return isExternalStorageReadable() && file.exists();
-	}
-
-	public boolean isDbOK() {
-		return dbOK;
 	}
 
 	public long install(File file, String name, String author, long apiId) throws Exception {
@@ -223,10 +217,6 @@ public class LevelsManager {
 		return dataSource.isApiIdInstalled(apiId);
 	}
 
-	public Level[] getInstalledLevels(int offset, int count) {
-		return dataSource.getLevels(offset, count).toArray(new Level[0]);
-	}
-
 	public Level getLeveL(long id) {
 		return dataSource.getLevel(id);
 	}
@@ -235,35 +225,16 @@ public class LevelsManager {
 		return dataSource.getAllLevels().toArray(new Level[0]);
 	}
 
-	public synchronized HashMap<String, Double> getLevelsStat() {
-		Level[] levels = getAllInstalledLevels();
-		HashMap<String, Double> stat = new HashMap<>();
-		if (levels.length > 0) {
-			for (Level level : levels) {
-				int[] completed = level.getUnlockedAll();
-				int completedCount = 0;
-				for (int i = 0; i < completed.length; i++) {
-					if (completed[i] < 0) completed[i] = 0;
-					completedCount += completed[i];
-				}
-
-				double totalCount = level.getCountEasy() + level.getCountMedium() + level.getCountHard();
-				double per = completedCount / totalCount * 100;
-
-				stat.put(String.valueOf(level.getApiId()), per);
-			}
-		}
-		return stat;
-	}
-
 	public void delete(Level level) {
 		dataSource.deleteLevel(level);
+		// getMrgFileById returns null for the built-in levels.mrg (id == 1)
 		File file = getMrgFileById(level.getId());
 		try {
-			if (file.exists()) {
+			if (file != null && file.exists()) {
 				file.delete();
 			}
 		} catch (Exception e) {
+			logDebug("LevelsManager.delete: " + e);
 			e.printStackTrace();
 		}
 	}
@@ -439,10 +410,6 @@ public class LevelsManager {
 
 		logDebug("All levels now: " + dataSource.getAllLevels());
 		logDebug("Level#1: " + dataSource.getLevel(1));
-	}
-
-	public static boolean isExternalStorageWritable() {
-		return getGDActivity().getExternalFilesDir(null) != null;
 	}
 
 	public static boolean isExternalStorageReadable() {

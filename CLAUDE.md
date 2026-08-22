@@ -8,7 +8,7 @@ A faithful Android port of the classic 2004 J2ME game **Gravity Defied** (a moto
 
 ## Build system
 
-This is a **Gradle-based Android project** (AGP 9.1.1, Gradle 9.3.1).
+This is a **Gradle-based Android project** (AGP 9.2.1, Gradle 9.4.1).
 
 ### Build commands
 
@@ -32,16 +32,20 @@ fastlane prod                    # build release AAB
 fastlane prod_googleplay         # upload AAB to Play Store production track (draft)
 ```
 
-All six lanes upload as **draft**; the `*_googleplay` lanes only upload — they do not build, so run the matching build lane first.
+All six lanes upload as **draft**; the `*_googleplay` lanes only upload — they do not build, so run the matching build lane first. The three build lanes (`internal`/`beta`/`prod`) are byte-identical — `clean` then `bundle Release` with `-PuploadMapping`. Only the `*_googleplay` lanes differ, by track.
 
-Signing env vars required: `STORE_FILE`, `STORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
-Credentials file (gitignored): `keys/keystore.properties`.
+Signing comes entirely from `keys/keystore.properties` (gitignored), read by the `release`
+`signingConfig` in `app/build.gradle.kts`. Fastlane deliberately does **not** inject
+`android.injected.signing.*` — a second copy of the keystore path drifted per-machine once already,
+and `-P` properties leak the passwords into the build log. The only property fastlane passes is
+`uploadMapping`.
 
 ### Dependencies and config
 
-- `app/build.gradle.kts`: `compileSdk 36`, `minSdk 23`, `targetSdk 36`.
+- `app/build.gradle.kts`: `compileSdk 37`, `minSdk 23`, `targetSdk 37`.
+- Toolchain is pinned in `mise.toml`: **Java temurin-21**, **Ruby 3.4** (fastlane).
 - Language level Java 8 (`compileOptions JavaVersion.VERSION_1_8`), but the codebase style is Java 6/7 era — anonymous inner classes everywhere, no lambdas, no streams. Match this style in new code.
-- **AndroidX: in the build, not in our source.** Our own Java under `app/src/main/java/` deliberately uses framework classes only — `android.app.Activity`, `android.widget.*`, no `androidx.*` imports — and new code should match that style for parity with the J2ME-era port. The **built APK does contain AndroidX**, however: `gradle.properties` sets `android.useAndroidX=true`, and `firebase-analytics` transitively pulls `androidx.fragment`, `androidx.activity`, `androidx.core`, etc. A couple are pinned explicitly in `gradle/libs.versions.toml` (`androidx-fragment`, `androidx-activity`) to override outdated transitive versions Play Console flagged — that's a build-time override, not a license to start importing AndroidX from app code. If a platform/Play Console issue genuinely requires an AndroidX API to fix (e.g. `WindowInsetsControllerCompat` for the immersive-mode migration on API 23–29), reach for it deliberately and call it out in the commit.
+- **AndroidX: in the build, not in our source.** Our own Java under `app/src/main/java/` deliberately uses framework classes only — `android.app.Activity`, `android.widget.*`, no `androidx.*` imports — and new code should match that style for parity with the J2ME-era port. The **built APK does contain AndroidX**, however: `gradle.properties` sets `android.useAndroidX=true`, and `firebase-analytics` transitively pulls `androidx.fragment`, `androidx.activity`, `androidx.core`, etc. A couple are pinned explicitly in `gradle/libs.versions.toml` (`androidx-fragment`, `androidx-activity`) to override outdated transitive versions Play Console flagged — that's a build-time override, not a license to start importing AndroidX from app code. One exception already exists: `androidx-core` is a **direct** dependency because `GDActivity.applyImmersiveMode()` and its window-insets listener need `WindowCompat` / `WindowInsetsControllerCompat` / `WindowInsetsCompat`. `GDActivity.java` is the **only** file in `app/src/main/java/` with an `androidx` import — keep it that way; if a platform/Play Console issue genuinely forces another one, reach for it deliberately and call it out in the commit.
 - `gradle.properties` also sets `android.r8.strictFullModeForKeepRules=false` — R8 full-mode keep-rule strictness is relaxed on purpose; don't flip it without re-testing a release build.
 - **Release builds are minified**: `isMinifyEnabled = true` with `proguard-android-optimize.txt` + `app/proguard-rules.pro`, which exists mainly to `-keep class …Game.**` and `…Levels.**` so the decompiled identifiers survive R8. The "don't rename cryptic identifiers" rule (below) has this build-level counterpart — anything reflective added to those packages needs a matching keep rule. (The ACRA and Apache-HTTP rules in that file are dead leftovers from earlier dependencies; harmless, leave them.)
 - **Debug installs alongside release**: `applicationIdSuffix = ".dev"`, `versionNameSuffix = "-debug"`, and `app_name` is supplied per-build-type via `resValue` in `app/build.gradle.kts` — it is *not* in `strings.xml`.
@@ -67,7 +71,7 @@ Threading rule the codebase follows consistently: game logic runs on `game_threa
 - `Levels/` — binary track loading. `Loader` parses `.mrg` level-pack files; `Reader`/`Level`/`LevelHeader` decode the format. The bundled original packs are `assets/levels.mrg`; downloaded mods are `.mrg` files fetched from `http://gdtr.net/mrg/<id>.mrg`. `Levels/Level` is an in-memory parsed track — **not** the same type as `Storage/Level`.
 - `Storage/` — SQLite persistence. `LevelsSQLiteOpenHelper` defines `levels.db` (tables `levels`, `highscores`; schema version 1, no migrations in `onUpgrade`). `LevelsDataSource` is the DAO; `LevelsManager` is the high-level controller for installing/switching mods and computing stats; `HighScores` and `Storage/Level` are entities.
 - `Menu/` — a custom menu framework rendered as real Android Views inside `GDActivity`'s `ScrollView` (the original J2ME canvas menu was replaced; `MenuElementOld`/`SimpleMenuElement` are leftover remnants). `Menu` is the controller, `MenuScreen` a screen, `MenuElement` subclasses are rows, `Menu/Views/` holds custom `View` subclasses. The mod browser/manager screens are `LevelsMenuScreen`, `InstalledLevelsMenuScreen`, `DownloadLevelsMenuScreen`.
-- `API/` — gdtr.net backend client. Endpoint `http://gdtr.net/api.php` (API `VERSION = 2`), requests run on a thread pool (`ExecutorService`) via `HttpURLConnection`. **Active calls: `getLevels`** (mod browser listing) and **`downloadMrg`** (level pack download). Methods `sendStats`, `sendKeyboardLogs`, `getNotifications` exist in the class but are not invoked — removed from call sites for privacy reasons. Callback style: `Request` + `ResponseHandler` with typed `LevelsResponse`/`NotificationsResponse`. `gdtr.net` is plain **HTTP**; cleartext is permitted only via `app/src/main/res/xml/network_security_config.xml`, which allowlists `gdtr.net` (and subdomains, e.g. `API.DEBUG_URL` → `dev.gdtr.net`) — a new host must be added there or requests fail silently.
+- `API/` — gdtr.net backend client. Endpoint `http://gdtr.net/api.php` (API `VERSION = 2`), requests run on a thread pool (`ExecutorService`) via `HttpURLConnection`. The whole surface is **`getLevels`** (mod browser listing, from `DownloadLevelsMenuScreen`) and **`getMrgURL` + `DownloadFile`/`DownloadHandler`** (level pack download, from `LevelsManager`). The old `sendStats` / `sendKeyboardLogs` / `getNotifications` endpoints and `NotificationsResponse` were deleted for privacy reasons — don't re-add them. Callback style: `Request` + `ResponseHandler` with typed `LevelsResponse`. `gdtr.net` is plain **HTTP**; cleartext is permitted only via `app/src/main/res/xml/network_security_config.xml`, which allowlists `gdtr.net` (`includeSubdomains="true"`) — a new host must be added there or requests fail silently.
 - `Helpers.java` — static utilities, including a **Windows-1251 (CP1251) translation table**: level and menu strings use CP1251 (Russian text), not UTF-8. `Settings.java` wraps `SharedPreferences`. `KeyboardController` drives the on-screen 3×3 numeric control pad. `GDApplication.onCreate()` is empty — crash reporting is handled by Firebase Crashlytics.
 
 ## Working in this codebase
@@ -78,4 +82,4 @@ Threading rule the codebase follows consistently: game logic runs on `game_threa
 - All user-visible strings are in `res/values*/`. Resource qualifiers in use: tablet (`values-sw600dp`, `values-sw720dp-land`) only; `values/screen.xml` holds screen-metric resources.
 - UI colors are centralized in `res/values/colors.xml`; do not add hardcoded hex color literals. Spacing/typography lives in `res/values/dimens.xml`.
 - `Html.fromHtml()` must always be called via `Helpers.fromHtml()` — it handles the API 24 signature change.
-- `res/layout/` only contains `levels_list_item.xml`; the main view tree is built programmatically in `GDActivity.onCreate()`.
+- There is **no `res/layout/`** and no `R.layout` reference anywhere; the entire view tree is built programmatically in `GDActivity.onCreate()` and by the `Menu/` framework.

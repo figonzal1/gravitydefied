@@ -69,7 +69,7 @@ public class NameInputMenuScreen extends MenuScreen {
 	protected MenuTextView createTextView() {
 		Context context = getGDActivity();
 		MenuTextView textView = new MenuTextView(context);
-		textView.setTextColor(context.getResources().getColor(R.color.menu_text_primary));
+		textView.setTextColor(context.getColor(R.color.menu_text_primary));
 		textView.setLayoutParams(new LinearLayout.LayoutParams(
 				wordWidth,
 				ViewGroup.LayoutParams.WRAP_CONTENT

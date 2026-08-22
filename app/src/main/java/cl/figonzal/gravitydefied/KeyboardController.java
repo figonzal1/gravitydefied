@@ -1,15 +1,11 @@
 package cl.figonzal.gravitydefied;
 
 import android.graphics.Rect;
-import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
 import cl.figonzal.gravitydefied.Game.GameView;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import static cl.figonzal.gravitydefied.Helpers.getDp;
 
@@ -25,7 +21,6 @@ public class KeyboardController implements View.OnTouchListener {
 	private int[] buf;
 	private LinearLayout[] btns;
 	private PointerInfo[] pointers;
-	private StringBuffer logBuffer;
 
 	static {
 		PADDING_DP = getDp(PADDING);
@@ -39,8 +34,6 @@ public class KeyboardController implements View.OnTouchListener {
 		for (int i = 0; i < MAX_POINTERS; i++) {
 			pointers[i] = new PointerInfo(i);
 		}
-
-		logBuffer = new StringBuffer();
 	}
 
 	@Override
@@ -163,70 +156,6 @@ public class KeyboardController implements View.OnTouchListener {
 		}
 
 		return true;
-	}
-
-	private synchronized void log(Object o, boolean last) {
-		String logStr = o.toString();
-		Log.d("GD Keyboard", o.toString());
-
-		if (last)
-			Log.d("", "");
-
-		/*if (!gd.isMenuShown()) {
-			logBuffer.append("<");
-			logBuffer.append(getCurrentTime());
-			logBuffer.append("> ");
-
-			logBuffer.append(logStr);
-			logBuffer.append("\n");
-
-			if (last)
-				logBuffer.append("\n");
-		}*/
-	}
-
-	private void log(Object o) {
-		log(o, false);
-	}
-
-	public synchronized void clearLogBuffer() {
-		logBuffer = null;
-		logBuffer = new StringBuffer();
-	}
-
-	public String getLog() {
-		return logBuffer.toString();
-	}
-
-	private static String getCurrentTime() {
-		Calendar cal = Calendar.getInstance();
-		cal.getTime();
-		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
-		return sdf.format(cal.getTime());
-	}
-
-	private static String actionToString(int action) {
-		switch (action) {
-			case MotionEvent.ACTION_DOWN:
-				return "ACTION_DOWN";
-			case MotionEvent.ACTION_POINTER_DOWN:
-				return "ACTION_POINTER_DOWN";
-			case MotionEvent.ACTION_POINTER_2_DOWN:
-				return "ACTION_POINTER_2_DOWN";
-			case MotionEvent.ACTION_POINTER_2_UP:
-				return "ACTION_POINTER_2_UP";
-			case MotionEvent.ACTION_POINTER_3_DOWN:
-				return "ACTION_POINTER_3_DOWN";
-			case MotionEvent.ACTION_POINTER_3_UP:
-				return "ACTION_POINTER_3_UP";
-			case MotionEvent.ACTION_UP:
-				return "ACTION_UP";
-			case MotionEvent.ACTION_POINTER_UP:
-				return "ACTION_POINTER_UP";
-			case MotionEvent.ACTION_MOVE:
-				return "ACTION_MOVE";
-		}
-		return "?";
 	}
 
 	private static int whichButton(Rect rect, int x, int y) {

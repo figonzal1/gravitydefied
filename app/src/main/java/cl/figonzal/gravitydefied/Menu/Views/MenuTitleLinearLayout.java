@@ -3,8 +3,6 @@ package cl.figonzal.gravitydefied.Menu.Views;
 import android.app.Activity;
 import android.widget.RelativeLayout;
 
-import static cl.figonzal.gravitydefied.Helpers.logDebug;
-
 public class MenuTitleLinearLayout extends RelativeLayout {
 
 	private Callback onSizeChangedCallback = null;

@@ -1,25 +1,11 @@
 <resources>
 
-    <!-- Default screen margins -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
-
-    <!-- Menu typography -->
-    <dimen name="menu_text_size">20sp</dimen>
-    <dimen name="menu_text_size_small">15sp</dimen>
-    <dimen name="menu_title_text_size">30sp</dimen>
-
     <!-- Menu layout -->
     <dimen name="menu_layout_padding_horizontal">30dp</dimen>
     <dimen name="menu_layout_padding_bottom">15dp</dimen>
-    <dimen name="menu_item_padding_vertical">5dp</dimen>
 
     <!-- Menu title bar -->
     <dimen name="menu_title_padding_top">25dp</dimen>
     <dimen name="menu_title_padding_bottom">13dp</dimen>
-
-    <!-- Keyboard -->
-    <dimen name="keyboard_button_height_phone">55dp</dimen>
-    <dimen name="keyboard_button_height_tablet">85dp</dimen>
 
 </resources>

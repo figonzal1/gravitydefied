@@ -716,6 +716,7 @@ public class GDActivity extends Activity implements Runnable {
 	}
 
 	@Override
+	@android.annotation.SuppressLint("GestureBackNavigation")
 	public void onBackPressed() {
 		// On API 33+ the OnBackInvokedCallback registered in onCreate handles back
 		// instead — this override only runs on API < 33.
@@ -749,7 +750,7 @@ public class GDActivity extends Activity implements Runnable {
 		menu.clear();
 		int id = 1;
 		for (Command cmd : commands) {
-			MenuItem item = menu.add(0, id, 0, cmd.title);
+			menu.add(0, id, 0, cmd.title);
 			id++;
 		}
 		return true;

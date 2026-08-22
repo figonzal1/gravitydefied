@@ -14,14 +14,14 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "cl.figonzal.gravitydefied"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "cl.figonzal.gravitydefied"
         minSdk = 23
-        targetSdk = 36
-        versionCode = 7
-        versionName = "1.0.6"
+        targetSdk = 37
+        versionCode = 8
+        versionName = "1.0.7"
     }
 
     signingConfigs {
@@ -60,7 +60,10 @@ android {
             )
             resValue("string", "app_name", "Gravity Defied Classic")
             configure<CrashlyticsExtension> {
-                mappingFileUploadEnabled = true
+                // Only deploy builds upload the mapping (fastlane passes
+                // -PuploadMapping); local release builds would otherwise keep
+                // overwriting the mapping of the same versionCode in Firebase.
+                mappingFileUploadEnabled = project.hasProperty("uploadMapping")
             }
         }
     }

@@ -10,7 +10,6 @@ import cl.figonzal.gravitydefied.Game.Bitmap;
 
 import static cl.figonzal.gravitydefied.Helpers.getDp;
 import static cl.figonzal.gravitydefied.Helpers.isSDK11OrHigher;
-import static cl.figonzal.gravitydefied.Helpers.logDebug;
 
 public class MenuHelmetView extends View {
 
