@@ -308,6 +308,15 @@ public class Menu
 				fullLeaguesList = getStringArray(R.array.leagues_full);
 				trackNames = getLevelLoader().names;
 
+				// League unlocks are granted as a one-time event in saveCompletedTrack(); if that save
+				// is ever lost (crash, killed process, damaged track), the league stays locked forever
+				// even though the tier's tracks are all done. Re-derive it from real track progress.
+				for (int i = 0; i < 3; i++) {
+					if (level.getUnlocked(i) >= level.getCount(i) && level.getUnlockedLeagues() < i + 1) {
+						level.setUnlockedLeagues(i + 1);
+					}
+				}
+
 				if (level.getUnlockedLeagues() < 3) {
 					leagues = leaguesList;
 				} else {
