@@ -44,7 +44,7 @@ import static cl.figonzal.gravitydefied.Helpers.logDebug;
 
 public class GDActivity extends Activity implements Runnable {
 
-	public static GDActivity shared = null;
+	public static volatile GDActivity shared = null;
 	public static final int MENU_TITLE_LAYOUT_TOP_PADDING = 25;
 	public static final int MENU_TITLE_LAYOUT_BOTTOM_PADDING = 13;
 	public static final int MENU_TITLE_LAYOUT_X_PADDING = 30;
@@ -423,6 +423,7 @@ public class GDActivity extends Activity implements Runnable {
 				// menu = null;
 				// menu.hideKeyboard();
 				for (int i = 1; i <= 4; i++) {
+					if (shared != this) return; // replaced by a newer activity; abandon this init
 					menu.load(i);
 				}
 
@@ -485,6 +486,10 @@ public class GDActivity extends Activity implements Runnable {
 			} catch (Exception _ex) {
 				_ex.printStackTrace();
 				// Log.w("GDTR", _ex);
+				if (shared != this) {
+					Helpers.logDebug("run(): init aborted, this activity was replaced");
+					return;
+				}
 				throw new RuntimeException(_ex);
 			}
 		}
@@ -502,7 +507,7 @@ public class GDActivity extends Activity implements Runnable {
 
 		// try {
 		Helpers.logDebug("start main loop");
-		while (alive) {
+		while (alive && shared == this) {
 			/*if (!alive) {
 				logDebug("!alive");
 				break;
