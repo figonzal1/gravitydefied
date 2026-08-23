@@ -121,7 +121,7 @@
 	<!-- About screen credits — one string per entry, chronological order newest first -->
 	<string name="about_credit_figonzal"><![CDATA[
 		<b>Gravity Defied Classic</b><br/>
-		Modernized for Android 16 by Felipe Gonzalez<br/>
+		Modernized for Android 16+ by Felipe Gonzalez<br/>
 		figonzal.cl · 2026
 	]]></string>
 	<string name="about_credit_happysanta"><![CDATA[
