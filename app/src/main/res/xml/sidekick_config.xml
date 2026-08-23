@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<deku-config>
+	<!-- TOP_RIGHT (el default) choca con el boton de menu in-game. -->
+	<default-entrypoint-position orientation="portrait" value="MIDDLE_LEFT" />
+</deku-config>

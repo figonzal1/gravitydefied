@@ -20,6 +20,9 @@
 		<property
 				android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
 				android:value="true" />
+		<meta-data
+				android:name="com.google.android.finsky.deku.OVERLAY_CONFIG"
+				android:resource="@xml/sidekick_config" />
 		<activity
 				android:name=".GDActivity"
 				android:label="@string/app_name"
