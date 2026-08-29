@@ -102,6 +102,9 @@ public class Menu
 	private SimpleMenuElementNew highscoreHelpItem;
 	private MenuScreen optionsHelpScreen;
 	private SimpleMenuElementNew optionsHelpItem;
+	private MenuScreen optionsDisplayHelpScreen;
+	private MenuScreen optionsControlsHelpScreen;
+	private MenuScreen optionsClearHelpScreen;
 	private NameInputMenuScreen nameScreen;
 	private ActionMenuElement continueAction;
 	// private ActionMenuElement goToMainAction;
@@ -466,9 +469,26 @@ public class Menu
 				highscoreHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				optionsHelpScreen = new MenuScreen(getString(R.string.options), helpMenu);
-				optionsHelpScreen.setIsTextScreen(true);
 				optionsHelpItem = new SimpleMenuElementNew(getString(R.string.options), optionsHelpScreen, this);
-				optionsHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.options_text))));
+
+				optionsDisplayHelpScreen = new MenuScreen(getString(R.string.options_display), optionsHelpScreen);
+				optionsDisplayHelpScreen.setIsTextScreen(true);
+				optionsDisplayHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.options_display_text))));
+				optionsDisplayHelpScreen.addItem(createAction(ActionMenuElement.BACK));
+
+				optionsControlsHelpScreen = new MenuScreen(getString(R.string.options_controls), optionsHelpScreen);
+				optionsControlsHelpScreen.setIsTextScreen(true);
+				optionsControlsHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.options_controls_text))));
+				optionsControlsHelpScreen.addItem(createAction(ActionMenuElement.BACK));
+
+				optionsClearHelpScreen = new MenuScreen(getString(R.string.clear_highscore), optionsHelpScreen);
+				optionsClearHelpScreen.setIsTextScreen(true);
+				optionsClearHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.clear_highscore_text))));
+				optionsClearHelpScreen.addItem(createAction(ActionMenuElement.BACK));
+
+				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.options_display), optionsDisplayHelpScreen, this));
+				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.options_controls), optionsControlsHelpScreen, this));
+				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.clear_highscore), optionsClearHelpScreen, this));
 				optionsHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				helpMenu.addItem(objectiveHelpItem);

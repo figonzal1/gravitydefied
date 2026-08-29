@@ -84,7 +84,7 @@
 	<string name="highscore_text">The three best times on every track are saved for each league. When beating a time on a track you will be asked to enter your name. The highscores can be viewed from the Play Menu. By pressing left and right in the highscore view you can view the highscore for a specific league. The highscore can be cleared from the options menu.</string>
 	<string name="no_highscores">No Highscores</string>
 
-	<string name="options_text"><![CDATA[
+	<string name="options_display_text"><![CDATA[
 		<b>Perspective: On/Off</b><br/>
 		Default: &lt;On&gt;<br/>
 		Turns on and off the perspective view of the tracks.<br/><br/>
@@ -95,23 +95,25 @@
 
 		<b>Driver Sprite: On / Off</b><br/>
 		Default: &lt;On&gt;<br/>
-		&lt;On&gt; uses a texture for the driver. &lt;.Off&gt; uses line graphics.<br/><br/>
+		&lt;On&gt; uses a texture for the driver. &lt;Off&gt; uses line graphics.<br/><br/>
 
 		<b>Bike Sprite: On / Off</b><br/>
 		Default: &lt;On&gt;<br/>
 		&lt;On&gt; uses a texture for the bike. &lt;Off&gt; uses line graphics.<br/><br/>
 
-		<b>Input: Keyset 1,2,3</b><br/>
-		Default: &lt;1&gt;<br/>
-		Determines which type of input should be used when playing. See "Keys" in the help menu for more info.<br/><br/>
-
 		<b>Look ahead: On/Off</b><br/>
 		Default: &lt;On&gt;<br/>
 		Turns on and off smart camera movement.<br/><br/>
 
-		<b>Vibrate on touch: On/Off</b><br/>
-		Default: &lt;On&gt;<br/>
-		Enables haptic feedback when you press control keys.<br/><br/>
+		<b>Night mode: On/Off</b><br/>
+		Default: &lt;Off&gt;<br/>
+		Darkens the menus and the in-game view for low-light play.
+	]]></string>
+
+	<string name="options_controls_text"><![CDATA[
+		<b>Input: Keyset 1,2,3</b><br/>
+		Default: &lt;1&gt;<br/>
+		Determines which type of input should be used when playing. See "Keys" in the help menu for more info.<br/><br/>
 
 		<b>Keyboard size: 50%-200%</b><br/>
 		Default: &lt;100%&gt;<br/>
@@ -121,6 +123,12 @@
 		Default: &lt;On&gt;<br/>
 		Turns on and off keyboard in menu.<br/><br/>
 
+		<b>Vibrate on touch: On/Off</b><br/>
+		Default: &lt;On&gt;<br/>
+		Enables haptic feedback when you press control keys.
+	]]></string>
+
+	<string name="clear_highscore_text"><![CDATA[
 		<b>Clear highscore</b><br/>
 		Lets you clear the highscores. Here you can also do a "Full Reset" which will reset the game to original state (clear settings, highscores, unlocked levels and leagues).
 	]]></string>
