@@ -27,7 +27,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -52,16 +51,15 @@ public class LevelsManager {
 	public LevelsManager() {
 		GDActivity gd = getGDActivity();
 		dataSource = new LevelsDataSource(gd);
+		dataSource.open(); // a corrupted/unopenable DB throws SQLiteException; let it propagate to the caller
 
 		try {
-			dataSource.open();
-
 			if (!dataSource.isDefaultLevelCreated()) {
-				Level level = dataSource.createLevel("GDTR original", "Codebrew Software", 10, 10, 10, 0, 0, true, 1);
+				Level level = createDefaultLevel();
 				logDebug("LevelsManager: Default level created!");
 				logDebug(level);
 			}
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			logDebug("LevelsManager: db feels bad :(");
 			// return;
@@ -92,12 +90,22 @@ public class LevelsManager {
 		long id = Settings.getLevelId();
 		currentLevel = dataSource.getLevel(id);
 
-		if (currentLevel == null) {
+		if (currentLevel == null && id != 1) {
 			logDebug("LevelsManager: failed to load currentLevel; currentId = " + id);
-		} else {
-			logDebug("LevelsManager: level = " + currentLevel);
+			resetId();
+			currentLevel = dataSource.getLevel(1);
 		}
 
+		if (currentLevel == null) { // default row missing too: recreate it
+			currentLevel = createDefaultLevel();
+			setCurrentId(currentLevel.getId());
+		}
+
+		logDebug("LevelsManager: level = " + currentLevel);
+	}
+
+	private Level createDefaultLevel() {
+		return dataSource.createLevel("GDTR original", "Codebrew Software", 10, 10, 10, 0, 0, true, 1);
 	}
 
 	public void closeDataSource() {
@@ -105,7 +113,7 @@ public class LevelsManager {
 	}
 
 	public long getCurrentId() {
-		return currentLevel.getId();
+		return currentLevel != null ? currentLevel.getId() : 1;
 	}
 
 	public void setCurrentId(long id) {
@@ -122,7 +130,7 @@ public class LevelsManager {
 	}
 
 	public File getCurrentLevelsFile() {
-		if (currentLevel.getId() > 1)
+		if (currentLevel != null && currentLevel.getId() > 1)
 			return getMrgFileById(currentLevel.getId());
 
 		return null;

@@ -29,6 +29,7 @@ import cl.figonzal.gravitydefied.Menu.Views.MenuLinearLayout;
 import cl.figonzal.gravitydefied.Menu.Views.MenuTextView;
 import cl.figonzal.gravitydefied.Menu.Views.MenuTitleLinearLayout;
 import cl.figonzal.gravitydefied.Menu.Views.ObservableScrollView;
+import cl.figonzal.gravitydefied.Storage.LevelsDataSource;
 import cl.figonzal.gravitydefied.Storage.LevelsManager;
 import cl.figonzal.gravitydefied.Settings;
 import org.json.JSONObject;
@@ -409,10 +410,17 @@ public class GDActivity extends Activity implements Runnable {
 
 				MenuHelmetView.clearStaticFields();
 
-				levelsManager = new LevelsManager();
+				try {
+					levelsManager = new LevelsManager();
+				} catch (android.database.SQLException e) {
+					e.printStackTrace();
+					showDatabaseCorruptedDialog();
+					return; // init aborted; user decides via the dialog
+				}
+
 				try {
 					levelLoader = new Loader(levelsManager.getCurrentLevelsFile());
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 					// logDebug("Reset level id now");
 					levelsManager.resetId();
@@ -499,7 +507,7 @@ public class GDActivity extends Activity implements Runnable {
 					Helpers.logDebug("run(): init aborted, this activity was replaced");
 					return;
 				}
-				throw new RuntimeException(_ex);
+				throw new RuntimeException("init failed: " + _ex, _ex);
 			}
 		}
 
@@ -1092,6 +1100,31 @@ public class GDActivity extends Activity implements Runnable {
 			destroyApp(true);
 			restartingStarted = true;
 		}
+	}
+
+	// @UiThread
+	private void showDatabaseCorruptedDialog() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Helpers.showConfirm(
+						getString(R.string.e_database_damaged_title),
+						getString(R.string.e_database_damaged_message),
+						new Runnable() { // OK: delete the db and restart
+							@Override
+							public void run() {
+								LevelsDataSource.deleteDatabase(GDActivity.this);
+								restartApp();
+							}
+						},
+						new Runnable() { // Cancel: close
+							@Override
+							public void run() {
+								finish();
+							}
+						});
+			}
+		});
 	}
 
 	private void doRestartApp() {
