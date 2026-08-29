@@ -95,6 +95,7 @@ public class GDActivity extends Activity implements Runnable {
 	private MenuLinearLayout keyboardLayout;
 	private MenuTextView portedTextView;
 	private int buttonHeight = 60;
+	private int baseButtonHeight = 60;
 	public LevelsManager levelsManager;
 
 	// android.window.OnBackInvokedCallback when registered on API 33+, null otherwise.
@@ -175,10 +176,11 @@ public class GDActivity extends Activity implements Runnable {
 					R.drawable.btn_r, R.drawable.btn_r, R.drawable.btn_n
 			};
 			if (getString(R.string.screen_type).equals("tablet")) {
-				buttonHeight = 85;
+				baseButtonHeight = 85;
 			} else if (getResources().getDisplayMetrics().density < 1.5) {
-				buttonHeight = 55;
+				baseButtonHeight = 55;
 			}
+			buttonHeight = scaledButtonHeight();
 
 			keyboardLayout = new MenuLinearLayout(this, true);
 			keyboardLayout.setOrientation(LinearLayout.VERTICAL);
@@ -896,6 +898,44 @@ public class GDActivity extends Activity implements Runnable {
 
 	public int getButtonsLayoutHeight() {
 		return buttonHeight * 3 + KeyboardController.PADDING * 2;
+	}
+
+	// Device-only variant (ignores the user's keyboard-size preference) so the in-game
+	// camera offset doesn't shift when the user changes Options > Keyboard size.
+	public int getButtonsLayoutHeightBase() {
+		return baseButtonHeight * 3 + KeyboardController.PADDING * 2;
+	}
+
+	private int scaledButtonHeight() {
+		return baseButtonHeight * Settings.getKeyboardScale() / 100;
+	}
+
+	// @UiThread
+	// updateMenuMargin: false while the user is still dragging the slider — the pad rescales
+	// live for preview, but the scrollView's bottom margin (and thus its content) only jumps
+	// to match once the drag ends, so the slider itself doesn't move under the finger.
+	public void applyKeyboardSize(final boolean updateMenuMargin) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (!Helpers.isActivityAlive()) return;
+
+				buttonHeight = scaledButtonHeight();
+
+				for (int i = 0; i < keyboardLayout.getChildCount(); i++) {
+					LinearLayout row = (LinearLayout) keyboardLayout.getChildAt(i);
+					for (int j = 0; j < row.getChildCount(); j++) {
+						View btn = row.getChildAt(j);
+						ViewGroup.LayoutParams params = btn.getLayoutParams();
+						params.height = Helpers.getDp(buttonHeight);
+						btn.setLayoutParams(params);
+					}
+				}
+
+				if (updateMenuMargin && keyboardLayout.getVisibility() == android.view.View.VISIBLE)
+					showKeyboardLayout();
+			}
+		});
 	}
 
 	// @UiThread

@@ -415,7 +415,7 @@ public class GameView extends View {
 	}
 
 	private float offsetY(float j) {
-		return -j + m_BI - getGDActivity().getButtonsLayoutHeight() / 2;
+		return -j + m_BI - getGDActivity().getButtonsLayoutHeightBase() / 2;
 	}
 
 	public void _newvV() {
