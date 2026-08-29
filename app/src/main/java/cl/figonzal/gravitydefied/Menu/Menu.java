@@ -55,6 +55,10 @@ public class Menu
 	private MenuScreen mainMenu;
 	private MenuScreen playMenu;
 	private MenuScreen optionsMenu;
+	private MenuScreen displayOptionsMenu;
+	private MenuScreen controlsOptionsMenu;
+	private SimpleMenuElementNew displayOptionsItem;
+	private SimpleMenuElementNew controlsOptionsItem;
 	private MenuScreen aboutScreen;
 	private MenuScreen helpMenu;
 	private MenuScreen eraseScreen;
@@ -79,6 +83,7 @@ public class Menu
 	private OptionsMenuElement bikeSpriteOptionItem;
 	private OptionsMenuElement inputOptionItem;
 	private OptionsMenuElement lookAheadOptionItem;
+	private SliderMenuElement keyboardSizeSlider;
 	private OptionsMenuElement keyboardInMenuOptionItem;
 	private OptionsMenuElement vibrateOnTouchOptionItem;
 	private OptionsMenuElement nightModeOptionItem;
@@ -332,6 +337,8 @@ public class Menu
 				playMenu = new MenuScreen(getString(R.string.play), mainMenu);
 				managerScreen = new MenuScreen(getString(R.string.mods), mainMenu);
 				optionsMenu = new MenuScreen(getString(R.string.options), mainMenu);
+				displayOptionsMenu = new MenuScreen(getString(R.string.options_display), optionsMenu);
+				controlsOptionsMenu = new MenuScreen(getString(R.string.options_controls), optionsMenu);
 				aboutScreen = new MenuScreen(getString(R.string.about) + " v" + getAppVersion(), mainMenu);
 				helpMenu = new MenuScreen(getString(R.string.help), mainMenu);
 
@@ -354,6 +361,8 @@ public class Menu
 				gameMenuItem = new SimpleMenuElementNew(getString(R.string.play_menu), playMenu, this);
 				managerMenuItem = new SimpleMenuElementNew(getString(R.string.mods), managerScreen, this);
 				aboutMenuItem = new SimpleMenuElementNew(getString(R.string.about), aboutScreen, this);
+				displayOptionsItem = new SimpleMenuElementNew(getString(R.string.options_display), displayOptionsMenu, this);
+				controlsOptionsItem = new SimpleMenuElementNew(getString(R.string.options_controls), controlsOptionsMenu, this);
 
 				mainMenu.addItem(gameMenuItem);
 				//if (ENABLE_MANAGER)
@@ -384,30 +393,38 @@ public class Menu
 				playMenu.addItem(createAction(ActionMenuElement.GO_TO_MAIN));
 				// if (hasPointer)
 				// 	softwareJoystickOptionItem = new ActionMenuElement("Software Joystick", m_aTB, this, onOffStrings, true, activity, optionsMenu, false);
-				perspectiveOptionItem = new OptionsMenuElement(getString(R.string.perspective), Settings.isPerspectiveEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				shadowsOptionItem = new OptionsMenuElement(getString(R.string.shadows), Settings.isShadowsEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				driverSpriteOptionItem = new OptionsMenuElement(getString(R.string.driver_sprite), Settings.isDriverSpriteEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				bikeSpriteOptionItem = new OptionsMenuElement(getString(R.string.bike_sprite), Settings.isBikeSpriteEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				inputOptionItem = new OptionsMenuElement(getString(R.string.input), Settings.getInputOption(), this, keysetStrings, false, optionsMenu);
-				lookAheadOptionItem = new OptionsMenuElement(getString(R.string.look_ahead), Settings.isLookAheadEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				nightModeOptionItem = new OptionsMenuElement(getString(R.string.night_mode), Settings.isNightModeEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
+				perspectiveOptionItem = new OptionsMenuElement(getString(R.string.perspective), Settings.isPerspectiveEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				shadowsOptionItem = new OptionsMenuElement(getString(R.string.shadows), Settings.isShadowsEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				driverSpriteOptionItem = new OptionsMenuElement(getString(R.string.driver_sprite), Settings.isDriverSpriteEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				bikeSpriteOptionItem = new OptionsMenuElement(getString(R.string.bike_sprite), Settings.isBikeSpriteEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				lookAheadOptionItem = new OptionsMenuElement(getString(R.string.look_ahead), Settings.isLookAheadEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				nightModeOptionItem = new OptionsMenuElement(getString(R.string.night_mode), Settings.isNightModeEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				inputOptionItem = new OptionsMenuElement(getString(R.string.input), Settings.getInputOption(), this, keysetStrings, false, controlsOptionsMenu);
+				keyboardSizeSlider = new SliderMenuElement(getString(R.string.keyboard_size), Settings.getKeyboardScale(), Settings.KEYBOARD_SCALE_MIN, Settings.KEYBOARD_SCALE_MAX, 5, this);
+				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
+				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
 				clearHighscoreOptionItem = new SimpleMenuElementNew(getString(R.string.clear_highscore), eraseScreen, this);
 
 				// if (hasPointer)
 				//	optionsMenu.addItem(softwareJoystickOptionItem);
-				optionsMenu.addItem(perspectiveOptionItem);
-				optionsMenu.addItem(shadowsOptionItem);
-				optionsMenu.addItem(driverSpriteOptionItem);
-				optionsMenu.addItem(bikeSpriteOptionItem);
-				optionsMenu.addItem(inputOptionItem);
-				optionsMenu.addItem(lookAheadOptionItem);
-				optionsMenu.addItem(vibrateOnTouchOptionItem);
-				optionsMenu.addItem(keyboardInMenuOptionItem);
-				optionsMenu.addItem(nightModeOptionItem);
+				optionsMenu.addItem(displayOptionsItem);
+				optionsMenu.addItem(controlsOptionsItem);
 				optionsMenu.addItem(clearHighscoreOptionItem);
 				optionsMenu.addItem(createAction(ActionMenuElement.BACK));
+
+				displayOptionsMenu.addItem(perspectiveOptionItem);
+				displayOptionsMenu.addItem(shadowsOptionItem);
+				displayOptionsMenu.addItem(driverSpriteOptionItem);
+				displayOptionsMenu.addItem(bikeSpriteOptionItem);
+				displayOptionsMenu.addItem(lookAheadOptionItem);
+				displayOptionsMenu.addItem(nightModeOptionItem);
+				displayOptionsMenu.addItem(createAction(ActionMenuElement.BACK));
+
+				controlsOptionsMenu.addItem(inputOptionItem);
+				controlsOptionsMenu.addItem(keyboardSizeSlider);
+				controlsOptionsMenu.addItem(keyboardInMenuOptionItem);
+				controlsOptionsMenu.addItem(vibrateOnTouchOptionItem);
+				controlsOptionsMenu.addItem(createAction(ActionMenuElement.BACK));
 
 				// noAction = new ActionMenuElement(getString(R.string.no), 0, this, null, false, mainMenu, true);
 				// yesAction = new ActionMenuElement(getString(R.string.yes), 0, this, null, false, mainMenu, true);
@@ -1131,6 +1148,11 @@ public class Menu
 				return;
 			}
 
+		if (item == keyboardSizeSlider) {
+			Settings.setKeyboardScale(keyboardSizeSlider.getValue());
+			gd.applyKeyboardSize(!keyboardSizeSlider.isDragging());
+			return;
+		}
 		if (item == vibrateOnTouchOptionItem) {
 			Settings.setVibrateOnTouchEnabled(((OptionsMenuElement) item).getSelectedOption() == 0);
 		}

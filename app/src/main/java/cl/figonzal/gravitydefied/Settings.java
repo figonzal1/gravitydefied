@@ -26,6 +26,11 @@ public class Settings {
 	private static final String INPUT_OPTION = "input_option";
 	private static final int INPUT_OPTION_DEFAULT = 0;
 
+	private static final String KEYBOARD_SCALE = "keyboard_scale";
+	private static final int KEYBOARD_SCALE_DEFAULT = 100;
+	public static final int KEYBOARD_SCALE_MIN = 50;
+	public static final int KEYBOARD_SCALE_MAX = 200;
+
 	private static final String LOOK_AHEAD_ENABLED = "look_ahead_enabled";
 	private static final boolean LOOK_AHEAD_ENABLED_DEFAULT = true;
 
@@ -60,6 +65,7 @@ public class Settings {
 		setVibrateOnTouchEnabled(VIBRATE_ENABLED_DEFAULT);
 		setKeyboardInMenuEnabled(KEYBOARD_IN_MENU_ENABLED_DEFAULT);
 		setInputOption(INPUT_OPTION_DEFAULT);
+		setKeyboardScale(KEYBOARD_SCALE_DEFAULT);
 		setLevelsSort(LEVELS_SORT_DEFAULT);
 		setName(NAME_CHARS_DEFALUT);
 		setNightModeEnabled(NIGHT_MODE_ENABLED_DEFAULT);
@@ -135,6 +141,17 @@ public class Settings {
 
 	public static void setInputOption(int value) {
 		setInt(INPUT_OPTION, value);
+	}
+
+	public static int getKeyboardScale() {
+		int value = preferences.getInt(KEYBOARD_SCALE, KEYBOARD_SCALE_DEFAULT);
+		if (value < KEYBOARD_SCALE_MIN) return KEYBOARD_SCALE_MIN;
+		if (value > KEYBOARD_SCALE_MAX) return KEYBOARD_SCALE_MAX;
+		return value;
+	}
+
+	public static void setKeyboardScale(int value) {
+		setInt(KEYBOARD_SCALE, value);
 	}
 
 	public static API.LevelsSortType getLevelsSort() {
