@@ -50,6 +50,9 @@ public class Settings {
 	private static final String NIGHT_MODE_ENABLED = "night_mode";
 	private static final boolean NIGHT_MODE_ENABLED_DEFAULT = false;
 
+	private static final String LAST_SEEN_VERSION = "last_seen_version";
+	private static final String LAST_SEEN_VERSION_DEFAULT = "";
+
 	private static SharedPreferences preferences;
 
 	static {
@@ -196,6 +199,14 @@ public class Settings {
 
 	public static void setNightModeEnabled(boolean enabled) {
 		setBoolean(NIGHT_MODE_ENABLED, enabled);
+	}
+
+	public static String getLastSeenVersion() {
+		return preferences.getString(LAST_SEEN_VERSION, LAST_SEEN_VERSION_DEFAULT);
+	}
+
+	public static void setLastSeenVersion(String version) {
+		setString(LAST_SEEN_VERSION, version);
 	}
 
 	private static void setLong(String key, long value) {

@@ -92,6 +92,9 @@ public class Menu
 	// private ActionMenuElement yesAction;
 	// private ActionMenuElement noAction;
 	private SimpleMenuElementNew aboutMenuItem;
+	private MenuScreen whatsNewScreen;
+	private SimpleMenuElementNew whatsNewItem;
+	private ActionMenuElement whatsNewReplayItem;
 	private MenuScreen objectiveHelpScreen;
 	private SimpleMenuElementNew objectiveHelpItem;
 	private MenuScreen keysHelpScreen;
@@ -126,6 +129,7 @@ public class Menu
 	private int track = 0;
 	private boolean leagueCompleted = false;
 	private boolean m_SZ = false;
+	private boolean pendingWhatsNew = false;
 	private Object m_BObject;
 	private String[] difficultyLevels = null; /* {
 			"Easy", "Medium", "Hard"
@@ -444,6 +448,22 @@ public class Menu
 				resetScreen.addItem(createAction(ActionMenuElement.NO));
 				resetScreen.addItem(createAction(ActionMenuElement.YES));
 
+				whatsNewScreen = new MenuScreen(getString(R.string.whats_new) + " v" + getAppVersion(), helpMenu);
+				whatsNewScreen.setIsTextScreen(true);
+				whatsNewItem = new SimpleMenuElementNew(getString(R.string.whats_new), whatsNewScreen, this);
+				whatsNewScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.whats_new_text))));
+				if (isDebugBuild()) {
+					whatsNewReplayItem = new ActionMenuElement(getString(R.string.whats_new_replay), 0, this);
+					whatsNewScreen.addItem(whatsNewReplayItem);
+				}
+				// "Ok" label, BACK action: reads better than "Back" for a one-way announcement
+				// screen, but keeps BACK's actual navigation (ActionMenuElement.OK is hard-wired
+				// to saveCompletedTrack() for the finished-race screen — wrong handler here)
+				whatsNewScreen.addItem(new ActionMenuElement(getString(R.string.ok), ActionMenuElement.BACK, this));
+				// default the highlight to Ok, not the debug replay row: the first FIRE press
+				// should dismiss the screen, not restart the app
+				whatsNewScreen.setSelected(whatsNewScreen.menuItems.size() - 1);
+
 				objectiveHelpScreen = new MenuScreen(getString(R.string.objective), helpMenu);
 				objectiveHelpScreen.setIsTextScreen(true);
 				objectiveHelpItem = new SimpleMenuElementNew(getString(R.string.objective), objectiveHelpScreen, this);
@@ -491,6 +511,7 @@ public class Menu
 				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.clear_highscore), optionsClearHelpScreen, this));
 				optionsHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
+				helpMenu.addItem(whatsNewItem);
 				helpMenu.addItem(objectiveHelpItem);
 				helpMenu.addItem(keysHelpItem);
 				helpMenu.addItem(unlockingHelpItem);
@@ -804,6 +825,10 @@ public class Menu
 		return getGDView().getScaledWidth();
 	} */
 
+	public void setPendingWhatsNew(boolean pending) {
+		pendingWhatsNew = pending;
+	}
+
 	public void showMenu(int k) {
 		logDebug("[Menu] showMenu()");
 		// k = 2;
@@ -817,7 +842,13 @@ public class Menu
 		menuDisabled = false;
 		switch (k) {
 			case 0: // Just started
-				setCurrentMenu(mainMenu, false);
+				if (pendingWhatsNew) {
+					pendingWhatsNew = false;
+					whatsNewScreen.setNavTarget(mainMenu); // Back → Main on this one launch
+					setCurrentMenu(whatsNewScreen, false);
+				} else {
+					setCurrentMenu(mainMenu, false);
+				}
 				gd.physEngine._casevV();
 				m_SZ = true;
 				break;
@@ -1063,6 +1094,8 @@ public class Menu
 			}
 			trackSelector.setUnlockedCount(level.getUnlocked(levelSelector.getSelectedOption()));
 			trackSelector.setSelectedOption(selectedTrack[levelSelector.getSelectedOption()]);
+		} else if (newMenu == whatsNewScreen) {
+			Settings.setLastSeenVersion(getAppVersion()); // read: don't auto-open again next launch
 		}
 		if ((newMenu == mainMenu || newMenu == playMenu) && gd.physEngine != null)
 			gd.physEngine._casevV();
@@ -1187,6 +1220,11 @@ public class Menu
 		}
 		if (item == nightModeOptionItem) {
 			Settings.setNightModeEnabled(nightModeOptionItem.getSelectedOption() == 0);
+			gd.restartApp();
+			return;
+		}
+		if (item == whatsNewReplayItem) {
+			Settings.setLastSeenVersion("0"); // non-empty and != current, so the next launch replays it
 			gd.restartApp();
 			return;
 		}

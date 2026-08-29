@@ -518,6 +518,8 @@ public class GDActivity extends Activity implements Runnable {
 		restart(false);
 		// logDebug("showMenu() now");
 
+		maybeShowWhatsNew();
+
 		/*if (menu != null) */
 		menu.showMenu(0);
 		if (/*menu != null && */menu.canStartTrack())
@@ -1165,6 +1167,19 @@ public class GDActivity extends Activity implements Runnable {
 						});
 			}
 		});
+	}
+
+	private void maybeShowWhatsNew() {
+		String current = Helpers.getAppVersion();
+		String seen = Settings.getLastSeenVersion();
+		if (seen.equals(current)) return;
+
+		// fresh install, or a release not worth interrupting for: record it and stay quiet
+		if (seen.length() == 0 || !getResources().getBoolean(R.bool.whats_new_announce)) {
+			Settings.setLastSeenVersion(current);
+			return;
+		}
+		menu.setPendingWhatsNew(true);
 	}
 
 	private void doRestartApp() {

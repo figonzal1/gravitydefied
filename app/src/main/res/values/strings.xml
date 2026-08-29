@@ -16,6 +16,7 @@
 	<string name="options">Options</string>
 	<string name="help">Help</string>
 	<string name="about">About</string>
+	<string name="whats_new">What\'s New</string>
 
 	<string name="play">Play</string>
 	<string name="start">Start</string>
@@ -132,6 +133,18 @@
 		<b>Clear highscore</b><br/>
 		Lets you clear the highscores. Here you can also do a "Full Reset" which will reset the game to original state (clear settings, highscores, unlocked levels and leagues).
 	]]></string>
+
+	<!-- What's New — mirror of fastlane/metadata/android/en-US/changelogs/default.txt -->
+	<string name="whats_new_text"><![CDATA[
+		&#8226; Your progress is now restored automatically: unlocked leagues no longer show as locked<br/>
+		&#8226; Fixed unexpected crashes when switching screens or returning to the game<br/>
+		&#8226; Stability improvements across different Android devices
+	]]></string>
+	<!-- Announce this release on first launch after updating? Set it to false for pure fix /
+	     stability releases: the text above still updates and stays readable under Help, but the
+	     game won't interrupt the player with it. -->
+	<bool name="whats_new_announce">true</bool>
+	<string name="whats_new_replay">Replay on next launch</string>
 
 	<!-- About screen credits — one string per entry, chronological order newest first -->
 	<string name="about_credit_figonzal"><![CDATA[
