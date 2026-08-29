@@ -809,6 +809,7 @@ public class Menu
 		// k = 2;
 
 		GDActivity gd = getGDActivity();
+		if (gd == null || gd.menu != this) return; // orphaned: another activity owns the game now
 		GameView view = getGDView();
 		Loader loader = getLevelLoader();
 
@@ -877,6 +878,8 @@ public class Menu
 		gd.gameToMenu();
 
 		do {
+			if (getGDActivity() != gd) return; // activity was replaced mid-loop; don't touch the new one
+
 			if (!gd.isMenuShown() || !gd.alive || currentMenu == null)
 				break;
 
@@ -1061,7 +1064,7 @@ public class Menu
 			trackSelector.setUnlockedCount(level.getUnlocked(levelSelector.getSelectedOption()));
 			trackSelector.setSelectedOption(selectedTrack[levelSelector.getSelectedOption()]);
 		}
-		if (newMenu == mainMenu || newMenu == playMenu && gd.physEngine != null)
+		if ((newMenu == mainMenu || newMenu == playMenu) && gd.physEngine != null)
 			gd.physEngine._casevV();
 
 		if (currentMenu != null)

@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class LevelsSQLiteOpenHelper extends SQLiteOpenHelper {
 
 	private static final int DATABASE_VERSION = 1;
-	private static final String DATABASE_NAME = "levels.db";
+	static final String DATABASE_NAME = "levels.db";
 
 	public static final String TABLE_LEVELS = "levels";
 	public static final String TABLE_HIGHSCORES = "highscores";

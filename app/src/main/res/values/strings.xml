@@ -246,5 +246,7 @@
 	<string name="e_cannot_save_level">Cannot save level into database</string>
 	<string name="e_no_network_connection">No network connection.</string>
 	<string name="e_level_damaged">Looks like this level is damaged.\nYou can skip it and unlock next level.</string>
+	<string name="e_database_damaged_title">Damaged data</string>
+	<string name="e_database_damaged_message">The levels and high scores database is damaged and cannot be opened. Delete it and restart the game? Your high scores will be lost; installed level packs will stay on disk.</string>
 
 </resources>
