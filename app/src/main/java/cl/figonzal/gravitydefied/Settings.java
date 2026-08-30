@@ -31,6 +31,16 @@ public class Settings {
 	public static final int KEYBOARD_SCALE_MIN = 50;
 	public static final int KEYBOARD_SCALE_MAX = 200;
 
+	private static final String CONTROL_SCHEME = "control_scheme";
+	public static final int CONTROL_SCHEME_KEYPAD = 0;
+	public static final int CONTROL_SCHEME_GAMEPAD = 1;
+	private static final int CONTROL_SCHEME_DEFAULT = CONTROL_SCHEME_KEYPAD;
+
+	private static final String BUTTON_LAYOUT = "button_layout";
+	public static final int BUTTON_LAYOUT_ARROWS_LEFT = 0;
+	public static final int BUTTON_LAYOUT_ARROWS_RIGHT = 1;
+	private static final int BUTTON_LAYOUT_DEFAULT = BUTTON_LAYOUT_ARROWS_LEFT;
+
 	private static final String LOOK_AHEAD_ENABLED = "look_ahead_enabled";
 	private static final boolean LOOK_AHEAD_ENABLED_DEFAULT = true;
 
@@ -66,6 +76,8 @@ public class Settings {
 		setKeyboardInMenuEnabled(KEYBOARD_IN_MENU_ENABLED_DEFAULT);
 		setInputOption(INPUT_OPTION_DEFAULT);
 		setKeyboardScale(KEYBOARD_SCALE_DEFAULT);
+		setControlScheme(CONTROL_SCHEME_DEFAULT);
+		setButtonLayout(BUTTON_LAYOUT_DEFAULT);
 		setLevelsSort(LEVELS_SORT_DEFAULT);
 		setName(NAME_CHARS_DEFALUT);
 		setNightModeEnabled(NIGHT_MODE_ENABLED_DEFAULT);
@@ -152,6 +164,22 @@ public class Settings {
 
 	public static void setKeyboardScale(int value) {
 		setInt(KEYBOARD_SCALE, value);
+	}
+
+	public static int getControlScheme() {
+		return preferences.getInt(CONTROL_SCHEME, CONTROL_SCHEME_DEFAULT);
+	}
+
+	public static void setControlScheme(int value) {
+		setInt(CONTROL_SCHEME, value);
+	}
+
+	public static int getButtonLayout() {
+		return preferences.getInt(BUTTON_LAYOUT, BUTTON_LAYOUT_DEFAULT);
+	}
+
+	public static void setButtonLayout(int value) {
+		setInt(BUTTON_LAYOUT, value);
 	}
 
 	public static API.LevelsSortType getLevelsSort() {

@@ -94,6 +94,7 @@ public class GDActivity extends Activity implements Runnable {
 	private boolean menuReady = false;
 	private ArrayList<Command> commands = new ArrayList<Command>();
 	private MenuLinearLayout keyboardLayout;
+	private MenuLinearLayout gamepadLayout;
 	private MenuTextView portedTextView;
 	private int buttonHeight = 60;
 	private int baseButtonHeight = 60;
@@ -171,11 +172,6 @@ public class GDActivity extends Activity implements Runnable {
 			scrollView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
 			// Keyboard
-			int[] buttonResources = {
-					R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
-					R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
-					R.drawable.btn_r, R.drawable.btn_r, R.drawable.btn_n
-			};
 			if (getString(R.string.screen_type).equals("tablet")) {
 				baseButtonHeight = 85;
 			} else if (getResources().getDisplayMetrics().density < 1.5) {
@@ -183,39 +179,8 @@ public class GDActivity extends Activity implements Runnable {
 			}
 			buttonHeight = scaledButtonHeight();
 
-			keyboardLayout = new MenuLinearLayout(this, true);
-			keyboardLayout.setOrientation(LinearLayout.VERTICAL);
-
-			keyboardController = new KeyboardController(this);
-
-			for (int i = 0; i < 3; i++) {
-				LinearLayout row = new LinearLayout(this);
-				row.setPadding(Helpers.getDp(KeyboardController.PADDING), i == 0 ? Helpers.getDp(KeyboardController.PADDING) : 0, Helpers.getDp(KeyboardController.PADDING), 0);
-				row.setOrientation(LinearLayout.HORIZONTAL);
-				row.setBackgroundColor(getResources().getColor(night ? R.color.keyboard_background_night : R.color.keyboard_background));
-				for (int j = 0; j < 3; j++) {
-					LinearLayout btn = new LinearLayout(this);
-					TextView btnText = new TextView(this);
-					btnText.setText(String.valueOf(i * 3 + j + 1));
-					btnText.setTextColor(getResources().getColor(night ? R.color.keyboard_button_text_night : R.color.keyboard_button_text));
-					btnText.setTextSize(17);
-					btn.setBackgroundResource(buttonResources[i * 3 + j]);
-					btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-					btn.setGravity(Gravity.CENTER);
-					btn.setWeightSum(1);
-
-					row.addView(btn, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, Helpers.getDp(buttonHeight), 1));
-
-					keyboardController.addButton(btn, j, i);
-				}
-
-				keyboardLayout.addView(row);
-			}
-
-			keyboardLayout.setGravity(Gravity.BOTTOM);
-			keyboardLayout.setPadding(0, 0, 0, Helpers.getDp(KeyboardController.PADDING));
-			keyboardLayout.setOnTouchListener(keyboardController);
-			keyboardLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+			keyboardLayout = buildKeypadLayout(night);
+			gamepadLayout = buildGamepadLayout(night);
 
 			hideKeyboardLayout();
 
@@ -251,6 +216,7 @@ public class GDActivity extends Activity implements Runnable {
 
 			frame.addView(menuLayout);
 			frame.addView(keyboardLayout);
+			frame.addView(gamepadLayout);
 			frame.addView(menuBtn);
 			frame.addView(portedTextView);
 
@@ -918,6 +884,101 @@ public class GDActivity extends Activity implements Runnable {
 		return baseButtonHeight * Settings.getKeyboardScale() / 100;
 	}
 
+	private MenuLinearLayout buildKeypadLayout(boolean night) {
+		int[] buttonResources = {
+				R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
+				R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
+				R.drawable.btn_r, R.drawable.btn_r, R.drawable.btn_n
+		};
+
+		MenuLinearLayout layout = new MenuLinearLayout(this, true);
+		layout.setOrientation(LinearLayout.VERTICAL);
+
+		keyboardController = new KeyboardController(this);
+
+		for (int i = 0; i < 3; i++) {
+			LinearLayout row = new LinearLayout(this);
+			row.setPadding(Helpers.getDp(KeyboardController.PADDING), i == 0 ? Helpers.getDp(KeyboardController.PADDING) : 0, Helpers.getDp(KeyboardController.PADDING), 0);
+			row.setOrientation(LinearLayout.HORIZONTAL);
+			row.setBackgroundColor(getResources().getColor(night ? R.color.keyboard_background_night : R.color.keyboard_background));
+			for (int j = 0; j < 3; j++) {
+				LinearLayout btn = new LinearLayout(this);
+				TextView btnText = new TextView(this);
+				btnText.setText(String.valueOf(i * 3 + j + 1));
+				btnText.setTextColor(getResources().getColor(night ? R.color.keyboard_button_text_night : R.color.keyboard_button_text));
+				btnText.setTextSize(17);
+				btn.setBackgroundResource(buttonResources[i * 3 + j]);
+				btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+				btn.setGravity(Gravity.CENTER);
+				btn.setWeightSum(1);
+
+				row.addView(btn, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, Helpers.getDp(buttonHeight), 1));
+
+				keyboardController.addButton(btn, j, i);
+			}
+
+			layout.addView(row);
+		}
+
+		layout.setGravity(Gravity.BOTTOM);
+		layout.setPadding(0, 0, 0, Helpers.getDp(KeyboardController.PADDING));
+		layout.setOnTouchListener(keyboardController);
+		layout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+
+		return layout;
+	}
+
+	// Button control scheme: lean left/right and gas/brake pedals — identical bar in menus and
+	// in-game. Emits the same ASCII key codes as keypad cells '2'/'4'/'6'/'8' (Keyset 1's
+	// accelerate/lean/brake mapping and the menu's UP/LEFT/RIGHT/DOWN), so it needs no changes
+	// below GameView.keyPressed/keyReleased. No OK button: tapping a menu row already fires
+	// KEY_FIRE (ClickableMenuElement), and NameInputMenuScreen is confirmed via the back button.
+	private MenuLinearLayout buildGamepadLayout(boolean night) {
+		MenuLinearLayout layout = new MenuLinearLayout(this, false);
+		layout.setOrientation(LinearLayout.HORIZONTAL);
+
+		fillGamepadLayout(layout, night);
+
+		layout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+
+		return layout;
+	}
+
+	// Settings.getButtonLayout() decides which side gets the arrows vs. the pedals; called again
+	// (after removeAllViews) whenever that preference changes, so the bar updates immediately.
+	private void fillGamepadLayout(MenuLinearLayout layout, boolean night) {
+		int rowsHeightDp = Helpers.getDp(buttonHeight * 3);
+		int pad = Helpers.getDp(KeyboardController.PADDING);
+		layout.setPadding(pad, pad, pad, pad);
+
+		View leanBack = buildControlButton(night, R.string.ctrl_nav_left, '4');
+		View leanForward = buildControlButton(night, R.string.ctrl_nav_right, '6');
+
+		LinearLayout pedalContainer = new LinearLayout(this);
+		pedalContainer.setOrientation(LinearLayout.VERTICAL);
+		pedalContainer.addView(buildControlButton(night, R.string.ctrl_gas, '2'), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+		pedalContainer.addView(buildControlButton(night, R.string.ctrl_brake, '8'), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+
+		boolean arrowsRight = Settings.getButtonLayout() == Settings.BUTTON_LAYOUT_ARROWS_RIGHT;
+		if (arrowsRight) layout.addView(pedalContainer, new LinearLayout.LayoutParams(0, rowsHeightDp, 2));
+		layout.addView(leanBack, new LinearLayout.LayoutParams(0, rowsHeightDp, 1.5f));
+		layout.addView(leanForward, new LinearLayout.LayoutParams(0, rowsHeightDp, 1.5f));
+		if (!arrowsRight) layout.addView(pedalContainer, new LinearLayout.LayoutParams(0, rowsHeightDp, 2));
+	}
+
+	private LinearLayout buildControlButton(boolean night, int textRes, int keyCode) {
+		LinearLayout btn = new LinearLayout(this);
+		TextView btnText = new TextView(this);
+		btnText.setText(getString(textRes));
+		btnText.setTextColor(getResources().getColor(night ? R.color.keyboard_button_text_night : R.color.keyboard_button_text));
+		btnText.setTextSize(17);
+		btn.setBackgroundResource(R.drawable.btn_br);
+		btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		btn.setGravity(Gravity.CENTER);
+		btn.setOnTouchListener(new KeyControlListener(this, keyCode));
+		return btn;
+	}
+
 	// @UiThread
 	// updateMenuMargin: false while the user is still dragging the slider — the pad rescales
 	// live for preview, but the scrollView's bottom margin (and thus its content) only jumps
@@ -940,10 +1001,23 @@ public class GDActivity extends Activity implements Runnable {
 					}
 				}
 
-				if (updateMenuMargin && keyboardLayout.getVisibility() == android.view.View.VISIBLE)
+				int rowsHeightDp = Helpers.getDp(buttonHeight * 3);
+				applyBarButtonHeight(gamepadLayout, rowsHeightDp);
+
+				if (updateMenuMargin && (keyboardLayout.getVisibility() == android.view.View.VISIBLE
+						|| gamepadLayout.getVisibility() == android.view.View.VISIBLE))
 					showKeyboardLayout();
 			}
 		});
+	}
+
+	private void applyBarButtonHeight(MenuLinearLayout bar, int heightDp) {
+		for (int i = 0; i < bar.getChildCount(); i++) {
+			View child = bar.getChildAt(i);
+			ViewGroup.LayoutParams params = child.getLayoutParams();
+			params.height = heightDp;
+			child.setLayoutParams(params);
+		}
 	}
 
 	// @UiThread
@@ -952,6 +1026,7 @@ public class GDActivity extends Activity implements Runnable {
 			@Override
 			public void run() {
 				keyboardLayout.setVisibility(android.view.View.GONE);
+				gamepadLayout.setVisibility(android.view.View.GONE);
 
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
 				params.setMargins(0, 0, 0, 0);
@@ -961,15 +1036,47 @@ public class GDActivity extends Activity implements Runnable {
 	}
 
 	// @UiThread
+	// D-pad scheme: same bar (cross + pedals) in menus and in-game — no context switching.
+	// NameInputMenuScreen (letter entry, key-only — see its performAction) works unmodified.
 	public void showKeyboardLayout() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				keyboardLayout.setVisibility(android.view.View.VISIBLE);
+				boolean gamepad = Settings.getControlScheme() == Settings.CONTROL_SCHEME_GAMEPAD;
+
+				keyboardLayout.setVisibility(gamepad ? android.view.View.GONE : android.view.View.VISIBLE);
+				gamepadLayout.setVisibility(gamepad ? android.view.View.VISIBLE : android.view.View.GONE);
 
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
 				params.setMargins(0, 0, 0, Helpers.getDp(getButtonsLayoutHeight()));
 				scrollView.setLayoutParams(params);
+			}
+		});
+	}
+
+	// @UiThread
+	// Button scheme emits Keyset 1's codes, so switching to it forces inputOption to 0 (and back
+	// to the user's keyset otherwise); also clears keys latched by the previous scheme.
+	public void applyControlScheme() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (!Helpers.isActivityAlive()) return;
+
+				boolean isGamepad = Settings.getControlScheme() == Settings.CONTROL_SCHEME_GAMEPAD;
+				gameView.setInputOption(isGamepad ? 0 : Settings.getInputOption());
+				gameView._avV();
+				physEngine._nullvV();
+
+				gamepadLayout.removeAllViews();
+				fillGamepadLayout(gamepadLayout, Settings.isNightModeEnabled());
+
+				// Not reachable before the boot splash finishes (inited==false the first time
+				// Menu.load(3) calls this) — skip so the splash never gets a controls bar.
+				if (!inited) return;
+
+				if (menuShown && !Settings.isKeyboardInMenuEnabled()) hideKeyboardLayout();
+				else showKeyboardLayout();
 			}
 		});
 	}

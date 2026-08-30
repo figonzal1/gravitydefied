@@ -81,6 +81,7 @@ public class Menu
 	private OptionsMenuElement shadowsOptionItem;
 	private OptionsMenuElement driverSpriteOptionItem;
 	private OptionsMenuElement bikeSpriteOptionItem;
+	private OptionsMenuElement controlSchemeItem;
 	private OptionsMenuElement inputOptionItem;
 	private OptionsMenuElement lookAheadOptionItem;
 	private SliderMenuElement keyboardSizeSlider;
@@ -146,6 +147,8 @@ public class Menu
 	// private byte m_arB = 0;
 	private String[] onOffStrings = null;
 	private String[] keysetStrings = null;
+	private String[] controlSchemeStrings = null;
+	private String[] buttonLayoutStrings = null;
 	// private EmptyLineMenuElement emptyLine;
 	// private EmptyLineMenuElement emptyLineBeforeAction;
 	// private AlertDialog alertDialog = null;
@@ -183,6 +186,8 @@ public class Menu
 				};
 				onOffStrings = getStringArray(R.array.on_off);
 				keysetStrings = getStringArray(R.array.keyset);
+				controlSchemeStrings = getStringArray(R.array.control_scheme);
+				buttonLayoutStrings = getStringArray(R.array.button_layout_options);
 				difficultyLevels = getStringArray(R.array.difficulty);
 
 				// saveManager = new SaveManager();
@@ -309,7 +314,7 @@ public class Menu
 				getLevelLoader().setPerspectiveEnabled(Settings.isPerspectiveEnabled());
 				getLevelLoader().setShadowsEnabled(Settings.isShadowsEnabled());
 				activity.physEngine._ifZV(Settings.isLookAheadEnabled());
-				getGDView().setInputOption(Settings.getInputOption());
+				activity.applyControlScheme();
 				// getGDView()._aZV(m_aTB == 0);
 				getGDView()._aZV(true);
 				String[] leaguesList = getStringArray(R.array.leagues);
@@ -402,7 +407,9 @@ public class Menu
 				bikeSpriteOptionItem = new OptionsMenuElement(getString(R.string.bike_sprite), Settings.isBikeSpriteEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
 				lookAheadOptionItem = new OptionsMenuElement(getString(R.string.look_ahead), Settings.isLookAheadEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
 				nightModeOptionItem = new OptionsMenuElement(getString(R.string.night_mode), Settings.isNightModeEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				controlSchemeItem = new OptionsMenuElement(getString(R.string.control_type), Settings.getControlScheme(), this, controlSchemeStrings, false, controlsOptionsMenu);
 				inputOptionItem = new OptionsMenuElement(getString(R.string.input), Settings.getInputOption(), this, keysetStrings, false, controlsOptionsMenu);
+				updateInputOptionItem();
 				keyboardSizeSlider = new SliderMenuElement(getString(R.string.keyboard_size), Settings.getKeyboardScale(), Settings.KEYBOARD_SCALE_MIN, Settings.KEYBOARD_SCALE_MAX, 5, this);
 				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
 				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
@@ -423,6 +430,7 @@ public class Menu
 				displayOptionsMenu.addItem(nightModeOptionItem);
 				displayOptionsMenu.addItem(createAction(ActionMenuElement.BACK));
 
+				controlsOptionsMenu.addItem(controlSchemeItem);
 				controlsOptionsMenu.addItem(inputOptionItem);
 				controlsOptionsMenu.addItem(keyboardSizeSlider);
 				controlsOptionsMenu.addItem(keyboardInMenuOptionItem);
@@ -1151,6 +1159,21 @@ public class Menu
 		}
 	}
 
+	// The "Input" row means different things per control scheme: keysets for the numeric keypad
+	// (nine cells to map), a left/right button layout for the button scheme (only 4 buttons, no
+	// keyset to pick). setUnlockedCount must follow setOptions — OptionsMenuElement.setOptions()
+	// only ever shrinks it, so switching to the shorter array without restoring it would leave a
+	// lock icon on a valid option (e.g. Keyset 3 while set to a 2-item array).
+	private void updateInputOptionItem() {
+		boolean gamepad = Settings.getControlScheme() == Settings.CONTROL_SCHEME_GAMEPAD;
+		String[] options = gamepad ? buttonLayoutStrings : keysetStrings;
+
+		inputOptionItem.setText(getString(gamepad ? R.string.button_layout : R.string.input));
+		inputOptionItem.setOptions(options, true);
+		inputOptionItem.setUnlockedCount(options.length - 1);
+		inputOptionItem.setSelectedOption(gamepad ? Settings.getButtonLayout() : Settings.getInputOption());
+	}
+
 	public void handleAction(MenuElement item) {
 		final GDActivity gd = getGDActivity();
 
@@ -1212,11 +1235,24 @@ public class Menu
 			}
 			Settings.setBikeSpriteEnabled(bikeSpriteOptionItem.getSelectedOption() == 0);
 		} else {
+			if (item == controlSchemeItem) {
+				if (controlSchemeItem._charvZ())
+					controlSchemeItem.setSelectedOption(controlSchemeItem.getSelectedOption() + 1);
+				Settings.setControlScheme(controlSchemeItem.getSelectedOption());
+				updateInputOptionItem();
+				gd.applyControlScheme();
+				return;
+			}
 			if (item == inputOptionItem) {
 				if (inputOptionItem._charvZ())
 					inputOptionItem.setSelectedOption(inputOptionItem.getSelectedOption() + 1);
-				getGDView().setInputOption(inputOptionItem.getSelectedOption());
-				Settings.setInputOption(inputOptionItem.getSelectedOption());
+				if (Settings.getControlScheme() == Settings.CONTROL_SCHEME_GAMEPAD) {
+					Settings.setButtonLayout(inputOptionItem.getSelectedOption());
+					gd.applyControlScheme();
+				} else {
+					getGDView().setInputOption(inputOptionItem.getSelectedOption());
+					Settings.setInputOption(inputOptionItem.getSelectedOption());
+				}
 				return;
 			}
 			if (item == lookAheadOptionItem) {
