@@ -1188,11 +1188,8 @@ public class Menu
 		}
 
 		inputOptionItem.setText(getString(labelRes));
-		// update=false: nothing ever navigates into inputOptionItem's own optionsScreen (unlike
-		// e.g. trackSelector/levelSelector), so rebuilding+highlighting it here was both wasted
-		// work and a bug — MenuHelmetView.lastActive is static (one "active" helmet for the
-		// whole app), so highlighting an item on that invisible, unused screen was stealing the
-		// helmet icon away from whatever row the player was actually looking at.
+		// update=false: nothing navigates into inputOptionItem's own optionsScreen, and
+		// MenuHelmetView.lastActive is static (one "active" helmet for the whole app).
 		inputOptionItem.setOptions(options, false);
 		inputOptionItem.setUnlockedCount(options.length - 1);
 		inputOptionItem.setSelectedOption(selected);

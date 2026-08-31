@@ -95,8 +95,6 @@ public class GDActivity extends Activity implements Runnable {
 	private ArrayList<Command> commands = new ArrayList<Command>();
 	private MenuLinearLayout keyboardLayout;
 	private MenuLinearLayout gamepadLayout;
-	private boolean gamepadPedalsOnly = false;
-	private boolean gamepadInGame = false;
 	private TiltController tiltController;
 	private MenuTextView portedTextView;
 	private int buttonHeight = 60;
@@ -943,7 +941,7 @@ public class GDActivity extends Activity implements Runnable {
 	//
 	// The tilt scheme reuses this same bar for its pedals: full-width GAS/FRENO in-game (tilting
 	// the device leans the bike, see TiltController), the usual four buttons in menus (tilting
-	// can't navigate a menu without changing values by accident) — see updateGamepadBar().
+	// can't navigate a menu without changing values by accident) — see rebuildGamepadBar().
 	private MenuLinearLayout buildGamepadLayout(boolean night) {
 		MenuLinearLayout layout = new MenuLinearLayout(this, false);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
@@ -1023,23 +1021,13 @@ public class GDActivity extends Activity implements Runnable {
 					}
 				}
 
-				int rowsHeightDp = Helpers.getDp(buttonHeight * 3);
-				applyBarButtonHeight(gamepadLayout, rowsHeightDp);
-
 				if (updateMenuMargin && (keyboardLayout.getVisibility() == android.view.View.VISIBLE
 						|| gamepadLayout.getVisibility() == android.view.View.VISIBLE))
 					showKeyboardLayout();
+				else
+					rebuildGamepadBar(); // live preview during the drag: resizes without touching the margin
 			}
 		});
-	}
-
-	private void applyBarButtonHeight(MenuLinearLayout bar, int heightDp) {
-		for (int i = 0; i < bar.getChildCount(); i++) {
-			View child = bar.getChildAt(i);
-			ViewGroup.LayoutParams params = child.getLayoutParams();
-			params.height = heightDp;
-			child.setLayoutParams(params);
-		}
 	}
 
 	// @UiThread
@@ -1060,13 +1048,13 @@ public class GDActivity extends Activity implements Runnable {
 	// @UiThread
 	// Button/Tilt schemes: same bar (lean buttons + pedals, or just pedals) in menus and
 	// in-game — no context switching for the button scheme; the tilt scheme is the one
-	// exception, see updateGamepadBar(). NameInputMenuScreen (letter entry, key-only — see its
+	// exception, see rebuildGamepadBar(). NameInputMenuScreen (letter entry, key-only — see its
 	// performAction) works unmodified either way.
 	public void showKeyboardLayout() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				updateGamepadBar();
+				rebuildGamepadBar();
 
 				boolean gamepad = Settings.getControlScheme() != Settings.CONTROL_SCHEME_KEYPAD;
 
@@ -1080,32 +1068,18 @@ public class GDActivity extends Activity implements Runnable {
 		});
 	}
 
-	// Tilt can't navigate a menu (it would change values by accident while just looking around),
-	// so the bar switches between full-width pedals in-game and the usual four buttons in menus.
-	private boolean computePedalsOnly() {
-		return Settings.getControlScheme() == Settings.CONTROL_SCHEME_TILT
-				&& !menuShown && tiltController.isAvailable();
-	}
-
-	// @UiThread
-	// Guarded so repeated showKeyboardLayout() calls (every menu navigation) only rebuild the bar
-	// when pedalsOnly or the menu/in-game pedal labels actually flip, not on every call.
-	private void updateGamepadBar() {
-		boolean pedalsOnly = computePedalsOnly();
-		boolean inGame = !menuShown;
-		if (pedalsOnly == gamepadPedalsOnly && inGame == gamepadInGame) return;
-		gamepadPedalsOnly = pedalsOnly;
-		gamepadInGame = inGame;
-		rebuildGamepadBar();
-	}
-
 	// Clears latched keys before rebuilding: a finger resting on a button that's about to
-	// disappear never gets an ACTION_UP, which would otherwise leave the key stuck down.
+	// disappear never gets an ACTION_UP, which would otherwise leave the key stuck down. Tilt
+	// can't navigate a menu (it would change values by accident while just looking around), so
+	// pedalsOnly (full-width pedals, no lean buttons) is only true for tilt, in-game.
 	private void rebuildGamepadBar() {
+		boolean pedalsOnly = Settings.getControlScheme() == Settings.CONTROL_SCHEME_TILT
+				&& !menuShown && tiltController.isAvailable();
+
 		gameView._avV();
 		physEngine._nullvV();
 		gamepadLayout.removeAllViews();
-		fillGamepadLayout(gamepadLayout, Settings.isNightModeEnabled(), gamepadPedalsOnly, gamepadInGame);
+		fillGamepadLayout(gamepadLayout, Settings.isNightModeEnabled(), pedalsOnly, !menuShown);
 	}
 
 	// @UiThread
@@ -1122,8 +1096,6 @@ public class GDActivity extends Activity implements Runnable {
 				gameView.setInputOption(isKeypad ? Settings.getInputOption() : 0);
 				tiltController.setEnabled(scheme == Settings.CONTROL_SCHEME_TILT);
 
-				gamepadPedalsOnly = computePedalsOnly();
-				gamepadInGame = !menuShown;
 				rebuildGamepadBar();
 
 				// Not reachable before the boot splash finishes (inited==false the first time

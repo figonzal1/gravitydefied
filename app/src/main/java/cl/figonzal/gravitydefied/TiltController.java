@@ -15,8 +15,8 @@ import android.hardware.SensorManager;
  * so Game/, Levels/ and Physics stay untouched.
  *
  * Registration follows two independent triggers — the selected control scheme and the activity
- * lifecycle — so it's tracked as two flags rather than calling register/unregister directly from
- * both places, which would risk registering twice or leaving the sensor listening in background.
+ * lifecycle — so it's tracked as two flags and re-evaluated on either change, rather than calling
+ * register/unregister directly from both places.
  */
 class TiltController implements SensorEventListener {
 
@@ -32,7 +32,6 @@ class TiltController implements SensorEventListener {
 
 	private boolean schemeSelected = false;
 	private boolean activityResumed = false;
-	private boolean registered = false;
 
 	private int heldKey = 0; // '4', '6', or 0 (centered)
 
@@ -62,11 +61,7 @@ class TiltController implements SensorEventListener {
 	}
 
 	private void updateRegistration() {
-		boolean shouldRegister = schemeSelected && activityResumed && accelerometer != null;
-		if (shouldRegister == registered) return;
-		registered = shouldRegister;
-
-		if (registered) {
+		if (schemeSelected && activityResumed && accelerometer != null) {
 			sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
 		} else {
 			sensorManager.unregisterListener(this);

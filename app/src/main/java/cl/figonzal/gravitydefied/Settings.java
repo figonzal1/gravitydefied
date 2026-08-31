@@ -43,9 +43,7 @@ public class Settings {
 	private static final int BUTTON_LAYOUT_DEFAULT = BUTTON_LAYOUT_ARROWS_LEFT;
 
 	private static final String TILT_SENSITIVITY = "tilt_sensitivity";
-	public static final int TILT_SENSITIVITY_LOW = 0;
 	public static final int TILT_SENSITIVITY_MEDIUM = 1;
-	public static final int TILT_SENSITIVITY_HIGH = 2;
 	private static final int TILT_SENSITIVITY_DEFAULT = TILT_SENSITIVITY_MEDIUM;
 
 	private static final String LOOK_AHEAD_ENABLED = "look_ahead_enabled";
