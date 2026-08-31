@@ -95,6 +95,9 @@ public class GDActivity extends Activity implements Runnable {
 	private ArrayList<Command> commands = new ArrayList<Command>();
 	private MenuLinearLayout keyboardLayout;
 	private MenuLinearLayout gamepadLayout;
+	private boolean gamepadPedalsOnly = false;
+	private boolean gamepadInGame = false;
+	private TiltController tiltController;
 	private MenuTextView portedTextView;
 	private int buttonHeight = 60;
 	private int baseButtonHeight = 60;
@@ -181,6 +184,7 @@ public class GDActivity extends Activity implements Runnable {
 
 			keyboardLayout = buildKeypadLayout(night);
 			gamepadLayout = buildGamepadLayout(night);
+			tiltController = new TiltController(this);
 
 			hideKeyboardLayout();
 
@@ -610,6 +614,7 @@ public class GDActivity extends Activity implements Runnable {
 		Helpers.logDebug("@@@ [GDActivity \"+hashCode()+\"] onResume()");
 		super.onResume();
 		applyImmersiveMode();
+		if (tiltController != null) tiltController.onResume();
 		Helpers.logDebug("[GDActivity \"+hashCode()+\"] onResume(), inited = " + inited);
 		if (wasPaused && wasStarted) {
 			// logDebug("onResume(): wasPaused && wasResumed");
@@ -652,6 +657,8 @@ public class GDActivity extends Activity implements Runnable {
 		super.onPause();
 
 		Helpers.logDebug("@@@ [GDActivity " + hashCode() + "] onPause()");
+
+		if (tiltController != null) tiltController.onPause();
 
 		wasPaused = true;
 		m_cZ = true;
@@ -933,31 +940,46 @@ public class GDActivity extends Activity implements Runnable {
 	// accelerate/lean/brake mapping and the menu's UP/LEFT/RIGHT/DOWN), so it needs no changes
 	// below GameView.keyPressed/keyReleased. No OK button: tapping a menu row already fires
 	// KEY_FIRE (ClickableMenuElement), and NameInputMenuScreen is confirmed via the back button.
+	//
+	// The tilt scheme reuses this same bar for its pedals: full-width GAS/FRENO in-game (tilting
+	// the device leans the bike, see TiltController), the usual four buttons in menus (tilting
+	// can't navigate a menu without changing values by accident) — see updateGamepadBar().
 	private MenuLinearLayout buildGamepadLayout(boolean night) {
 		MenuLinearLayout layout = new MenuLinearLayout(this, false);
 		layout.setOrientation(LinearLayout.HORIZONTAL);
 
-		fillGamepadLayout(layout, night);
+		fillGamepadLayout(layout, night, false, false);
 
 		layout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
 
 		return layout;
 	}
 
-	// Settings.getButtonLayout() decides which side gets the arrows vs. the pedals; called again
-	// (after removeAllViews) whenever that preference changes, so the bar updates immediately.
-	private void fillGamepadLayout(MenuLinearLayout layout, boolean night) {
+	// pedalsOnly drops the lean buttons and stretches the pedals to full width (tilt scheme,
+	// in-game). Otherwise Settings.getButtonLayout() decides which side gets the arrows vs. the
+	// pedals. inGame swaps the pedal labels: GAS/FRENO while driving, up/down arrows while they're
+	// really just moving the menu selection. Called again (after removeAllViews) whenever any of
+	// this changes, so the bar updates immediately.
+	private void fillGamepadLayout(MenuLinearLayout layout, boolean night, boolean pedalsOnly, boolean inGame) {
 		int rowsHeightDp = Helpers.getDp(buttonHeight * 3);
 		int pad = Helpers.getDp(KeyboardController.PADDING);
 		layout.setPadding(pad, pad, pad, pad);
 
-		View leanBack = buildControlButton(night, R.string.ctrl_nav_left, '4');
-		View leanForward = buildControlButton(night, R.string.ctrl_nav_right, '6');
+		int gasRes = inGame ? R.string.ctrl_gas : R.string.ctrl_nav_up;
+		int brakeRes = inGame ? R.string.ctrl_brake : R.string.ctrl_nav_down;
 
 		LinearLayout pedalContainer = new LinearLayout(this);
 		pedalContainer.setOrientation(LinearLayout.VERTICAL);
-		pedalContainer.addView(buildControlButton(night, R.string.ctrl_gas, '2'), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
-		pedalContainer.addView(buildControlButton(night, R.string.ctrl_brake, '8'), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+		pedalContainer.addView(buildControlButton(night, gasRes, '2'), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+		pedalContainer.addView(buildControlButton(night, brakeRes, '8'), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+
+		if (pedalsOnly) {
+			layout.addView(pedalContainer, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, rowsHeightDp));
+			return;
+		}
+
+		View leanBack = buildControlButton(night, R.string.ctrl_nav_left, '4');
+		View leanForward = buildControlButton(night, R.string.ctrl_nav_right, '6');
 
 		boolean arrowsRight = Settings.getButtonLayout() == Settings.BUTTON_LAYOUT_ARROWS_RIGHT;
 		if (arrowsRight) layout.addView(pedalContainer, new LinearLayout.LayoutParams(0, rowsHeightDp, 2));
@@ -1036,13 +1058,17 @@ public class GDActivity extends Activity implements Runnable {
 	}
 
 	// @UiThread
-	// D-pad scheme: same bar (cross + pedals) in menus and in-game — no context switching.
-	// NameInputMenuScreen (letter entry, key-only — see its performAction) works unmodified.
+	// Button/Tilt schemes: same bar (lean buttons + pedals, or just pedals) in menus and
+	// in-game — no context switching for the button scheme; the tilt scheme is the one
+	// exception, see updateGamepadBar(). NameInputMenuScreen (letter entry, key-only — see its
+	// performAction) works unmodified either way.
 	public void showKeyboardLayout() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				boolean gamepad = Settings.getControlScheme() == Settings.CONTROL_SCHEME_GAMEPAD;
+				updateGamepadBar();
+
+				boolean gamepad = Settings.getControlScheme() != Settings.CONTROL_SCHEME_KEYPAD;
 
 				keyboardLayout.setVisibility(gamepad ? android.view.View.GONE : android.view.View.VISIBLE);
 				gamepadLayout.setVisibility(gamepad ? android.view.View.VISIBLE : android.view.View.GONE);
@@ -1054,22 +1080,51 @@ public class GDActivity extends Activity implements Runnable {
 		});
 	}
 
+	// Tilt can't navigate a menu (it would change values by accident while just looking around),
+	// so the bar switches between full-width pedals in-game and the usual four buttons in menus.
+	private boolean computePedalsOnly() {
+		return Settings.getControlScheme() == Settings.CONTROL_SCHEME_TILT
+				&& !menuShown && tiltController.isAvailable();
+	}
+
 	// @UiThread
-	// Button scheme emits Keyset 1's codes, so switching to it forces inputOption to 0 (and back
-	// to the user's keyset otherwise); also clears keys latched by the previous scheme.
+	// Guarded so repeated showKeyboardLayout() calls (every menu navigation) only rebuild the bar
+	// when pedalsOnly or the menu/in-game pedal labels actually flip, not on every call.
+	private void updateGamepadBar() {
+		boolean pedalsOnly = computePedalsOnly();
+		boolean inGame = !menuShown;
+		if (pedalsOnly == gamepadPedalsOnly && inGame == gamepadInGame) return;
+		gamepadPedalsOnly = pedalsOnly;
+		gamepadInGame = inGame;
+		rebuildGamepadBar();
+	}
+
+	// Clears latched keys before rebuilding: a finger resting on a button that's about to
+	// disappear never gets an ACTION_UP, which would otherwise leave the key stuck down.
+	private void rebuildGamepadBar() {
+		gameView._avV();
+		physEngine._nullvV();
+		gamepadLayout.removeAllViews();
+		fillGamepadLayout(gamepadLayout, Settings.isNightModeEnabled(), gamepadPedalsOnly, gamepadInGame);
+	}
+
+	// @UiThread
+	// Button/Tilt schemes emit Keyset 1's codes, so switching to either forces inputOption to 0
+	// (and back to the user's keyset otherwise); also clears keys latched by the previous scheme.
 	public void applyControlScheme() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				if (!Helpers.isActivityAlive()) return;
 
-				boolean isGamepad = Settings.getControlScheme() == Settings.CONTROL_SCHEME_GAMEPAD;
-				gameView.setInputOption(isGamepad ? 0 : Settings.getInputOption());
-				gameView._avV();
-				physEngine._nullvV();
+				int scheme = Settings.getControlScheme();
+				boolean isKeypad = scheme == Settings.CONTROL_SCHEME_KEYPAD;
+				gameView.setInputOption(isKeypad ? Settings.getInputOption() : 0);
+				tiltController.setEnabled(scheme == Settings.CONTROL_SCHEME_TILT);
 
-				gamepadLayout.removeAllViews();
-				fillGamepadLayout(gamepadLayout, Settings.isNightModeEnabled());
+				gamepadPedalsOnly = computePedalsOnly();
+				gamepadInGame = !menuShown;
+				rebuildGamepadBar();
 
 				// Not reachable before the boot splash finishes (inited==false the first time
 				// Menu.load(3) calls this) — skip so the splash never gets a controls bar.

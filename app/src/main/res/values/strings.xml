@@ -44,6 +44,7 @@
 	<string name="control_type">Control type</string>
 	<string name="input">Input</string>
 	<string name="button_layout">Layout</string>
+	<string name="tilt_sensitivity">Sensitivity</string>
 	<string name="look_ahead">Look ahead</string>
 	<string name="vibrate_on_touch">Vibrate on touch</string>
 	<string name="keyboard_size">Keyboard size</string>
@@ -52,6 +53,8 @@
 	<string name="ctrl_brake">BRAKE</string>
 	<string name="ctrl_nav_left">&#9664;</string>
 	<string name="ctrl_nav_right">&#9654;</string>
+	<string name="ctrl_nav_up">&#9650;</string>
+	<string name="ctrl_nav_down">&#9660;</string>
 	<string name="night_mode">Night mode</string>
 	<string name="options_display">Display</string>
 	<string name="options_controls">Controls</string>
@@ -117,13 +120,13 @@
 	]]></string>
 
 	<string name="options_controls_text"><![CDATA[
-		<b>Control type: Numeric keypad/Buttons</b><br/>
+		<b>Control type: Numeric keypad/Buttons/Tilt</b><br/>
 		Default: &lt;Numeric keypad&gt;<br/>
-		Switches between the classic numeric keypad and four buttons: left/right lean (and go back / enter a screen, or change value on an option row), gas/brake pedals (and move the selection up/down). Identical bar in menus and in-game.<br/><br/>
+		Switches between the classic numeric keypad, four buttons (left/right lean and go back / enter a screen or change value on an option row, gas/brake pedals and move the selection up/down — identical bar in menus and in-game), and tilt (roll the device to lean the bike, gas/brake as full-width pedals in-game; the usual four buttons appear in menus, since tilting cannot navigate a menu without changing values by accident).<br/><br/>
 
 		<b>Input</b><br/>
 		Default: &lt;Keyset 1&gt;<br/>
-		With the numeric keypad, picks the keyset used when playing — see "Keys" in the help menu for more info. With buttons, picks which side the lean buttons are on: left (gas/brake on the right) or right (gas/brake on the left).<br/><br/>
+		With the numeric keypad, picks the keyset used when playing — see "Keys" in the help menu for more info. With buttons, picks which side the lean buttons are on: left (gas/brake on the right) or right (gas/brake on the left). With tilt, picks how far you need to roll the device before the bike leans.<br/><br/>
 
 		<b>Keyboard size: 50%-200%</b><br/>
 		Default: &lt;100%&gt;<br/>
@@ -199,11 +202,18 @@
 	<string-array name="control_scheme">
 		<item>Numeric keypad</item>
 		<item>Buttons</item>
+		<item>Tilt</item>
 	</string-array>
 
 	<string-array name="button_layout_options">
 		<item>Arrows left</item>
 		<item>Arrows right</item>
+	</string-array>
+
+	<string-array name="tilt_sensitivity_options">
+		<item>Low</item>
+		<item>Medium</item>
+		<item>High</item>
 	</string-array>
 
 	<string-array name="leagues">

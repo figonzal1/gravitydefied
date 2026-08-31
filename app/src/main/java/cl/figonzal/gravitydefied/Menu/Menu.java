@@ -149,6 +149,7 @@ public class Menu
 	private String[] keysetStrings = null;
 	private String[] controlSchemeStrings = null;
 	private String[] buttonLayoutStrings = null;
+	private String[] tiltSensitivityStrings = null;
 	// private EmptyLineMenuElement emptyLine;
 	// private EmptyLineMenuElement emptyLineBeforeAction;
 	// private AlertDialog alertDialog = null;
@@ -188,6 +189,7 @@ public class Menu
 				keysetStrings = getStringArray(R.array.keyset);
 				controlSchemeStrings = getStringArray(R.array.control_scheme);
 				buttonLayoutStrings = getStringArray(R.array.button_layout_options);
+				tiltSensitivityStrings = getStringArray(R.array.tilt_sensitivity_options);
 				difficultyLevels = getStringArray(R.array.difficulty);
 
 				// saveManager = new SaveManager();
@@ -1161,17 +1163,39 @@ public class Menu
 
 	// The "Input" row means different things per control scheme: keysets for the numeric keypad
 	// (nine cells to map), a left/right button layout for the button scheme (only 4 buttons, no
-	// keyset to pick). setUnlockedCount must follow setOptions — OptionsMenuElement.setOptions()
-	// only ever shrinks it, so switching to the shorter array without restoring it would leave a
-	// lock icon on a valid option (e.g. Keyset 3 while set to a 2-item array).
+	// keyset to pick), a lean sensitivity for the tilt scheme. setUnlockedCount must follow
+	// setOptions — OptionsMenuElement.setOptions() only ever shrinks it, so switching to a
+	// shorter array without restoring it would leave a lock icon on a valid option (e.g. Keyset
+	// 3 while set to a 2- or 3-item array).
 	private void updateInputOptionItem() {
-		boolean gamepad = Settings.getControlScheme() == Settings.CONTROL_SCHEME_GAMEPAD;
-		String[] options = gamepad ? buttonLayoutStrings : keysetStrings;
+		int scheme = Settings.getControlScheme();
 
-		inputOptionItem.setText(getString(gamepad ? R.string.button_layout : R.string.input));
-		inputOptionItem.setOptions(options, true);
+		String[] options;
+		int labelRes;
+		int selected;
+		if (scheme == Settings.CONTROL_SCHEME_GAMEPAD) {
+			options = buttonLayoutStrings;
+			labelRes = R.string.button_layout;
+			selected = Settings.getButtonLayout();
+		} else if (scheme == Settings.CONTROL_SCHEME_TILT) {
+			options = tiltSensitivityStrings;
+			labelRes = R.string.tilt_sensitivity;
+			selected = Settings.getTiltSensitivity();
+		} else {
+			options = keysetStrings;
+			labelRes = R.string.input;
+			selected = Settings.getInputOption();
+		}
+
+		inputOptionItem.setText(getString(labelRes));
+		// update=false: nothing ever navigates into inputOptionItem's own optionsScreen (unlike
+		// e.g. trackSelector/levelSelector), so rebuilding+highlighting it here was both wasted
+		// work and a bug — MenuHelmetView.lastActive is static (one "active" helmet for the
+		// whole app), so highlighting an item on that invisible, unused screen was stealing the
+		// helmet icon away from whatever row the player was actually looking at.
+		inputOptionItem.setOptions(options, false);
 		inputOptionItem.setUnlockedCount(options.length - 1);
-		inputOptionItem.setSelectedOption(gamepad ? Settings.getButtonLayout() : Settings.getInputOption());
+		inputOptionItem.setSelectedOption(selected);
 	}
 
 	public void handleAction(MenuElement item) {
@@ -1246,9 +1270,13 @@ public class Menu
 			if (item == inputOptionItem) {
 				if (inputOptionItem._charvZ())
 					inputOptionItem.setSelectedOption(inputOptionItem.getSelectedOption() + 1);
-				if (Settings.getControlScheme() == Settings.CONTROL_SCHEME_GAMEPAD) {
+				int scheme = Settings.getControlScheme();
+				if (scheme == Settings.CONTROL_SCHEME_GAMEPAD) {
 					Settings.setButtonLayout(inputOptionItem.getSelectedOption());
 					gd.applyControlScheme();
+				} else if (scheme == Settings.CONTROL_SCHEME_TILT) {
+					// TiltController reads the threshold on every sensor event, no rebuild needed.
+					Settings.setTiltSensitivity(inputOptionItem.getSelectedOption());
 				} else {
 					getGDView().setInputOption(inputOptionItem.getSelectedOption());
 					Settings.setInputOption(inputOptionItem.getSelectedOption());
