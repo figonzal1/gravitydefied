@@ -193,7 +193,9 @@ public class GDActivity extends Activity implements Runnable {
 			// once actually shown, since that space depends on the current keyboard height.
 			whatsNewHintView = new MenuTextView(this);
 			whatsNewHintView.setTextSize(15);
-			whatsNewHintView.setText("<< " + getString(R.string.whats_new) + " >>");
+			// Version included so the hint itself explains why it's here — "there's a new
+			// release" — matching the screen's own title (see Menu's whatsNewScreen).
+			whatsNewHintView.setText("<< " + getString(R.string.whats_new) + " v" + Helpers.getAppVersion() + " >>");
 			whatsNewHintView.setTextColor(getResources().getColor(R.color.menu_highlight));
 			whatsNewHintView.setGravity(Gravity.CENTER);
 			whatsNewHintView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP));
