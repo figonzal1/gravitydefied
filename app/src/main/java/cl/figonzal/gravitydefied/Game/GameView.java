@@ -811,7 +811,7 @@ public class GameView extends View {
 		inputOption = option;
 	}
 
-	private void _avV() {
+	public void _avV() {
 		for (int j = 0; j < 10; j++)
 			m_LaZ[j] = false;
 

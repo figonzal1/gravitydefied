@@ -201,10 +201,13 @@ public class LevelMenuElement
 		updateLevelsLine();
 	}
 
+	// See ActionMenuElement.performAction: KEY_LEFT/RIGHT fall back to back/select here too.
 	@Override
 	public void performAction(int k) {
-		if (k == MenuScreen.KEY_FIRE) {
+		if (k == MenuScreen.KEY_FIRE || k == MenuScreen.KEY_RIGHT) {
 			buildScreen();
+		} else if (k == MenuScreen.KEY_LEFT) {
+			getGameMenu().back();
 		}
 	}
 
