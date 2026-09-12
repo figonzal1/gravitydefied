@@ -1074,10 +1074,12 @@ public class GDActivity extends Activity implements Runnable {
 				blink.setRepeatCount(Animation.INFINITE);
 				whatsNewHintView.startAnimation(blink);
 
-				// Center it between the menu content area and the keyboard/gamepad bar. A few
-				// other UI updates (scrollView's content/visibility, the keyboard margin) are
-				// still queued on this same thread at this point, so wait for the layout pass
-				// that applies all of them before reading scrollView's actual bounds.
+				// Center it in the actual empty gap: from the bottom of the menu's item list
+				// down to the keyboard/gamepad bar — not the whole scrollView band, which
+				// starts above the list, right under the title. A few other UI updates
+				// (scrollView's content/visibility, the keyboard margin) are still queued on
+				// this same thread at this point, so wait for the layout pass that applies all
+				// of them before reading these views' actual bounds.
 				frame.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 					@Override
 					public void onGlobalLayout() {
@@ -1085,10 +1087,19 @@ public class GDActivity extends Activity implements Runnable {
 						if (!Helpers.isActivityAlive() || whatsNewHintView.getVisibility() != android.view.View.VISIBLE)
 							return;
 
-						int center = (scrollView.getTop() + scrollView.getBottom()) / 2;
+						android.view.View content = scrollView.getChildCount() > 0 ? scrollView.getChildAt(0) : null;
+						int gapTop = scrollView.getTop()
+								+ (content == null ? 0 : content.getBottom() - scrollView.getScrollY());
+						int gapBottom = scrollView.getBottom(); // already sits at the keyboard's top edge
+						int hintHeight = whatsNewHintView.getHeight();
+
+						int top = (gapTop + gapBottom - hintHeight) / 2;
+						if (top > gapBottom - hintHeight)
+							top = gapBottom - hintHeight; // list fills the gap: rest right above the bar
+
 						FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) whatsNewHintView.getLayoutParams();
 						params.gravity = Gravity.TOP;
-						params.topMargin = center - whatsNewHintView.getHeight() / 2;
+						params.topMargin = top;
 						whatsNewHintView.setLayoutParams(params);
 					}
 				});
