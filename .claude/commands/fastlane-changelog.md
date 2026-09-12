@@ -41,8 +41,8 @@ Generate the Fastlane changelog files before a Google Play release.
    player would notice on their own (a new feature or a visible behavior change); `false` for a
    pure `fix:`/`perf:` release — crashes, stability, compatibility. Ask the user which one applies,
    showing the filtered commit list as evidence. Either way the text above still updates and stays
-   readable under Help; `whats_new_announce` only controls whether the game interrupts the player
-   with it on next launch.
+   readable under Help; `whats_new_announce` only controls whether the blinking "What's New" hint
+   shows on the main menu on next launch.
 
 7. Report a summary:
     - Files created or updated

@@ -13,6 +13,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -97,6 +99,7 @@ public class GDActivity extends Activity implements Runnable {
 	private MenuLinearLayout gamepadLayout;
 	private TiltController tiltController;
 	private MenuTextView portedTextView;
+	private MenuTextView whatsNewHintView;
 	private int buttonHeight = 60;
 	private int baseButtonHeight = 60;
 	public LevelsManager levelsManager;
@@ -184,6 +187,24 @@ public class GDActivity extends Activity implements Runnable {
 			gamepadLayout = buildGamepadLayout(night);
 			tiltController = new TiltController(this);
 
+			// Blinking "What's New" hint above the keyboard, shown only on the launch right
+			// after an update (see maybeShowWhatsNew()); tapping it opens the screen. Built here,
+			// before hideKeyboardLayout()'s first call, since that call touches it immediately.
+			whatsNewHintView = new MenuTextView(this);
+			whatsNewHintView.setTextSize(15);
+			whatsNewHintView.setText(getString(R.string.whats_new) + " v" + Helpers.getAppVersion());
+			whatsNewHintView.setTextColor(getResources().getColor(R.color.menu_highlight));
+			whatsNewHintView.setGravity(Gravity.CENTER);
+			whatsNewHintView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+			whatsNewHintView.setPadding(0, 0, 0, Helpers.getDp(10));
+			whatsNewHintView.setVisibility(android.view.View.GONE);
+			whatsNewHintView.setOnClickListener(new android.view.View.OnClickListener() {
+				@Override
+				public void onClick(android.view.View v) {
+					if (menu != null) menu.openWhatsNew();
+				}
+			});
+
 			hideKeyboardLayout();
 
 			menuBtn = new MenuImageView(this);
@@ -221,6 +242,7 @@ public class GDActivity extends Activity implements Runnable {
 			frame.addView(gamepadLayout);
 			frame.addView(menuBtn);
 			frame.addView(portedTextView);
+			frame.addView(whatsNewHintView);
 
 			gameView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT, 1));
 			frame.addView(gameView, 0);
@@ -1033,6 +1055,28 @@ public class GDActivity extends Activity implements Runnable {
 	}
 
 	// @UiThread
+	public void setWhatsNewHintVisible(final boolean visible) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (!Helpers.isActivityAlive()) return;
+
+				if (visible) {
+					AlphaAnimation blink = new AlphaAnimation(1f, 0.15f);
+					blink.setDuration(600);
+					blink.setRepeatMode(Animation.REVERSE);
+					blink.setRepeatCount(Animation.INFINITE);
+					whatsNewHintView.setVisibility(android.view.View.VISIBLE);
+					whatsNewHintView.startAnimation(blink);
+				} else {
+					whatsNewHintView.clearAnimation();
+					whatsNewHintView.setVisibility(android.view.View.GONE);
+				}
+			}
+		});
+	}
+
+	// @UiThread
 	public void hideKeyboardLayout() {
 		runOnUiThread(new Runnable() {
 			@Override
@@ -1043,6 +1087,10 @@ public class GDActivity extends Activity implements Runnable {
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
 				params.setMargins(0, 0, 0, 0);
 				scrollView.setLayoutParams(params);
+
+				FrameLayout.LayoutParams hintParams = (FrameLayout.LayoutParams) whatsNewHintView.getLayoutParams();
+				hintParams.bottomMargin = 0;
+				whatsNewHintView.setLayoutParams(hintParams);
 			}
 		});
 	}
@@ -1066,6 +1114,10 @@ public class GDActivity extends Activity implements Runnable {
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
 				params.setMargins(0, 0, 0, Helpers.getDp(getButtonsLayoutHeight()));
 				scrollView.setLayoutParams(params);
+
+				FrameLayout.LayoutParams hintParams = (FrameLayout.LayoutParams) whatsNewHintView.getLayoutParams();
+				hintParams.bottomMargin = Helpers.getDp(getButtonsLayoutHeight());
+				whatsNewHintView.setLayoutParams(hintParams);
 			}
 		});
 	}
@@ -1308,11 +1360,13 @@ public class GDActivity extends Activity implements Runnable {
 		String seen = Settings.getLastSeenVersion();
 		if (seen.equals(current)) return;
 
-		// fresh install, or a release not worth interrupting for: record it and stay quiet
-		if (seen.length() == 0 || !getResources().getBoolean(R.bool.whats_new_announce)) {
-			Settings.setLastSeenVersion(current);
-			return;
-		}
+		// The hint is a one-launch nudge, not a persistent nag: mark the version seen right
+		// away, whether or not the player ever taps it.
+		Settings.setLastSeenVersion(current);
+
+		// fresh install, or a release not worth announcing: stay quiet
+		if (seen.length() == 0 || !getResources().getBoolean(R.bool.whats_new_announce)) return;
+
 		menu.setPendingWhatsNew(true);
 	}
 

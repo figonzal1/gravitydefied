@@ -839,6 +839,12 @@ public class Menu
 		pendingWhatsNew = pending;
 	}
 
+	// Called from the blinking hint on the main menu (GDActivity.whatsNewHintView).
+	public void openWhatsNew() {
+		whatsNewScreen.setNavTarget(currentMenu); // Back → wherever this was tapped from
+		setCurrentMenu(whatsNewScreen, false);
+	}
+
 	public void showMenu(int k) {
 		logDebug("[Menu] showMenu()");
 		// k = 2;
@@ -852,13 +858,7 @@ public class Menu
 		menuDisabled = false;
 		switch (k) {
 			case 0: // Just started
-				if (pendingWhatsNew) {
-					pendingWhatsNew = false;
-					whatsNewScreen.setNavTarget(mainMenu); // Back → Main on this one launch
-					setCurrentMenu(whatsNewScreen, false);
-				} else {
-					setCurrentMenu(mainMenu, false);
-				}
+				setCurrentMenu(mainMenu, false);
 				gd.physEngine._casevV();
 				m_SZ = true;
 				break;
@@ -1105,10 +1105,12 @@ public class Menu
 			trackSelector.setUnlockedCount(level.getUnlocked(levelSelector.getSelectedOption()));
 			trackSelector.setSelectedOption(selectedTrack[levelSelector.getSelectedOption()]);
 		} else if (newMenu == whatsNewScreen) {
-			Settings.setLastSeenVersion(getAppVersion()); // read: don't auto-open again next launch
+			pendingWhatsNew = false; // read: the main-menu hint won't come back this launch
 		}
 		if ((newMenu == mainMenu || newMenu == playMenu) && gd.physEngine != null)
 			gd.physEngine._casevV();
+
+		gd.setWhatsNewHintVisible(newMenu == mainMenu && pendingWhatsNew);
 
 		if (currentMenu != null)
 			currentMenu.onHide(newMenu);
