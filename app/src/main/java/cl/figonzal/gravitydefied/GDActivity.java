@@ -187,16 +187,16 @@ public class GDActivity extends Activity implements Runnable {
 			gamepadLayout = buildGamepadLayout(night);
 			tiltController = new TiltController(this);
 
-			// Blinking "What's New" hint above the keyboard, shown only on the launch right
-			// after an update (see maybeShowWhatsNew()); tapping it opens the screen. Built here,
-			// before hideKeyboardLayout()'s first call, since that call touches it immediately.
+			// Blinking "What's New" hint, shown only on the launch right after an update (see
+			// maybeShowWhatsNew()); tapping it opens the screen. Vertically centered between the
+			// menu content and the keyboard/gamepad bar — setWhatsNewHintVisible() positions it
+			// once actually shown, since that space depends on the current keyboard height.
 			whatsNewHintView = new MenuTextView(this);
 			whatsNewHintView.setTextSize(15);
 			whatsNewHintView.setText(getString(R.string.whats_new) + " v" + Helpers.getAppVersion());
 			whatsNewHintView.setTextColor(getResources().getColor(R.color.menu_highlight));
 			whatsNewHintView.setGravity(Gravity.CENTER);
-			whatsNewHintView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
-			whatsNewHintView.setPadding(0, 0, 0, Helpers.getDp(10));
+			whatsNewHintView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP));
 			whatsNewHintView.setVisibility(android.view.View.GONE);
 			whatsNewHintView.setOnClickListener(new android.view.View.OnClickListener() {
 				@Override
@@ -1061,17 +1061,37 @@ public class GDActivity extends Activity implements Runnable {
 			public void run() {
 				if (!Helpers.isActivityAlive()) return;
 
-				if (visible) {
-					AlphaAnimation blink = new AlphaAnimation(1f, 0.15f);
-					blink.setDuration(600);
-					blink.setRepeatMode(Animation.REVERSE);
-					blink.setRepeatCount(Animation.INFINITE);
-					whatsNewHintView.setVisibility(android.view.View.VISIBLE);
-					whatsNewHintView.startAnimation(blink);
-				} else {
+				if (!visible) {
 					whatsNewHintView.clearAnimation();
 					whatsNewHintView.setVisibility(android.view.View.GONE);
+					return;
 				}
+
+				whatsNewHintView.setVisibility(android.view.View.VISIBLE);
+				AlphaAnimation blink = new AlphaAnimation(1f, 0.15f);
+				blink.setDuration(600);
+				blink.setRepeatMode(Animation.REVERSE);
+				blink.setRepeatCount(Animation.INFINITE);
+				whatsNewHintView.startAnimation(blink);
+
+				// Center it between the menu content area and the keyboard/gamepad bar. A few
+				// other UI updates (scrollView's content/visibility, the keyboard margin) are
+				// still queued on this same thread at this point, so wait for the layout pass
+				// that applies all of them before reading scrollView's actual bounds.
+				frame.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+					@Override
+					public void onGlobalLayout() {
+						frame.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+						if (!Helpers.isActivityAlive() || whatsNewHintView.getVisibility() != android.view.View.VISIBLE)
+							return;
+
+						int center = (scrollView.getTop() + scrollView.getBottom()) / 2;
+						FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) whatsNewHintView.getLayoutParams();
+						params.gravity = Gravity.TOP;
+						params.topMargin = center - whatsNewHintView.getHeight() / 2;
+						whatsNewHintView.setLayoutParams(params);
+					}
+				});
 			}
 		});
 	}
@@ -1087,10 +1107,6 @@ public class GDActivity extends Activity implements Runnable {
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
 				params.setMargins(0, 0, 0, 0);
 				scrollView.setLayoutParams(params);
-
-				FrameLayout.LayoutParams hintParams = (FrameLayout.LayoutParams) whatsNewHintView.getLayoutParams();
-				hintParams.bottomMargin = 0;
-				whatsNewHintView.setLayoutParams(hintParams);
 			}
 		});
 	}
@@ -1114,10 +1130,6 @@ public class GDActivity extends Activity implements Runnable {
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
 				params.setMargins(0, 0, 0, Helpers.getDp(getButtonsLayoutHeight()));
 				scrollView.setLayoutParams(params);
-
-				FrameLayout.LayoutParams hintParams = (FrameLayout.LayoutParams) whatsNewHintView.getLayoutParams();
-				hintParams.bottomMargin = Helpers.getDp(getButtonsLayoutHeight());
-				whatsNewHintView.setLayoutParams(hintParams);
 			}
 		});
 	}
