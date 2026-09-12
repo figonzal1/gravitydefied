@@ -1087,9 +1087,23 @@ public class GDActivity extends Activity implements Runnable {
 						if (!Helpers.isActivityAlive() || whatsNewHintView.getVisibility() != android.view.View.VISIBLE)
 							return;
 
+						// scrollView.setFillViewport(true) stretches its child (MenuScreen.layout)
+						// to the full viewport height, so that child's own getBottom() doesn't
+						// mark the end of the list — the last non-GONE row does.
 						android.view.View content = scrollView.getChildCount() > 0 ? scrollView.getChildAt(0) : null;
-						int gapTop = scrollView.getTop()
-								+ (content == null ? 0 : content.getBottom() - scrollView.getScrollY());
+						int listBottom = 0;
+						if (content instanceof ViewGroup) {
+							ViewGroup rows = (ViewGroup) content;
+							for (int i = rows.getChildCount() - 1; i >= 0; i--) {
+								View row = rows.getChildAt(i);
+								if (row.getVisibility() != android.view.View.GONE) {
+									listBottom = row.getBottom();
+									break;
+								}
+							}
+						}
+
+						int gapTop = scrollView.getTop() + listBottom - scrollView.getScrollY();
 						int gapBottom = scrollView.getBottom(); // already sits at the keyboard's top edge
 						int hintHeight = whatsNewHintView.getHeight();
 
