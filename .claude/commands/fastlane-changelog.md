@@ -32,7 +32,19 @@ Generate the Fastlane changelog files before a Google Play release.
     - `fastlane/metadata/android/es-419/changelogs/default.txt`
     - `fastlane/metadata/android/en-US/changelogs/default.txt`
 
-6. Report a summary:
+6. Update the in-app "What's New" text so it matches: replace the bullets inside
+   `whats_new_text` in `app/src/main/res/values/strings.xml` with the same content as the
+   **en-US** changelog (the app UI is English-only), keeping the CDATA/`&#8226;`/`<br/>`
+   formatting already used there.
+
+   Also set `whats_new_announce` in the same file: `true` only if this release ships something a
+   player would notice on their own (a new feature or a visible behavior change); `false` for a
+   pure `fix:`/`perf:` release — crashes, stability, compatibility. Ask the user which one applies,
+   showing the filtered commit list as evidence. Either way the text above still updates and stays
+   readable under Help; `whats_new_announce` only controls whether the game interrupts the player
+   with it on next launch.
+
+7. Report a summary:
     - Files created or updated
     - Character count for each changelog (reminder: Google Play limit is 500 chars)
     - Next step hint: run `fastlane beta_googleplay` or `fastlane prod_googleplay`

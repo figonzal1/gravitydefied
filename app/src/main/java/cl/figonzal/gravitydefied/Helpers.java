@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -299,6 +300,10 @@ public class Helpers {
 		} catch (PackageManager.NameNotFoundException e) {
 		}
 		return v;
+	}
+
+	public static boolean isDebugBuild() {
+		return (GDActivity.shared.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 	}
 
 	public static String decodeCp1251(byte[] data) {

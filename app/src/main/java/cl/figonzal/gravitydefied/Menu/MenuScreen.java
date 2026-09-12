@@ -90,7 +90,7 @@ public class MenuScreen
 				break;
 
 			case KEY_UP:
-				if (isTextScreen) {
+				if (isTextScreen && countNavigable() < 2) {
 					getGDActivity().scrollTextMenuUp();
 					return;
 				}
@@ -115,7 +115,7 @@ public class MenuScreen
 				break;
 
 			case KEY_DOWN:
-				if (isTextScreen) {
+				if (isTextScreen && countNavigable() < 2) {
 					getGDActivity().scrollTextMenuDown();
 					return;
 				}
@@ -138,6 +138,19 @@ public class MenuScreen
 				}
 				break;
 		}
+	}
+
+	// A text screen reserves up/down for scrolling, which only works when there is a single
+	// action to fall back on. With two or more, up/down have to move the highlight instead or
+	// the extra actions are unreachable from the on-screen keypad.
+	protected int countNavigable() {
+		int n = 0;
+		for (int i = 0; i < menuItems.size(); i++) {
+			MenuElement el = (MenuElement) menuItems.elementAt(i);
+			if (el instanceof ClickableMenuElement && !((ClickableMenuElement) el).isDisabled())
+				n++;
+		}
+		return n;
 	}
 
 	protected boolean elementIsFirstClickable(int index) {
