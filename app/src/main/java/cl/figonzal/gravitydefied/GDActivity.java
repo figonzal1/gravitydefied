@@ -193,7 +193,7 @@ public class GDActivity extends Activity implements Runnable {
 			// once actually shown, since that space depends on the current keyboard height.
 			whatsNewHintView = new MenuTextView(this);
 			whatsNewHintView.setTextSize(15);
-			whatsNewHintView.setText(getString(R.string.whats_new) + " v" + Helpers.getAppVersion());
+			whatsNewHintView.setText("<< " + getString(R.string.whats_new) + " >>");
 			whatsNewHintView.setTextColor(getResources().getColor(R.color.menu_highlight));
 			whatsNewHintView.setGravity(Gravity.CENTER);
 			whatsNewHintView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP));
