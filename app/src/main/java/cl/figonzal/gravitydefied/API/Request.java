@@ -29,13 +29,22 @@ public class Request {
 	private ResponseHandler handler;
 	private Future<?> task;
 	private String apiURL;
+	private String bearerToken;
 
 	public Request(String method, List<String[]> params, ResponseHandler handler) {
-		construct(method, params, handler);
+		construct(API.URL, method, params, handler, null);
 	}
 
-	private void construct(String method, List<String[]> params, ResponseHandler handler) {
-		this.apiURL = API.URL;
+	// Same transport (form-urlencoded POST, cached-thread executor, UI-thread callback) against a
+	// different backend - used by API/Ranking.java for the world-ranking server, which needs its
+	// own base URL and an optional Bearer token instead of gdtr.net's api.php.
+	public Request(String url, String method, List<String[]> params, ResponseHandler handler, String bearerToken) {
+		construct(url, method, params, handler, bearerToken);
+	}
+
+	private void construct(String url, String method, List<String[]> params, ResponseHandler handler, String bearerToken) {
+		this.apiURL = url;
+		this.bearerToken = bearerToken;
 
 		params.add(new String[]{"v", String.valueOf(API.VERSION)});
 		params.add(new String[]{"method", method});
@@ -97,6 +106,9 @@ public class Request {
 			connection.setRequestMethod("POST");
 			connection.setDoOutput(true);
 			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			if (bearerToken != null) {
+				connection.setRequestProperty("Authorization", "Bearer " + bearerToken);
+			}
 			connection.setFixedLengthStreamingMode(bodyBytes.length);
 			connection.connect();
 

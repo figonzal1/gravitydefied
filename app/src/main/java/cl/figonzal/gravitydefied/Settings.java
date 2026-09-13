@@ -68,6 +68,14 @@ public class Settings {
 	private static final String LAST_SEEN_VERSION = "last_seen_version";
 	private static final String LAST_SEEN_VERSION_DEFAULT = "";
 
+	private static final String RANKING_ENABLED = "ranking_enabled";
+	private static final boolean RANKING_ENABLED_DEFAULT = true;
+
+	// The world-ranking backend's own JWT, obtained via API/Ranking.auth() after Play Games sign-in.
+	// Not cleared by resetAll() - same treatment as LEVEL_ID, it's account state, not a game setting.
+	private static final String RANKING_TOKEN = "ranking_token";
+	private static final String RANKING_TOKEN_DEFAULT = "";
+
 	private static SharedPreferences preferences;
 
 	static {
@@ -90,6 +98,7 @@ public class Settings {
 		setLevelsSort(LEVELS_SORT_DEFAULT);
 		setName(NAME_CHARS_DEFALUT);
 		setNightModeEnabled(NIGHT_MODE_ENABLED_DEFAULT);
+		setRankingEnabled(RANKING_ENABLED_DEFAULT);
 	}
 
 	public static long getLevelId() {
@@ -249,6 +258,26 @@ public class Settings {
 
 	public static void setLastSeenVersion(String version) {
 		setString(LAST_SEEN_VERSION, version);
+	}
+
+	public static boolean isRankingEnabled() {
+		return preferences.getBoolean(RANKING_ENABLED, RANKING_ENABLED_DEFAULT);
+	}
+
+	public static void setRankingEnabled(boolean enabled) {
+		setBoolean(RANKING_ENABLED, enabled);
+	}
+
+	/**
+	 * @return null if never signed in to the ranking backend (avoids sending an empty Bearer token).
+	 */
+	public static String getRankingToken() {
+		String token = preferences.getString(RANKING_TOKEN, RANKING_TOKEN_DEFAULT);
+		return token.isEmpty() ? null : token;
+	}
+
+	public static void setRankingToken(String token) {
+		setString(RANKING_TOKEN, token == null ? RANKING_TOKEN_DEFAULT : token);
 	}
 
 	private static void setLong(String key, long value) {

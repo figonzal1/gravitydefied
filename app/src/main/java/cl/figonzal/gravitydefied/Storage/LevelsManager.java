@@ -129,6 +129,25 @@ public class LevelsManager {
 		return currentLevel;
 	}
 
+	/**
+	 * Stable, device-independent id for the current pack, for the world ranking backend.
+	 * Returns null for a pack sideloaded from a local file (apiId == 0, not default) - those
+	 * have no id any other device could agree on, so they are never ranked.
+	 */
+	public String packKey() {
+		return packKey(currentLevel);
+	}
+
+	public static String packKey(Level level) {
+		if (level == null)
+			return null;
+		if (level.isDefault())
+			return "builtin";
+		if (level.getApiId() > 0)
+			return "gdtr:" + level.getApiId();
+		return null; // sideloaded from file, not identifiable across devices
+	}
+
 	public File getCurrentLevelsFile() {
 		if (currentLevel != null && currentLevel.getId() > 1)
 			return getMrgFileById(currentLevel.getId());

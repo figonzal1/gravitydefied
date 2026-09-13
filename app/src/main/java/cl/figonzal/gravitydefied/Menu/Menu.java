@@ -8,6 +8,11 @@ import android.graphics.Paint;
 import android.net.Uri;
 import android.text.InputType;
 import android.widget.EditText;
+import cl.figonzal.gravitydefied.API.APIException;
+import cl.figonzal.gravitydefied.API.Ranking;
+import cl.figonzal.gravitydefied.API.RankingAuth;
+import cl.figonzal.gravitydefied.API.Response;
+import cl.figonzal.gravitydefied.API.ResponseHandler;
 import cl.figonzal.gravitydefied.Command;
 import cl.figonzal.gravitydefied.GDActivity;
 import cl.figonzal.gravitydefied.Game.GameView;
@@ -76,6 +81,7 @@ public class Menu
 	private MenuScreen leagueSelectorCurrentMenu;
 	private MenuScreen highScoreMenu;
 	private SimpleMenuElementNew highscoreItem;
+	private RankingMenuScreen rankingScreen;
 	private ActionMenuElement startItem;
 	private OptionsMenuElement perspectiveOptionItem;
 	private OptionsMenuElement shadowsOptionItem;
@@ -89,6 +95,8 @@ public class Menu
 	private OptionsMenuElement vibrateOnTouchOptionItem;
 	private OptionsMenuElement nightModeOptionItem;
 	private SimpleMenuElementNew clearHighscoreOptionItem;
+	private OptionsMenuElement rankingEnabledOptionItem;
+	private ActionMenuElement rankingSignInItem;
 	private SimpleMenuElementNew fullResetItem;
 	// private ActionMenuElement yesAction;
 	// private ActionMenuElement noAction;
@@ -366,6 +374,7 @@ public class Menu
 				finishedRestartAction = new ActionMenuElement(getString(R.string.restart) + ": DEFAULT", ActionMenuElement.RESTART, this);*/
 
 				highScoreMenu = new MenuScreen(getString(R.string.highscores), playMenu);
+				rankingScreen = new RankingMenuScreen(getString(R.string.world_ranking), highScoreMenu);
 				finishedMenu = new MenuScreen(getString(R.string.finished), playMenu);
 				ingameScreen = new MenuScreen(getString(R.string.ingame), playMenu);
 				nameScreen = new NameInputMenuScreen(getString(R.string.enter_name), finishedMenu, nameChars);
@@ -420,12 +429,16 @@ public class Menu
 				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
 				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
 				clearHighscoreOptionItem = new SimpleMenuElementNew(getString(R.string.clear_highscore), eraseScreen, this);
+				rankingEnabledOptionItem = new OptionsMenuElement(getString(R.string.ranking_enabled_option), Settings.isRankingEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
+				rankingSignInItem = new ActionMenuElement(getString(R.string.ranking_sign_in), ActionMenuElement.SIGN_IN_RANKING, this);
 
 				// if (hasPointer)
 				//	optionsMenu.addItem(softwareJoystickOptionItem);
 				optionsMenu.addItem(displayOptionsItem);
 				optionsMenu.addItem(controlsOptionsItem);
 				optionsMenu.addItem(clearHighscoreOptionItem);
+				optionsMenu.addItem(rankingEnabledOptionItem);
+				optionsMenu.addItem(rankingSignInItem);
 				optionsMenu.addItem(createAction(ActionMenuElement.BACK));
 
 				displayOptionsMenu.addItem(perspectiveOptionItem);
@@ -655,6 +668,10 @@ public class Menu
 		return trackSelector.getSelectedOption();
 	}
 
+	public int getSelectedLeague() {
+		return leagueSelector.getSelectedOption();
+	}
+
 	// not sure about this name
 	public boolean canStartTrack() {
 		if (m_SZ) {
@@ -679,6 +696,9 @@ public class Menu
 		}
 		// saveManager.write();
 		levelsManager.saveHighScores(currentScores);
+
+		submitWorldRankingScore(levelSelector.getSelectedOption(), trackSelector.getSelectedOption(),
+				leagueSelector.getSelectedOption(), lastTrackTime);
 
 		leagueCompleted = false;
 
@@ -821,6 +841,46 @@ public class Menu
 		finishedMenu.addItem(createAction(ActionMenuElement.PLAY_MENU));
 
 		setCurrentMenu(finishedMenu, false);
+	}
+
+	/**
+	 * Fire-and-forget submit to the world-ranking backend, called once per finish right after the
+	 * local highscore is saved above. Silently no-ops when ranking is off, not signed in, or the
+	 * pack has no stable global id (see LevelsManager.packKey()) - none of that should ever
+	 * interrupt saving the local record, which already happened.
+	 */
+	private void submitWorldRankingScore(int difficulty, int track, int league, long timeCs) {
+		if (!Settings.isRankingEnabled())
+			return;
+
+		String token = Settings.getRankingToken();
+		if (token == null)
+			return; // never signed in to the ranking backend
+
+		String pack = getLevelsManager().packKey();
+		if (pack == null)
+			return; // sideloaded pack (Menu.java installFromFile()), no id another device could agree on
+
+		long crc32;
+		try {
+			crc32 = getLevelLoader().computeCrc32();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		Ranking.submitScore(pack, difficulty, track, league, timeCs, crc32, token, new ResponseHandler() {
+			@Override
+			public void onResponse(Response response) {
+				// Nothing to show here - the local highscore (already saved) is this device's
+				// source of truth; RankingMenuScreen re-queries the backend on its own each time.
+			}
+
+			@Override
+			public void onError(APIException error) {
+				logDebug("World ranking submit failed: " + error.getMessage());
+			}
+		});
 	}
 
 	//public void _hvV() {
@@ -1163,6 +1223,7 @@ public class Menu
 		if (scores[0] == null)
 			highScoreMenu.addItem(new TextMenuElement(getString(R.string.no_highscores)));
 
+		highScoreMenu.addItem(new SimpleMenuElementNew(getString(R.string.world_ranking), rankingScreen, this));
 		highScoreMenu.addItem(createAction(ActionMenuElement.BACK));
 		highScoreMenu.highlightElement();
 
@@ -1269,6 +1330,10 @@ public class Menu
 			gd.restartApp();
 			return;
 		}
+		if (item == rankingEnabledOptionItem) {
+			Settings.setRankingEnabled(rankingEnabledOptionItem.getSelectedOption() == 0);
+			return;
+		}
 		if (item == whatsNewReplayItem) {
 			Settings.setLastSeenVersion("0"); // non-empty and != current, so the next launch replays it
 			gd.restartApp();
@@ -1333,6 +1398,20 @@ public class Menu
 				}
 				if (((ActionMenuElement) item).getActionValue() == ActionMenuElement.SELECT_FILE) {
 					installFromFileBrowse();
+					return;
+				}
+				if (((ActionMenuElement) item).getActionValue() == ActionMenuElement.SIGN_IN_RANKING) {
+					RankingAuth.signIn(gd, new RankingAuth.Callback() {
+						@Override
+						public void onSignedIn() {
+							showAlert(getString(R.string.ranking_signed_in), getString(R.string.ranking_signed_in_text), null);
+						}
+
+						@Override
+						public void onFailed(String message) {
+							showAlert(getString(R.string.error), message, null);
+						}
+					});
 					return;
 				}
 				if (((ActionMenuElement) item).getActionValue() == ActionMenuElement.YES) {

@@ -22,6 +22,13 @@
 		<property
 				android:name="android.window.PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY"
 				android:value="true" />
+
+		<!-- World ranking sign-in (Menu/RankingMenuScreen). Needs a real Play Games Services
+		     project linked in Play Console before this placeholder is replaced. -->
+		<meta-data
+				android:name="com.google.android.gms.games.APP_ID"
+				android:value="@string/game_services_project_id" />
+
 		<activity
 				android:name=".GDActivity"
 				android:label="@string/app_name"

@@ -41,6 +41,7 @@ public class ActionMenuElement
 	public static final int SELECT_FILE = 12;
 	public static final int DELETE = 13;
 	public static final int RESTART_WITH_NEW_LEVEL = 14;
+	public static final int SIGN_IN_RANKING = 15;
 
 	protected MenuHandler handler;
 	protected boolean isLocked = false;

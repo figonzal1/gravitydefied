@@ -7,6 +7,7 @@ ben-manes-versions = "0.62.0"
 firebase-bom = "34.19.0"
 firebase-crashlytics-gradle = "3.0.8"
 google-services = "4.5.0"
+play-services-games = "20.1.2"
 version-catalog-update = "1.1.1"
 
 [libraries]
@@ -16,6 +17,7 @@ androidx-fragment = { module = "androidx.fragment:fragment", version.ref = "andr
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+play-services-games = { module = "com.google.android.gms:play-services-games-v2", version.ref = "play-services-games" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

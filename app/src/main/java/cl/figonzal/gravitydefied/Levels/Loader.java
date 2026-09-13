@@ -89,6 +89,25 @@ public class Loader {
 			return new FileInputStream(levelsFile);
 	}
 
+	/**
+	 * CRC32 of the currently loaded levels.mrg (builtin asset or a swapped-in pack file) - lets the
+	 * world-ranking backend pin a pack's identity to its actual bytes (see Menu.submitWorldRankingScore()).
+	 */
+	public long computeCrc32() throws IOException {
+		java.util.zip.CRC32 crc = new java.util.zip.CRC32();
+		InputStream in = getLevelsInputStream("levels.mrg");
+		try {
+			byte[] buf = new byte[4096];
+			int n;
+			while ((n = in.read(buf)) != -1) {
+				crc.update(buf, 0, n);
+			}
+		} finally {
+			in.close();
+		}
+		return crc.getValue();
+	}
+
 	private void readLevels() throws IOException {
 		//try {
 		InputStream in = getLevelsInputStream("levels.mrg");

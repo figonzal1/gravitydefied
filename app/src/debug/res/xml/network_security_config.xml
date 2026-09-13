@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug-only override of app/src/main/res/xml/network_security_config.xml (same file path,
+     the debug source set wins for debug builds). Adds cleartext for the local ranking backend
+     while it's being run on a dev machine instead of a real HTTPS host - never merged into
+     release, which only ever sees the main/ version (gdtr.net only). -->
+<network-security-config>
+	<domain-config cleartextTrafficPermitted="true">
+		<domain includeSubdomains="true">gdtr.net</domain>
+	</domain-config>
+
+	<!-- TODO: this is felipe's current LAN IP (Ethernet, 2026-09-12) - update if it changes, or
+	     switch to a mDNS/hosts-file name if that gets annoying. Only reachable from devices on the
+	     same Wi-Fi as the backend; the emulator would instead use 10.0.2.2. -->
+	<domain-config cleartextTrafficPermitted="true">
+		<domain includeSubdomains="false">192.168.1.161</domain>
+	</domain-config>
+</network-security-config>

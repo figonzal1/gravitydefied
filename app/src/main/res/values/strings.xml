@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+	<string name="game_services_project_id" translatable="false">144764087426</string>
+
 	<string name="no">No</string>
 	<string name="yes">Yes</string>
 	<string name="back">Back</string>
@@ -93,6 +95,17 @@
 
 	<string name="highscore_text">The three best times on every track are saved for each league. When beating a time on a track you will be asked to enter your name. The highscores can be viewed from the Play Menu. By pressing left and right in the highscore view you can view the highscore for a specific league. The highscore can be cleared from the options menu.</string>
 	<string name="no_highscores">No Highscores</string>
+
+	<string name="world_ranking">World Ranking</string>
+	<string name="ranking_loading">Loading…</string>
+	<string name="ranking_error">Could not reach the world ranking.</string>
+	<string name="ranking_sign_in_required">Sign in with Play Games (Options) to see the world ranking.</string>
+	<string name="ranking_unavailable_sideload">World ranking is not available for tracks installed from a file.</string>
+	<string name="ranking_your_place">You: #%1$d  %2$s</string>
+	<string name="ranking_enabled_option">Submit times to world ranking</string>
+	<string name="ranking_sign_in">Sign in with Play Games</string>
+	<string name="ranking_signed_in">Signed in</string>
+	<string name="ranking_signed_in_text">Your times will now be submitted to the world ranking.</string>
 
 	<string name="options_display_text"><![CDATA[
 		<b>Perspective: On/Off</b><br/>

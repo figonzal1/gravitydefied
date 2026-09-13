@@ -49,6 +49,9 @@ android {
             isDebuggable = true
             isMinifyEnabled = false
             resValue("string", "app_name", "Gravity Defied Classic-debug")
+            // Local backend for world-ranking dev (see API/Ranking.java + src/debug's
+            // network_security_config.xml cleartext override). Not used by release.
+            resValue("string", "ranking_base_url", "http://192.168.1.161:3000")
         }
         release {
             isMinifyEnabled = true
@@ -59,6 +62,7 @@ android {
                 "proguard-rules.pro"
             )
             resValue("string", "app_name", "Gravity Defied Classic")
+            resValue("string", "ranking_base_url", "https://ranking.gdtr.net")
             configure<CrashlyticsExtension> {
                 // Only deploy builds upload the mapping (fastlane passes
                 // -PuploadMapping); local release builds would otherwise keep
@@ -85,6 +89,10 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+
+    // World ranking sign-in (Menu/RankingMenuScreen, API/Ranking) - PGS API surface only,
+    // com.google.android.gms.games.* / .tasks.*, no androidx import (see GDActivity.java note below).
+    implementation(libs.play.services.games)
 
     // Override outdated transitive AndroidX deps pulled in by firebase-analytics →
     // play-services-measurement (Play Console flagged fragment 1.1.0 / activity 1.0.0).
