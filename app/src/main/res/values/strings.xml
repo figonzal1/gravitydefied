@@ -99,7 +99,7 @@
 	<string name="world_ranking">World Ranking</string>
 	<string name="ranking_loading">Loading…</string>
 	<string name="ranking_error">Could not reach the world ranking.</string>
-	<string name="ranking_sign_in_required">Sign in with Play Games (Options) to see the world ranking.</string>
+	<string name="ranking_disabled">World ranking is turned off (Options) for this device.</string>
 	<string name="ranking_unavailable_sideload">World ranking is not available for tracks installed from a file.</string>
 	<string name="ranking_your_place">You: #%1$d  %2$s</string>
 	<string name="ranking_enabled_option">Submit times to world ranking</string>

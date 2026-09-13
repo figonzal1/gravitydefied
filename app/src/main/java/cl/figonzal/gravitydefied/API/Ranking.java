@@ -48,16 +48,22 @@ public class Ranking {
 	}
 
 	public static Request submitScore(String pack, int difficulty, int track, int league,
-			long timeCs, long crc32, String bearerToken, ResponseHandler handler) {
+			long timeCs, String bearerToken, ResponseHandler handler) {
 		List<String[]> params = new LinkedList<String[]>();
 		params.add(new String[]{"pack", pack});
 		params.add(new String[]{"difficulty", String.valueOf(difficulty)});
 		params.add(new String[]{"track", String.valueOf(track)});
 		params.add(new String[]{"league", String.valueOf(league)});
 		params.add(new String[]{"timeCs", String.valueOf(timeCs)});
-		params.add(new String[]{"crc32", String.valueOf(crc32)});
 
 		return new Request(scoresUrl(), "submitScore", params, handler, bearerToken);
+	}
+
+	// Exact messages thrown by the backend's JwtAuthGuard (auth/jwt-auth.guard.ts) for a
+	// missing/expired/tampered Bearer token - lets callers tell "not signed in (yet)" apart from
+	// every other APIException and react by clearing the stale token instead of just logging it.
+	public static boolean isAuthError(String message) {
+		return "missing token".equals(message) || "invalid token".equals(message);
 	}
 
 	/**

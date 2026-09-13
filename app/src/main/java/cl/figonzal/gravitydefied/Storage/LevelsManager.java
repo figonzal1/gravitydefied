@@ -130,9 +130,11 @@ public class LevelsManager {
 	}
 
 	/**
-	 * Stable, device-independent id for the current pack, for the world ranking backend.
-	 * Returns null for a pack sideloaded from a local file (apiId == 0, not default) - those
-	 * have no id any other device could agree on, so they are never ranked.
+	 * Stable, device-independent id for the current pack, for the world ranking backend - includes
+	 * the .mrg's CRC32 (e.g. "builtin@a1b2c3d4"), so a pack edited byte-for-byte becomes a
+	 * different board on the backend instead of a permanent conflict (see the plan). Returns null
+	 * for a pack sideloaded from a local file (apiId == 0, not default) - those have no id any
+	 * other device could agree on, so they are never ranked - or if the .mrg can't be read.
 	 */
 	public String packKey() {
 		return packKey(currentLevel);
@@ -141,11 +143,22 @@ public class LevelsManager {
 	public static String packKey(Level level) {
 		if (level == null)
 			return null;
+
+		String prefix;
 		if (level.isDefault())
-			return "builtin";
-		if (level.getApiId() > 0)
-			return "gdtr:" + level.getApiId();
-		return null; // sideloaded from file, not identifiable across devices
+			prefix = "builtin";
+		else if (level.getApiId() > 0)
+			prefix = "gdtr:" + level.getApiId();
+		else
+			return null; // sideloaded from file, not identifiable across devices
+
+		try {
+			long crc32 = cl.figonzal.gravitydefied.Helpers.getLevelLoader().computeCrc32();
+			return String.format("%s@%08x", prefix, crc32); // zero-padded: backend expects exactly 8 hex chars
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public File getCurrentLevelsFile() {

@@ -859,17 +859,9 @@ public class Menu
 
 		String pack = getLevelsManager().packKey();
 		if (pack == null)
-			return; // sideloaded pack (Menu.java installFromFile()), no id another device could agree on
+			return; // sideloaded pack (Menu.java installFromFile()), or the .mrg couldn't be read
 
-		long crc32;
-		try {
-			crc32 = getLevelLoader().computeCrc32();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return;
-		}
-
-		Ranking.submitScore(pack, difficulty, track, league, timeCs, crc32, token, new ResponseHandler() {
+		Ranking.submitScore(pack, difficulty, track, league, timeCs, token, new ResponseHandler() {
 			@Override
 			public void onResponse(Response response) {
 				// Nothing to show here - the local highscore (already saved) is this device's
@@ -879,6 +871,13 @@ public class Menu
 			@Override
 			public void onError(APIException error) {
 				logDebug("World ranking submit failed: " + error.getMessage());
+
+				// The 30-day JWT expired (or was revoked) - clear it so we stop retrying with a
+				// dead token on every future finish, and so RankingMenuScreen shows its normal
+				// "sign in required" message (Settings.getRankingToken() == null) instead of the
+				// generic network-error message forever.
+				if (Ranking.isAuthError(error.getMessage()))
+					Settings.setRankingToken(null);
 			}
 		});
 	}

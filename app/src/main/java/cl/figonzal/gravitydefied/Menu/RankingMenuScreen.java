@@ -59,11 +59,14 @@ public class RankingMenuScreen extends MenuScreen {
 			return;
 		}
 
-		String token = Settings.getRankingToken();
-		if (!Settings.isRankingEnabled() || token == null) {
-			showMessage(getString(R.string.ranking_sign_in_required));
+		if (!Settings.isRankingEnabled()) {
+			showMessage(getString(R.string.ranking_disabled));
 			return;
 		}
+
+		// May be null: the backend's leaderboard read is auth-optional (OptionalJwtAuthGuard) -
+		// an anonymous viewer still sees the Top-10, just without the "You: #n" row below it.
+		String token = Settings.getRankingToken();
 
 		Menu menu = getGameMenu();
 		int difficulty = menu.getSelectedLevel();

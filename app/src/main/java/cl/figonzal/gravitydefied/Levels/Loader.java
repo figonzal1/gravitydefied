@@ -77,8 +77,12 @@ public class Loader {
 	}
 
 
+	// -1 means "not computed yet for the currently loaded levels.mrg" - see computeCrc32().
+	private long cachedCrc32 = -1;
+
 	public void setLevelsFile(File file) throws IOException {
 		levelsFile = file;
+		cachedCrc32 = -1;
 		reset();
 	}
 
@@ -90,10 +94,14 @@ public class Loader {
 	}
 
 	/**
-	 * CRC32 of the currently loaded levels.mrg (builtin asset or a swapped-in pack file) - lets the
-	 * world-ranking backend pin a pack's identity to its actual bytes (see Menu.submitWorldRankingScore()).
+	 * CRC32 of the currently loaded levels.mrg (builtin asset or a swapped-in pack file) - folded
+	 * into the world-ranking backend's pack identity (see Storage/LevelsManager.packKey()).
+	 * Cached per loaded file: called once per finished track, and packs run tens of KB.
 	 */
 	public long computeCrc32() throws IOException {
+		if (cachedCrc32 != -1)
+			return cachedCrc32;
+
 		java.util.zip.CRC32 crc = new java.util.zip.CRC32();
 		InputStream in = getLevelsInputStream("levels.mrg");
 		try {
@@ -105,7 +113,8 @@ public class Loader {
 		} finally {
 			in.close();
 		}
-		return crc.getValue();
+		cachedCrc32 = crc.getValue();
+		return cachedCrc32;
 	}
 
 	private void readLevels() throws IOException {
