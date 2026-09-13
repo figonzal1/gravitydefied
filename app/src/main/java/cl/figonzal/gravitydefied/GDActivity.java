@@ -581,7 +581,9 @@ public class GDActivity extends Activity implements Runnable {
 					seconds -= 10L; */
 					goalLoop();
 					// menu.setLastTrackTime(seconds / 10L);
-					menu.setLastTrackTime((finishedTime - startedTime) / 10);
+					// pausedTime subtracted to match the HUD timer (GameView.drawTimer) - a run where the
+					// in-game menu was opened must not record a worse time than what the player saw on screen
+					menu.setLastTrackTime((finishedTime - startedTime - pausedTime) / 10);
 					menu.showMenu(2);
 
 					if (menu.canStartTrack())
