@@ -76,6 +76,12 @@ public class Settings {
 	private static final String RANKING_TOKEN = "ranking_token";
 	private static final String RANKING_TOKEN_DEFAULT = "";
 
+	// Play Games display name, cached purely so the Options row can show "Signed in as X" without
+	// a network round trip - the backend (not this) is still the source of truth for submissions.
+	// Same treatment as RANKING_TOKEN: account state, not cleared by resetAll().
+	private static final String RANKING_PLAYER_NAME = "ranking_player_name";
+	private static final String RANKING_PLAYER_NAME_DEFAULT = "";
+
 	private static SharedPreferences preferences;
 
 	static {
@@ -278,6 +284,18 @@ public class Settings {
 
 	public static void setRankingToken(String token) {
 		setString(RANKING_TOKEN, token == null ? RANKING_TOKEN_DEFAULT : token);
+	}
+
+	/**
+	 * @return null if no Play Games display name has been cached yet.
+	 */
+	public static String getRankingPlayerName() {
+		String name = preferences.getString(RANKING_PLAYER_NAME, RANKING_PLAYER_NAME_DEFAULT);
+		return name.isEmpty() ? null : name;
+	}
+
+	public static void setRankingPlayerName(String name) {
+		setString(RANKING_PLAYER_NAME, name == null ? RANKING_PLAYER_NAME_DEFAULT : name);
 	}
 
 	private static void setLong(String key, long value) {

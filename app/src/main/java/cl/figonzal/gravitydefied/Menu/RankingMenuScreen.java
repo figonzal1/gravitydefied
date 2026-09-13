@@ -10,15 +10,21 @@ import cl.figonzal.gravitydefied.R;
 import cl.figonzal.gravitydefied.Settings;
 import cl.figonzal.gravitydefied.Storage.LevelsManager;
 
+import static cl.figonzal.gravitydefied.Helpers.fromHtml;
 import static cl.figonzal.gravitydefied.Helpers.getGDActivity;
 import static cl.figonzal.gravitydefied.Helpers.getGameMenu;
 import static cl.figonzal.gravitydefied.Helpers.getLevelsManager;
 import static cl.figonzal.gravitydefied.Helpers.getString;
 
 /**
- * World Top-10 for the pack/difficulty/track/league currently selected in Menu (playMenu's
- * selectors), reached from highScoreMenu. Read-only: rows are plain TextMenuElements, no clicking,
- * navigation is the usual back/scroll (see setIsTextScreen(true) in MenuScreen).
+ * World Top-10 (with medals for the top 3, like the old local highscore screen) for the
+ * pack/difficulty/track currently selected in Menu (playMenu's selectors), reached directly from
+ * playMenu - this is the only highscore/ranking screen left, local per-device highscores having
+ * been removed in favor of this being the single source of truth.
+ *
+ * League can be browsed independently of the actual play-menu selection via left/right (see
+ * Menu.keyPressed()), the same way the old local highscore screen worked - it resyncs to the
+ * current play-menu league every time the screen is (re)entered.
  *
  * Always reloads on entry rather than caching - the selection (track/league) can differ between
  * visits and a leaderboard query is cheap.
@@ -28,6 +34,7 @@ public class RankingMenuScreen extends MenuScreen {
 	private static final int LIMIT = 10;
 
 	private Request request;
+	private int league;
 
 	public RankingMenuScreen(String title, MenuScreen navTarget) {
 		super(title, navTarget);
@@ -37,6 +44,7 @@ public class RankingMenuScreen extends MenuScreen {
 	@Override
 	public void onShow() {
 		super.onShow();
+		league = getGameMenu().getSelectedLeague();
 		load();
 	}
 
@@ -46,6 +54,16 @@ public class RankingMenuScreen extends MenuScreen {
 			request.cancel();
 			request = null;
 		}
+	}
+
+	/**
+	 * Browses a different league without touching the actual play-menu league selection - called
+	 * from Menu.keyPressed() on left/right while this screen is shown.
+	 */
+	public void cycleLeague(int delta) {
+		int max = getGameMenu().getUnlockedLeagueCount();
+		league = Math.max(0, Math.min(max, league + delta));
+		load();
 	}
 
 	private void load() {
@@ -71,8 +89,8 @@ public class RankingMenuScreen extends MenuScreen {
 		Menu menu = getGameMenu();
 		int difficulty = menu.getSelectedLevel();
 		int track = menu.getSelectedTrack();
-		int league = menu.getSelectedLeague();
 
+		addSubtitle();
 		addItem(new TextMenuElement(getString(R.string.ranking_loading)));
 
 		request = Ranking.leaderboard(pack, difficulty, track, league, LIMIT, token, new ResponseHandler() {
@@ -95,15 +113,27 @@ public class RankingMenuScreen extends MenuScreen {
 		});
 	}
 
+	private void addSubtitle() {
+		HighScoreTextMenuElement subtitle = new HighScoreTextMenuElement(
+				fromHtml(getString(R.string.league) + ": " + getGameMenu().getLeagueName(league)));
+		subtitle.setIsSubtitle(true);
+		addItem(subtitle);
+	}
+
 	private void renderBoard(RankingResponse.Leaderboard board) {
 		clear();
+		addSubtitle();
 
 		if (board.entries.length == 0) {
 			addItem(new TextMenuElement(getString(R.string.no_highscores)));
 		} else {
 			for (int i = 0; i < board.entries.length; i++) {
 				RankingResponse.Entry entry = board.entries[i];
-				addItem(new TextMenuElement((i + 1) + ". " + entry.name + "  " + formatTime(entry.timeCs)));
+				HighScoreTextMenuElement row = new HighScoreTextMenuElement(
+						(i + 1) + ". " + entry.name + "  " + formatTime(entry.timeCs));
+				if (i < 3) row.setMedal(true, i);
+				row.setLayoutPadding(true);
+				addItem(row);
 			}
 		}
 
@@ -123,9 +153,10 @@ public class RankingMenuScreen extends MenuScreen {
 		highlightElement();
 	}
 
-	// Same "MM:SS.cc" format as HighScores.getScores()/Menu.getDurationString() - kept local
-	// rather than reusing those (private, instance-bound to Menu/HighScores) for a one-line format.
-	private static String formatTime(long centiseconds) {
+	// Same "MM:SS.cc" format as Menu.getDurationString() - kept local (package-visible, see
+	// Menu.saveCompletedTrack()'s Top-3 mini-board) rather than a private/instance-bound method,
+	// for a one-line format with no leading-space quirk.
+	static String formatTime(long centiseconds) {
 		int wholeSeconds = (int) (centiseconds / 100);
 		int hundredths = (int) (centiseconds % 100);
 		int minutes = wholeSeconds / 60;

@@ -24,11 +24,8 @@
 	<string name="start">Start</string>
 
 	<string name="mods">Mods</string>
-	<string name="highscores">High Scores</string>
 	<string name="finished">Finished!</string>
 	<string name="ingame">Ingame</string>
-	<string name="enter_name">Enter Name</string>
-	<string name="confirm_clear">Confirm Clear</string>
 	<string name="confirm_reset">Confirm Reset</string>
 	<string name="level">Level</string>
 	<string name="track">Track</string>
@@ -37,7 +34,6 @@
 	<string name="restart_with_new_level">Restart with new level</string>
 	<string name="next">Next</string>
 	<string name="_continue">Continue</string>
-	<string name="name">Name</string>
 	<string name="time">Time</string>
 
 	<string name="perspective">Perspective</string>
@@ -61,7 +57,6 @@
 	<string name="night_mode">Night mode</string>
 	<string name="options_display">Display</string>
 	<string name="options_controls">Controls</string>
-	<string name="clear_highscore">Clear highscore</string>
 	<string name="full_reset">Full Reset</string>
 	<string name="reset">Reset</string>
 	<string name="reset_text">Master reset. Application will be restarted.</string>
@@ -70,10 +65,6 @@
 	<string name="download_mods">Download mods</string>
 	<string name="install_mrg">Install levels.mrg</string>
 
-	<string name="cleared">Cleared</string>
-	<string name="cleared_text">Highscores have been cleared</string>
-	<string name="erase_text1">Clearing the highscores cannot be undone. It will remove all the registered times on all tracks.</string>
-	<string name="erase_text2">Would you like to clear the highscores?</string>
 	<string name="reset_text1">A full reset cannot be undone. It will relock all tracks and leagues and clear back all settings to default. A full reset will restart the application.</string>
 	<string name="reset_text2">Would you like to do a full reset?</string>
 
@@ -93,7 +84,6 @@
 	<string name="unlocking">Unlocking</string>
 	<string name="unlocking_text">By completing the easier levels, new levels will be unlocked. You will also gain access to higher leagues where more advanced bikes with different characteristics are available.</string>
 
-	<string name="highscore_text">The three best times on every track are saved for each league. When beating a time on a track you will be asked to enter your name. The highscores can be viewed from the Play Menu. By pressing left and right in the highscore view you can view the highscore for a specific league. The highscore can be cleared from the options menu.</string>
 	<string name="no_highscores">No Highscores</string>
 
 	<string name="world_ranking">World Ranking</string>
@@ -102,10 +92,15 @@
 	<string name="ranking_disabled">World ranking is turned off (Options) for this device.</string>
 	<string name="ranking_unavailable_sideload">World ranking is not available for tracks installed from a file.</string>
 	<string name="ranking_your_place">You: #%1$d  %2$s</string>
+	<string name="ranking_rank_tpl">World rank: #%1$d</string>
 	<string name="ranking_enabled_option">Submit times to world ranking</string>
 	<string name="ranking_sign_in">Sign in with Play Games</string>
 	<string name="ranking_signed_in">Signed in</string>
+	<string name="ranking_signed_in_as">Signed in as %1$s</string>
 	<string name="ranking_signed_in_text">Your times will now be submitted to the world ranking.</string>
+	<string name="ranking_sign_in_failed">Play Games sign-in failed</string>
+	<string name="ranking_auth_code_failed">Could not get a server access code</string>
+	<string name="ranking_malformed_response">Malformed response</string>
 
 	<string name="options_display_text"><![CDATA[
 		<b>Perspective: On/Off</b><br/>
@@ -155,11 +150,6 @@
 		Enables haptic feedback when you press control keys.
 	]]></string>
 
-	<string name="clear_highscore_text"><![CDATA[
-		<b>Clear highscore</b><br/>
-		Lets you clear the highscores. Here you can also do a "Full Reset" which will reset the game to original state (clear settings, highscores, unlocked levels and leagues).
-	]]></string>
-
 	<!-- What's New — mirror of fastlane/metadata/android/en-US/changelogs/default.txt -->
 	<string name="whats_new_text"><![CDATA[
 		&#8226; Your progress is now restored automatically: unlocked leagues no longer show as locked<br/>
@@ -207,12 +197,6 @@
 	<string name="level_completed_text">You have completed all tracks at this level.</string>
 	<string name="complete_to_unlock">Complete more tracks to unlock this track/league combo.</string>
 	<string name="tracks_completed_tpl"><![CDATA[%1$d of %2$d tracks in <b>%3$s</b> completed.]]></string>
-
-	<string-array name="finished_places">
-		<item>First place!</item>
-		<item>Second place!</item>
-		<item>Third place!</item>
-	</string-array>
 
 	<string-array name="on_off">
 		<item>On</item>
@@ -303,6 +287,6 @@
 	<string name="e_no_network_connection">No network connection.</string>
 	<string name="e_level_damaged">Looks like this level is damaged.\nYou can skip it and unlock next level.</string>
 	<string name="e_database_damaged_title">Damaged data</string>
-	<string name="e_database_damaged_message">The levels and high scores database is damaged and cannot be opened. Delete it and restart the game? Your high scores will be lost; installed level packs will stay on disk.</string>
+	<string name="e_database_damaged_message">The levels database is damaged and cannot be opened. Delete it and restart the game? Your progress (unlocked tracks and leagues) will be lost; installed level packs will stay on disk.</string>
 
 </resources>

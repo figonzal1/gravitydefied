@@ -64,6 +64,37 @@ public class MenuScreen
 			((ClickableMenuElement) item).setOnHighlightListener(this);
 	}
 
+	// Inserts mid-list instead of appending - for a screen that fills in rows as async data
+	// arrives at a fixed spot (e.g. Menu.finishedMenu's world-ranking rows, inserted right after
+	// the time and before the already-appended progression text/actions). Keeps selectedIndex
+	// pointing at the same logical element when the current highlight sits after the insertion.
+	public void addItem(MenuElement item, int index) {
+		layout.addView(item.getView(), index);
+		menuItems.insertElementAt(item, index);
+
+		if (item instanceof ClickableMenuElement)
+			((ClickableMenuElement) item).setOnHighlightListener(this);
+
+		if (selectedIndex >= index)
+			selectedIndex++;
+	}
+
+	// Symmetric counterpart to addItem(item, index) - removes one row without clear()ing/rebuilding
+	// everything else (e.g. swapping a "Loading…" placeholder for the real result, or dropping it
+	// on error).
+	public void removeItemAt(int index) {
+		MenuElement item = (MenuElement) menuItems.elementAt(index);
+		layout.removeView(item.getView());
+		menuItems.removeElementAt(index);
+
+		if (item == lastHighlighted)
+			lastHighlighted = null;
+		if (selectedIndex == index)
+			selectedIndex = -1;
+		else if (selectedIndex > index)
+			selectedIndex--;
+	}
+
 	protected void scrollToItem(MenuElement item) {
 		// int y = item.getView().getTop();
 		// logDebug("scrollTo: y = " + y);

@@ -965,7 +965,7 @@ public class GDActivity extends Activity implements Runnable {
 	// in-game. Emits the same ASCII key codes as keypad cells '2'/'4'/'6'/'8' (Keyset 1's
 	// accelerate/lean/brake mapping and the menu's UP/LEFT/RIGHT/DOWN), so it needs no changes
 	// below GameView.keyPressed/keyReleased. No OK button: tapping a menu row already fires
-	// KEY_FIRE (ClickableMenuElement), and NameInputMenuScreen is confirmed via the back button.
+	// KEY_FIRE (ClickableMenuElement).
 	//
 	// The tilt scheme reuses this same bar for its pedals: full-width GAS/FRENO in-game (tilting
 	// the device leans the bike, see TiltController), the usual four buttons in menus (tilting
@@ -1143,8 +1143,7 @@ public class GDActivity extends Activity implements Runnable {
 	// @UiThread
 	// Button/Tilt schemes: same bar (lean buttons + pedals, or just pedals) in menus and
 	// in-game — no context switching for the button scheme; the tilt scheme is the one
-	// exception, see rebuildGamepadBar(). NameInputMenuScreen (letter entry, key-only — see its
-	// performAction) works unmodified either way.
+	// exception, see rebuildGamepadBar().
 	public void showKeyboardLayout() {
 		runOnUiThread(new Runnable() {
 			@Override

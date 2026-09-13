@@ -427,24 +427,6 @@ public class LevelsManager {
 		return dataSource.findInstalledLevels(apiIds);
 	}
 
-	public HighScores getHighScores(int level, int track) {
-		HighScores scores = dataSource.getHighScores(currentLevel.getId(), level, track);
-		// logDebug("LevelsManager.getHighScores: " + scores);
-		return scores;
-	}
-
-	public void saveHighScores(HighScores scores) {
-		dataSource.updateHighScores(scores);
-	}
-
-	public void clearHighScores() {
-		dataSource.clearHighScores(currentLevel.getId());
-	}
-
-	public void clearAllHighScores() {
-		dataSource.clearHighScores(0);
-	}
-
 	public void resetAllLevelsSettings() {
 		dataSource.resetAllLevelsSettings();
 

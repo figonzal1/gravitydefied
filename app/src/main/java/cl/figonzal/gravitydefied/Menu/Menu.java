@@ -11,6 +11,8 @@ import android.widget.EditText;
 import cl.figonzal.gravitydefied.API.APIException;
 import cl.figonzal.gravitydefied.API.Ranking;
 import cl.figonzal.gravitydefied.API.RankingAuth;
+import cl.figonzal.gravitydefied.API.RankingResponse;
+import cl.figonzal.gravitydefied.API.Request;
 import cl.figonzal.gravitydefied.API.Response;
 import cl.figonzal.gravitydefied.API.ResponseHandler;
 import cl.figonzal.gravitydefied.Command;
@@ -20,14 +22,12 @@ import cl.figonzal.gravitydefied.Levels.InvalidTrackException;
 import cl.figonzal.gravitydefied.Levels.Loader;
 import cl.figonzal.gravitydefied.R;
 import cl.figonzal.gravitydefied.Settings;
-import cl.figonzal.gravitydefied.Storage.HighScores;
 import cl.figonzal.gravitydefied.Storage.Level;
 import cl.figonzal.gravitydefied.Storage.LevelsManager;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 
 import static cl.figonzal.gravitydefied.Helpers.*;
 import static cl.figonzal.gravitydefied.Helpers.logDebug;
@@ -40,7 +40,6 @@ public class Menu
 
 	public MenuScreen currentMenu;
 	public Level level;
-	private HighScores currentScores;
 	public int selectedLeague = 0;
 	public boolean m_blZ = false;
 	public boolean menuDisabled = false;
@@ -66,7 +65,6 @@ public class Menu
 	private SimpleMenuElementNew controlsOptionsItem;
 	private MenuScreen aboutScreen;
 	private MenuScreen helpMenu;
-	private MenuScreen eraseScreen;
 	private MenuScreen resetScreen;
 	private MenuScreen finishedMenu;
 	private MenuScreen ingameScreen;
@@ -79,7 +77,6 @@ public class Menu
 	private MenuScreen trackSelectorCurrentMenu;
 	private OptionsMenuElement leagueSelector;
 	private MenuScreen leagueSelectorCurrentMenu;
-	private MenuScreen highScoreMenu;
 	private SimpleMenuElementNew highscoreItem;
 	private RankingMenuScreen rankingScreen;
 	private ActionMenuElement startItem;
@@ -94,7 +91,6 @@ public class Menu
 	private OptionsMenuElement keyboardInMenuOptionItem;
 	private OptionsMenuElement vibrateOnTouchOptionItem;
 	private OptionsMenuElement nightModeOptionItem;
-	private SimpleMenuElementNew clearHighscoreOptionItem;
 	private OptionsMenuElement rankingEnabledOptionItem;
 	private ActionMenuElement rankingSignInItem;
 	private SimpleMenuElementNew fullResetItem;
@@ -110,14 +106,10 @@ public class Menu
 	private SimpleMenuElementNew keysHelpItem;
 	private MenuScreen unlockingHelpScreen;
 	private SimpleMenuElementNew unlockingHelpItem;
-	private MenuScreen highscoreHelpScreen;
-	private SimpleMenuElementNew highscoreHelpItem;
 	private MenuScreen optionsHelpScreen;
 	private SimpleMenuElementNew optionsHelpItem;
 	private MenuScreen optionsDisplayHelpScreen;
 	private MenuScreen optionsControlsHelpScreen;
-	private MenuScreen optionsClearHelpScreen;
-	private NameInputMenuScreen nameScreen;
 	private ActionMenuElement continueAction;
 	// private ActionMenuElement goToMainAction;
 	// private ActionMenuElement exitMenuItem;
@@ -125,12 +117,12 @@ public class Menu
 	private ActionMenuElement finishedRestartAction;
 	private ActionMenuElement nextAction;
 	// private ActionMenuElement okAction;
-	private ActionMenuElement nameAction;
 	private long lastTrackTime;
 	private int m_ajI;
 	private int m_atI;
 	private String finishedTime;
-	private byte[] nameChars;
+	private Request finishedRankingRequest; // in-flight submit/leaderboard call for finishedMenu's world-ranking rows
+	private int finishRunId; // bumped on every saveCompletedTrack() - guards a stale callback from an older run (cancelled but already in flight) touching the finishedMenu of a newer one
 	// private RecordStore recordStore;
 	// private int m_afI = -1;
 	private boolean settingsLoadedOK;
@@ -194,9 +186,6 @@ public class Menu
 		switch (step) {
 			case 1:
 				m_BObject = new Object();
-				nameChars = new byte[]{
-						65, 65, 65 // A A A
-				};
 				onOffStrings = getStringArray(R.array.on_off);
 				keysetStrings = getStringArray(R.array.keyset);
 				controlSchemeStrings = getStringArray(R.array.control_scheme);
@@ -255,7 +244,7 @@ public class Menu
 
 				}*/
 
-				nameChars = Settings.getName();
+				byte[] nameChars = Settings.getName();
 				// if (nameChars[0] == 82 && nameChars[1] == 75 && nameChars[2] == 69) {
 				if (isNameCheat(nameChars)) {
 					// Unlock everything for cheat
@@ -309,14 +298,6 @@ public class Menu
 
 				levelIndex = level.getSelectedLevel();
 				track = level.getSelectedTrack();
-
-				if (nameChars[0] != 82 || nameChars[1] != 75 || nameChars[2] != 69) {
-					//level.setUnlockedLeagues();
-					/*leaguesUnlockedCount = readSetting(5, leaguesUnlockedCount);
-					levelsUnlockedCount = readSetting(6, levelsUnlockedCount);
-					for (int i = 0; i < 3; i++)
-						unlockedTracks[i] = readSetting(7 + i, unlockedTracks[i]);*/
-				}
 
 				try {
 					selectedTrack[level.getSelectedLevel()] = level.getSelectedTrack();
@@ -373,13 +354,10 @@ public class Menu
 				ingameRestartAction = new ActionMenuElement(getString(R.string.restart) + ": DEFAULT", ActionMenuElement.RESTART, this);
 				finishedRestartAction = new ActionMenuElement(getString(R.string.restart) + ": DEFAULT", ActionMenuElement.RESTART, this);*/
 
-				highScoreMenu = new MenuScreen(getString(R.string.highscores), playMenu);
-				rankingScreen = new RankingMenuScreen(getString(R.string.world_ranking), highScoreMenu);
+				rankingScreen = new RankingMenuScreen(getString(R.string.world_ranking), playMenu);
 				finishedMenu = new MenuScreen(getString(R.string.finished), playMenu);
 				ingameScreen = new MenuScreen(getString(R.string.ingame), playMenu);
-				nameScreen = new NameInputMenuScreen(getString(R.string.enter_name), finishedMenu, nameChars);
-				eraseScreen = new MenuScreen(getString(R.string.confirm_clear), optionsMenu);
-				resetScreen = new MenuScreen(getString(R.string.confirm_reset), eraseScreen);
+				resetScreen = new MenuScreen(getString(R.string.confirm_reset), optionsMenu);
 
 				gameMenuItem = new SimpleMenuElementNew(getString(R.string.play_menu), playMenu, this);
 				managerMenuItem = new SimpleMenuElementNew(getString(R.string.mods), managerScreen, this);
@@ -405,8 +383,7 @@ public class Menu
 				}
 				levelSelector.setUnlockedCount(level.getUnlockedLevels());
 				leagueSelector.setUnlockedCount(level.getUnlockedLeagues());
-				highscoreItem = new SimpleMenuElementNew(getString(R.string.highscores), highScoreMenu, this);
-				highScoreMenu.addItem(createAction(ActionMenuElement.BACK));
+				highscoreItem = new SimpleMenuElementNew(getString(R.string.world_ranking), rankingScreen, this);
 				startItem = new ActionMenuElement(getString(R.string.start) + ">", this);
 				playMenu.addItem(startItem);
 				playMenu.addItem(levelSelector);
@@ -428,17 +405,18 @@ public class Menu
 				keyboardSizeSlider = new SliderMenuElement(getString(R.string.keyboard_size), Settings.getKeyboardScale(), Settings.KEYBOARD_SCALE_MIN, Settings.KEYBOARD_SCALE_MAX, 5, this);
 				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
 				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
-				clearHighscoreOptionItem = new SimpleMenuElementNew(getString(R.string.clear_highscore), eraseScreen, this);
 				rankingEnabledOptionItem = new OptionsMenuElement(getString(R.string.ranking_enabled_option), Settings.isRankingEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
 				rankingSignInItem = new ActionMenuElement(getString(R.string.ranking_sign_in), ActionMenuElement.SIGN_IN_RANKING, this);
+				updateRankingSignInItem();
+				fullResetItem = new SimpleMenuElementNew(getString(R.string.full_reset), resetScreen, this);
 
 				// if (hasPointer)
 				//	optionsMenu.addItem(softwareJoystickOptionItem);
 				optionsMenu.addItem(displayOptionsItem);
 				optionsMenu.addItem(controlsOptionsItem);
-				optionsMenu.addItem(clearHighscoreOptionItem);
 				optionsMenu.addItem(rankingEnabledOptionItem);
 				optionsMenu.addItem(rankingSignInItem);
+				optionsMenu.addItem(fullResetItem);
 				optionsMenu.addItem(createAction(ActionMenuElement.BACK));
 
 				displayOptionsMenu.addItem(perspectiveOptionItem);
@@ -458,13 +436,6 @@ public class Menu
 
 				// noAction = new ActionMenuElement(getString(R.string.no), 0, this, null, false, mainMenu, true);
 				// yesAction = new ActionMenuElement(getString(R.string.yes), 0, this, null, false, mainMenu, true);
-				fullResetItem = new SimpleMenuElementNew(getString(R.string.full_reset), resetScreen, this);
-				eraseScreen.addItem(new TextMenuElement(getString(R.string.erase_text1)));
-				eraseScreen.addItem(new TextMenuElement(getString(R.string.erase_text2)));
-				eraseScreen.addItem(createEmptyLine(true));
-				eraseScreen.addItem(createAction(ActionMenuElement.NO));
-				eraseScreen.addItem(createAction(ActionMenuElement.YES));
-				eraseScreen.addItem(fullResetItem);
 				resetScreen.addItem(new TextMenuElement(getString(R.string.reset_text1)));
 				resetScreen.addItem(new TextMenuElement(getString(R.string.reset_text2)));
 				resetScreen.addItem(createEmptyLine(true));
@@ -479,9 +450,7 @@ public class Menu
 					whatsNewReplayItem = new ActionMenuElement(getString(R.string.whats_new_replay), 0, this);
 					whatsNewScreen.addItem(whatsNewReplayItem);
 				}
-				// "Ok" label, BACK action: reads better than "Back" for a one-way announcement
-				// screen, but keeps BACK's actual navigation (ActionMenuElement.OK is hard-wired
-				// to saveCompletedTrack() for the finished-race screen — wrong handler here)
+				// "Ok" label, BACK action: reads better than "Back" for a one-way announcement screen.
 				whatsNewScreen.addItem(new ActionMenuElement(getString(R.string.ok), ActionMenuElement.BACK, this));
 				// default the highlight to Ok, not the debug replay row: the first FIRE press
 				// should dismiss the screen, not restart the app
@@ -505,12 +474,6 @@ public class Menu
 				unlockingHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.unlocking_text))));
 				unlockingHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
-				highscoreHelpScreen = new MenuScreen(getString(R.string.highscores), helpMenu);
-				highscoreHelpScreen.setIsTextScreen(true);
-				highscoreHelpItem = new SimpleMenuElementNew(getString(R.string.highscores), highscoreHelpScreen, this);
-				highscoreHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.highscore_text))));
-				highscoreHelpScreen.addItem(createAction(ActionMenuElement.BACK));
-
 				optionsHelpScreen = new MenuScreen(getString(R.string.options), helpMenu);
 				optionsHelpItem = new SimpleMenuElementNew(getString(R.string.options), optionsHelpScreen, this);
 
@@ -524,21 +487,14 @@ public class Menu
 				optionsControlsHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.options_controls_text))));
 				optionsControlsHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
-				optionsClearHelpScreen = new MenuScreen(getString(R.string.clear_highscore), optionsHelpScreen);
-				optionsClearHelpScreen.setIsTextScreen(true);
-				optionsClearHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.clear_highscore_text))));
-				optionsClearHelpScreen.addItem(createAction(ActionMenuElement.BACK));
-
 				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.options_display), optionsDisplayHelpScreen, this));
 				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.options_controls), optionsControlsHelpScreen, this));
-				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.clear_highscore), optionsClearHelpScreen, this));
 				optionsHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				helpMenu.addItem(whatsNewItem);
 				helpMenu.addItem(objectiveHelpItem);
 				helpMenu.addItem(keysHelpItem);
 				helpMenu.addItem(unlockingHelpItem);
-				helpMenu.addItem(highscoreHelpItem);
 				helpMenu.addItem(optionsHelpItem);
 				helpMenu.addItem(createAction(ActionMenuElement.BACK));
 
@@ -555,7 +511,6 @@ public class Menu
 				ingameScreen.addItem(new SimpleMenuElementNew(getString(R.string.options), optionsMenu, this));
 				ingameScreen.addItem(new SimpleMenuElementNew(getString(R.string.help), helpMenu, this));
 				ingameScreen.addItem(createAction(ActionMenuElement.PLAY_MENU));
-				nameAction = new ActionMenuElement(getString(R.string.name) + " - " + new String(nameChars), 0, this);
 				okCommand = new Command(getString(R.string.ok), 4, 1);
 				backCommand = new Command(getString(R.string.back), 2, 1);
 				setCurrentMenu(mainMenu, false);
@@ -580,6 +535,16 @@ public class Menu
 
 				// Level screen
 				levelScreen = new MenuScreen("", null);
+
+				// Play Games already signs the player in automatically on launch
+				// (PlayGamesSdk.initialize() in GDApplication) - this just picks that up silently
+				// and refreshes the Options row, with no dialog. See RankingAuth.ensureSignedIn().
+				RankingAuth.ensureSignedIn(activity, new Runnable() {
+					@Override
+					public void run() {
+						updateRankingSignInItem();
+					}
+				});
 				break;
 		}
 	}
@@ -607,10 +572,6 @@ public class Menu
 
 			case ActionMenuElement.EXIT:
 				r = R.string.exit;
-				break;
-
-			case ActionMenuElement.OK:
-				r = R.string.ok;
 				break;
 
 			case ActionMenuElement.PLAY_MENU:
@@ -672,6 +633,14 @@ public class Menu
 		return leagueSelector.getSelectedOption();
 	}
 
+	public int getUnlockedLeagueCount() {
+		return leagueSelector.getUnlockedCount();
+	}
+
+	public String getLeagueName(int league) {
+		return leagueSelector.getOptions()[league];
+	}
+
 	// not sure about this name
 	public boolean canStartTrack() {
 		if (m_SZ) {
@@ -686,30 +655,21 @@ public class Menu
 		// ATTENTION!!!
 		// WHEN CHANGING THIS CODE, COPY-PASTE TO startTrack() !!!
 
-		LevelsManager levelsManager = getLevelsManager();
-
-		try {
-			currentScores.saveHighScore(leagueSelector.getSelectedOption(), new String(nameChars, "UTF-8"), lastTrackTime);
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			showAlert(getString(R.string.error), e.getMessage(), null);
+		if (finishedRankingRequest != null) {
+			finishedRankingRequest.cancel();
+			finishedRankingRequest = null;
 		}
-		// saveManager.write();
-		levelsManager.saveHighScores(currentScores);
-
-		submitWorldRankingScore(levelSelector.getSelectedOption(), trackSelector.getSelectedOption(),
-				leagueSelector.getSelectedOption(), lastTrackTime);
+		final int runId = ++finishRunId;
 
 		leagueCompleted = false;
 
 		finishedMenu.clear();
 		finishedMenu.addItem(new TextMenuElement(fromHtml("<b>" + getString(R.string.time) + "</b>: " + finishedTime)));
 
+		submitWorldRankingScore(runId, levelSelector.getSelectedOption(), trackSelector.getSelectedOption(),
+				leagueSelector.getSelectedOption(), lastTrackTime);
+
 		System.gc();
-		String[] as = currentScores.getScores(leagueSelector.getSelectedOption());
-		for (int k = 0; k < as.length; k++)
-			if (as[k] != null)
-				finishedMenu.addItem(new TextMenuElement("" + (k + 1) + ". " + as[k]));
 
 		byte byte0 = -1;
 		// logDebug("trackSelector.getUnlockedCount() = " + trackSelector.getUnlockedCount());
@@ -843,41 +803,100 @@ public class Menu
 		setCurrentMenu(finishedMenu, false);
 	}
 
+	// Index into finishedMenu where the world-ranking rows live - right after the single "Time: X"
+	// row added first in saveCompletedTrack(), before the progression text/actions appended later.
+	private static final int RANKING_ROW_INDEX = 1;
+
 	/**
-	 * Fire-and-forget submit to the world-ranking backend, called once per finish right after the
-	 * local highscore is saved above. Silently no-ops when ranking is off, not signed in, or the
-	 * pack has no stable global id (see LevelsManager.packKey()) - none of that should ever
-	 * interrupt saving the local record, which already happened.
+	 * Submits the just-finished time to the world-ranking backend and, on success, follows up
+	 * with a Top-3 fetch - both rendered into finishedMenu (see loadFinishedTop3()) via a
+	 * "Loading…" placeholder swapped out once each response arrives. Silently does nothing to the
+	 * UI when ranking is off, not signed in, or the pack has no stable global id (see
+	 * LevelsManager.packKey()) - none of that should ever interrupt the finish screen, which is
+	 * already showing by the time this runs.
+	 *
+	 * Every callback checks BOTH currentMenu == finishedMenu (the player navigated away entirely)
+	 * AND runId == finishRunId (a newer saveCompletedTrack() superseded this one but reuses the
+	 * same finishedMenu instance) - cancel() on the old Request is only best-effort (see
+	 * API/Request.java), so a reply already in flight can still arrive after being "cancelled".
 	 */
-	private void submitWorldRankingScore(int difficulty, int track, int league, long timeCs) {
+	private void submitWorldRankingScore(final int runId, final int difficulty, final int track, final int league, long timeCs) {
 		if (!Settings.isRankingEnabled())
 			return;
 
-		String token = Settings.getRankingToken();
+		final String token = Settings.getRankingToken();
 		if (token == null)
 			return; // never signed in to the ranking backend
 
-		String pack = getLevelsManager().packKey();
+		final String pack = getLevelsManager().packKey();
 		if (pack == null)
 			return; // sideloaded pack (Menu.java installFromFile()), or the .mrg couldn't be read
 
-		Ranking.submitScore(pack, difficulty, track, league, timeCs, token, new ResponseHandler() {
+		finishedMenu.addItem(new TextMenuElement(getString(R.string.ranking_loading)), RANKING_ROW_INDEX);
+
+		finishedRankingRequest = Ranking.submitScore(pack, difficulty, track, league, timeCs, token, new ResponseHandler() {
 			@Override
 			public void onResponse(Response response) {
-				// Nothing to show here - the local highscore (already saved) is this device's
-				// source of truth; RankingMenuScreen re-queries the backend on its own each time.
+				finishedRankingRequest = null;
+				if (runId != finishRunId || currentMenu != finishedMenu) return;
+
+				try {
+					RankingResponse.SubmitResult result = RankingResponse.parseSubmit(response);
+					finishedMenu.removeItemAt(RANKING_ROW_INDEX);
+					finishedMenu.addItem(new TextMenuElement(String.format(getString(R.string.ranking_rank_tpl), result.rank)), RANKING_ROW_INDEX);
+					loadFinishedTop3(runId, pack, difficulty, track, league, token);
+				} catch (Exception e) {
+					e.printStackTrace();
+					finishedMenu.removeItemAt(RANKING_ROW_INDEX);
+				}
 			}
 
 			@Override
 			public void onError(APIException error) {
+				finishedRankingRequest = null;
 				logDebug("World ranking submit failed: " + error.getMessage());
 
 				// The 30-day JWT expired (or was revoked) - clear it so we stop retrying with a
-				// dead token on every future finish, and so RankingMenuScreen shows its normal
-				// "sign in required" message (Settings.getRankingToken() == null) instead of the
-				// generic network-error message forever.
-				if (Ranking.isAuthError(error.getMessage()))
+				// dead token on every future finish, and so Options shows "Sign in..." again
+				// instead of a stale "Signed in as X" forever.
+				if (Ranking.isAuthError(error.getMessage())) {
 					Settings.setRankingToken(null);
+					Settings.setRankingPlayerName(null);
+				}
+
+				if (runId == finishRunId && currentMenu == finishedMenu)
+					finishedMenu.removeItemAt(RANKING_ROW_INDEX);
+			}
+		});
+	}
+
+	private void loadFinishedTop3(final int runId, String pack, int difficulty, int track, int league, String token) {
+		finishedRankingRequest = Ranking.leaderboard(pack, difficulty, track, league, 3, token, new ResponseHandler() {
+			@Override
+			public void onResponse(Response response) {
+				finishedRankingRequest = null;
+				if (runId != finishRunId || currentMenu != finishedMenu) return;
+
+				try {
+					RankingResponse.Leaderboard board = RankingResponse.parseLeaderboard(response);
+					int insertAt = RANKING_ROW_INDEX + 1;
+					for (int i = 0; i < board.entries.length; i++) {
+						RankingResponse.Entry entry = board.entries[i];
+						HighScoreTextMenuElement row = new HighScoreTextMenuElement(
+								(i + 1) + ". " + entry.name + "  " + RankingMenuScreen.formatTime(entry.timeCs));
+						row.setMedal(true, i);
+						row.setLayoutPadding(true);
+						finishedMenu.addItem(row, insertAt++);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+			@Override
+			public void onError(APIException error) {
+				finishedRankingRequest = null;
+				logDebug("World ranking board fetch failed: " + error.getMessage());
 			}
 		});
 	}
@@ -932,37 +951,10 @@ public class Menu
 				break;
 
 			case 2: // Finished
-				// finishTime = System.currentTimeMillis();
-				finishedMenu.clear();
-
 				levelIndex = levelSelector.getSelectedOption();
 				track = trackSelector.getSelectedOption();
-				HighScores scores = getLevelsManager().getHighScores(levelSelector.getSelectedOption(), trackSelector.getSelectedOption());
-				currentScores = scores;
-
-				// saveManager.setTrack(levelSelector.getSelectedOption(), trackSelector.getSelectedOption());
-				int place = scores.getPlace(leagueSelector.getSelectedOption(), lastTrackTime);
 				finishedTime = getDurationString(lastTrackTime);
-
-				if (place >= 0 && place <= 2) {
-					HighScoreTextMenuElement placeText = new HighScoreTextMenuElement("");
-					placeText.setText(getStringArray(R.array.finished_places)[place]);
-					placeText.setMedal(true, place);
-
-					finishedMenu.addItem(placeText);
-
-					TextMenuElement h2 = new TextMenuElement(finishedTime);
-					finishedMenu.addItem(h2);
-
-					// finishedMenu.addItem(createEmptyLine(true));
-					finishedMenu.addItem(createAction(ActionMenuElement.OK));
-					finishedMenu.addItem(nameAction);
-
-					setCurrentMenu(finishedMenu, false);
-					m_blZ = false;
-				} else {
-					saveCompletedTrack();
-				}
+				saveCompletedTrack();
 				break;
 
 			default:
@@ -1082,24 +1074,23 @@ public class Menu
 					return;
 
 				case MenuScreen.KEY_RIGHT: // right
-					currentMenu.performAction(MenuScreen.KEY_RIGHT);
-					if (currentMenu == highScoreMenu) {
-						selectedLeague++;
-						if (selectedLeague > leagueSelector.getUnlockedCount())
-							selectedLeague = leagueSelector.getUnlockedCount();
-						showHighScoreMenu(selectedLeague);
+					// Intercepted before performAction(): rankingScreen's only clickable row is
+					// BACK, and ActionMenuElement treats RIGHT the same as FIRE (see its
+					// performAction) - letting it through here would navigate back instead of
+					// cycling the league.
+					if (currentMenu == rankingScreen) {
+						rankingScreen.cycleLeague(1);
 						return;
 					}
+					currentMenu.performAction(MenuScreen.KEY_RIGHT);
 					break;
 
 				case MenuScreen.KEY_LEFT: // left
+					if (currentMenu == rankingScreen) {
+						rankingScreen.cycleLeague(-1);
+						return;
+					}
 					currentMenu.performAction(MenuScreen.KEY_LEFT);
-					if (currentMenu != highScoreMenu)
-						break;
-					selectedLeague--;
-					if (selectedLeague < 0)
-						selectedLeague = 0;
-					showHighScoreMenu(selectedLeague);
 					break;
 			}
 	}
@@ -1138,25 +1129,14 @@ public class Menu
 		GameView view = getGDView();
 
 		if (!Settings.isKeyboardInMenuEnabled()) {
-			if (newMenu == nameScreen) {
-				gd.showKeyboardLayout();
-			} else {
-				gd.hideKeyboardLayout();
-			}
+			gd.hideKeyboardLayout();
 		}
 
 		view.removeCommand(backCommand);
 		if (newMenu != mainMenu && newMenu != finishedMenu && newMenu != null)
 			view.addCommand(backCommand);
 
-		if (newMenu == highScoreMenu) {
-			selectedLeague = leagueSelector.getSelectedOption();
-			showHighScoreMenu(selectedLeague);
-		} else if (newMenu == finishedMenu) {
-			// logDebug("it's finished!!!");
-			nameChars = nameScreen.getChars();
-			nameAction.setText(getString(R.string.name) + " - " + new String(nameChars));
-		} else if (newMenu == playMenu) {
+		if (newMenu == playMenu) {
 			trackSelector.setOptions(getLevelLoader().names[levelSelector.getSelectedOption()], false);
 			if (currentMenu == trackSelectorCurrentMenu) {
 				selectedTrack[levelSelector.getSelectedOption()] = trackSelector.getSelectedOption();
@@ -1165,6 +1145,8 @@ public class Menu
 			trackSelector.setSelectedOption(selectedTrack[levelSelector.getSelectedOption()]);
 		} else if (newMenu == whatsNewScreen) {
 			pendingWhatsNew = false; // read: the main-menu hint won't come back this launch
+		} else if (newMenu == optionsMenu) {
+			updateRankingSignInItem();
 		}
 		if ((newMenu == mainMenu || newMenu == playMenu) && gd.physEngine != null)
 			gd.physEngine._casevV();
@@ -1189,46 +1171,6 @@ public class Menu
 		// */
 	}
 
-	public void showHighScoreMenu(int league) {
-		HighScores highScores = getLevelsManager().getHighScores(levelSelector.getSelectedOption(), trackSelector.getSelectedOption());
-
-		highScoreMenu.clear();
-		highScoreMenu.setTitle(getString(R.string.highscores) + ": " + getLevelLoader().getLevelName(levelSelector.getSelectedOption(), trackSelector.getSelectedOption()));
-
-		HighScoreTextMenuElement subtitle = new HighScoreTextMenuElement(fromHtml(getString(R.string.league) + ": " + leagueSelector.getOptions()[league]));
-		subtitle.setIsSubtitle(true);
-
-		highScoreMenu.addItem(subtitle);
-
-		String[] scores = highScores.getScores(league);
-
-		for (int place = 0; place < scores.length; place++) {
-			if (scores[place] == null)
-				continue;
-
-			HighScoreTextMenuElement h1 = new HighScoreTextMenuElement("" + (place + 1) + ". " + scores[place]);
-			if (place == 0)
-				h1.setMedal(true, 0);
-			else if (place == 1)
-				h1.setMedal(true, 1);
-			else if (place == 2)
-				h1.setMedal(true, 2);
-
-			h1.setLayoutPadding(true);
-			highScoreMenu.addItem(h1);
-		}
-
-		// saveManager.closeRecordStore();
-		if (scores[0] == null)
-			highScoreMenu.addItem(new TextMenuElement(getString(R.string.no_highscores)));
-
-		highScoreMenu.addItem(new SimpleMenuElementNew(getString(R.string.world_ranking), rankingScreen, this));
-		highScoreMenu.addItem(createAction(ActionMenuElement.BACK));
-		highScoreMenu.highlightElement();
-
-		// System.gc();
-	}
-
 	public synchronized void destroy() {
 		currentMenu = null;
 	}
@@ -1238,8 +1180,6 @@ public class Menu
 
 		try {
 			if (level != null) {
-				Settings.setName(nameChars);
-
 				level.setUnlockedLeagues(leagueSelector.getUnlockedCount());
 				level.setUnlockedLevels(levelSelector.getUnlockedCount());
 
@@ -1288,6 +1228,21 @@ public class Menu
 		inputOptionItem.setOptions(options, false);
 		inputOptionItem.setUnlockedCount(options.length - 1);
 		inputOptionItem.setSelectedOption(selected);
+	}
+
+	// Reflects the current Play Games / backend session on the Options row - called after every
+	// sign-in attempt (manual or automatic, see RankingAuth) and on every Options entry, so a
+	// token cleared elsewhere (submitWorldRankingScore's auth-error path) is picked up too.
+	private void updateRankingSignInItem() {
+		if (Settings.getRankingToken() == null) {
+			rankingSignInItem.setText(getString(R.string.ranking_sign_in));
+			return;
+		}
+
+		String name = Settings.getRankingPlayerName();
+		rankingSignInItem.setText(name != null
+				? String.format(getString(R.string.ranking_signed_in_as), name)
+				: getString(R.string.ranking_signed_in));
 	}
 
 	public void handleAction(MenuElement item) {
@@ -1403,21 +1358,20 @@ public class Menu
 					RankingAuth.signIn(gd, new RankingAuth.Callback() {
 						@Override
 						public void onSignedIn() {
+							updateRankingSignInItem();
 							showAlert(getString(R.string.ranking_signed_in), getString(R.string.ranking_signed_in_text), null);
 						}
 
 						@Override
 						public void onFailed(String message) {
+							updateRankingSignInItem();
 							showAlert(getString(R.string.error), message, null);
 						}
 					});
 					return;
 				}
 				if (((ActionMenuElement) item).getActionValue() == ActionMenuElement.YES) {
-					if (currentMenu == eraseScreen) {
-						getLevelsManager().clearHighScores();
-						showAlert(getString(R.string.cleared), getString(R.string.cleared_text), null);
-					} else if (currentMenu == resetScreen) {
+					if (currentMenu == resetScreen) {
 						showAlert(getString(R.string.reset), getString(R.string.reset_text), new Runnable() {
 							@Override
 							public void run() {
@@ -1483,15 +1437,6 @@ public class Menu
 				if (item == continueAction) {
 					// _hvV();
 					gd.menuToGame();
-					return;
-				}
-				if (item == nameAction) {
-					nameScreen.resetCursorPosition();
-					setCurrentMenu(nameScreen, false);
-					return;
-				}
-				if (item instanceof ActionMenuElement && ((ActionMenuElement) item).getActionValue() == ActionMenuElement.OK) {
-					saveCompletedTrack();
 					return;
 				}
 				if (item == trackSelector) {
@@ -1674,7 +1619,6 @@ public class Menu
 	private void resetAll() {
 		Settings.resetAll();
 		getLevelsManager().resetAllLevelsSettings();
-		getLevelsManager().clearAllHighScores();
 
 		getGDActivity().fullResetting = true;
 		getGDActivity().destroyApp(true);
