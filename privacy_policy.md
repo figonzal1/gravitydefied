@@ -13,6 +13,10 @@ Personal Data processed for the following purposes and using the following servi
     * __Google Play Store__: Usage Data
 * Content delivery:
     * __gdtr.net Mod Backend__: application version; device language
+* Account creation and world ranking:
+    * __Google Play Games Services__: Play Games player ID; Play Games display name
+    * __Gravity Defied World Ranking Backend__: Play Games player ID; display name; race time;
+      level pack identifier
 * Analytics:
     * __Google Analytics for Firebase__: Application opens; Application updates; device information;
       geography/region; launches; number of sessions; number of Users; operating systems; session
@@ -134,6 +138,37 @@ Personal Data is collected for the following purposes and using the following se
       technical parameters. No personal identifiers, installation IDs, gameplay data, or user
       account information are transmitted. Personal Data processed: application version; device
       language. Place of processing: gdtr.net servers.
+
+* **Account creation and world ranking:**
+
+  This feature is optional and off by default until the User explicitly signs in (Options >
+  "Sign in with Play Games"). It lets Users submit their race times to a public, worldwide
+  leaderboard for each level pack/track/difficulty/league combination, and see how they rank
+  against other Users.
+
+    * __Google Play Games Services__: When the User chooses to sign in, the Application uses
+      Google Play Games Services (provided by Google LLC or Google Ireland Limited, depending on
+      location) to authenticate the User's Google account and obtain a server-verified Play Games
+      player ID and display name. The Application never collects the User's email address, real
+      name, or any other Google account Data beyond these two fields. Personal Data processed:
+      Play Games player ID; Play Games display name. Place of processing: see
+      [Google's Privacy Policy](https://policies.google.com/privacy).
+
+    * __Gravity Defied World Ranking Backend__: After sign-in, each time the User finishes a race
+      the Application sends the Play Games player ID (via an authentication token), the race time,
+      and an identifier for the level pack/difficulty/track/league to the Owner's own ranking
+      server. The server stores the User's Play Games display name (shown next to it) and best
+      time for each track, and this information — **display name and time only, never the
+      player ID or any other account Data** — is shown publicly to any User who opens the World
+      Ranking screen, including Users who are not signed in. Personal Data processed: Play Games
+      player ID; display name; race time; level pack identifier. Place of processing: the Owner's
+      own server infrastructure.
+
+      Users can turn this feature off at any time from Options ("Submit times to world ranking"),
+      which stops all future submissions; turning it off does not retroactively remove times
+      already on the leaderboard. To request erasure of previously submitted world-ranking Data
+      (display name and times, identified by the Play Games account used to submit them), Users
+      can contact the Owner using the email address at the top of this document.
 
 * **Analytics:**
 
@@ -288,4 +323,4 @@ Art. 13/14 of Regulation (EU) 2016/679 (General Data Protection Regulation).
 This privacy policy relates solely to this Application, if not stated otherwise within this
 document.
 
-*Latest update: May 23, 2026*
+*Latest update: September 12, 2026*
