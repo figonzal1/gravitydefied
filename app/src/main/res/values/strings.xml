@@ -149,9 +149,11 @@
 
 	<!-- What's New — mirror of fastlane/metadata/android/en-US/changelogs/default.txt -->
 	<string name="whats_new_text"><![CDATA[
-		&#8226; Your progress is now restored automatically: unlocked leagues no longer show as locked<br/>
-		&#8226; Fixed unexpected crashes when switching screens or returning to the game<br/>
-		&#8226; Stability improvements across different Android devices
+		&#8226; New controls: on-screen buttons mode and device tilt mode<br/>
+		&#8226; Adjustable on-screen keyboard size, and Options reorganized into Display, Controls and Clear highscore<br/>
+		&#8226; New "What's New" screen, with a hint on the main menu<br/>
+		&#8226; Fixed unexpected crashes and better recovery from corrupted game data<br/>
+		&#8226; Improved keypad navigation on text screens
 	]]></string>
 	<!-- Announce this release on first launch after updating? Set it to false for pure fix /
 	     stability releases: the text above still updates and stays readable under Help, but the

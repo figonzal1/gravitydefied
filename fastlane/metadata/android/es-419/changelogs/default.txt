@@ -1,3 +1,5 @@
-- Se recupera automáticamente tu progreso: las ligas ya desbloqueadas dejan de aparecer bloqueadas
-- Se corrigieron cierres inesperados al cambiar de pantalla o volver al juego
-- Mejoras de estabilidad en distintos modelos de Android
+- Nuevos controles: modo con botones y modo inclinación del dispositivo
+- Tamaño del teclado en pantalla ajustable, y opciones reorganizadas en Pantalla, Controles y Borrar récord
+- Nueva pantalla "Novedades" con un aviso en el menú principal
+- Se corrigieron cierres inesperados y el juego se recupera mejor de datos dañados
+- Mejor navegación con el teclado en pantallas de texto
