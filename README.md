@@ -1,4 +1,26 @@
-# Gravity Defied – Android port
+<p align="center">
+  <img src="https://raw.githubusercontent.com/figonzal1/gravitydefied/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" width="200" height="200">
+</p>
+<h1 align="center"><a href="https://play.google.com/store/apps/details?id=cl.figonzal.gravitydefied">Gravity Defied – Android port</a></h1>
+
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=cl.figonzal.gravitydefied">
+    <img alt="Google Play Badge" src="https://img.shields.io/endpoint?color=green&logo=google-play&logoColor=green&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Dcl.figonzal.gravitydefied%26gl%3Dcl%26hl%3Den%26l%3DGoogle%2520Play%26m%3DVersion%253A%2520%24version%2520%257C%2520Downloads%253A%2520%2524shortinstalls%2520%257C%2520Updated%253A%2520%2524updated">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/figonzal1/gravitydefied">
+    <img alt="GitHub repo language" src="https://img.shields.io/github/languages/top/figonzal1/gravitydefied?color=orange">
+  </a>
+  <a href="https://github.com/figonzal1/gravitydefied">
+    <img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/figonzal1/gravitydefied">
+  </a>
+  <a href="https://github.com/figonzal1/gravitydefied/commits">
+    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/figonzal1/gravitydefied?color=yellow">
+  </a>
+</p>
+
 **Gravity Defied** is an iconic trial racing mobile game. It was originally developed by Codebrew Software in 2004 for J2ME platform.
 
 Codebrew has launched an Android version of the game in 2012, though it was totally remade. We are the ones who like classic version of Gravity Defied more, so we ported it to Android almost unchanged!
