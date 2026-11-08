@@ -1,5 +1,6 @@
 package cl.figonzal.gravitydefied.Menu;
 
+import static cl.figonzal.gravitydefied.Helpers.getGameMenu;
 import static cl.figonzal.gravitydefied.Helpers.logDebug;
 
 public class SimpleMenuElementNew extends ClickableMenuElement
@@ -66,6 +67,10 @@ public class SimpleMenuElementNew extends ClickableMenuElement
 				handler.handleAction(this);
 				screen.setNavTarget(handler.getCurrentMenu());
 				handler.setCurrentMenu(screen, false);
+				break;
+
+			case MenuScreen.KEY_LEFT:
+				getGameMenu().back();
 				break;
 		}
 	}

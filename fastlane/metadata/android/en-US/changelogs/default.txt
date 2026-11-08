@@ -1,3 +1,5 @@
-- Your progress is now restored automatically: unlocked leagues no longer show as locked
-- Fixed unexpected crashes when switching screens or returning to the game
-- Stability improvements across different Android devices
+- New controls: on-screen buttons mode and device tilt mode
+- Adjustable on-screen keyboard size, and Options reorganized into Display, Controls and Clear highscore
+- New "What's New" screen, with a hint on the main menu
+- Fixed unexpected crashes and better recovery from corrupted game data
+- Improved keypad navigation on text screens

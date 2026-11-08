@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,12 +20,16 @@ public class LevelsDataSource {
 		dbHelper = new LevelsSQLiteOpenHelper(context);
 	}
 
-	public synchronized void open() throws SQLException {
+	public synchronized void open() {
 		db = dbHelper.getWritableDatabase();
 	}
 
 	public synchronized void close() {
 		dbHelper.close();
+	}
+
+	public static void deleteDatabase(Context context) {
+		context.deleteDatabase(LevelsSQLiteOpenHelper.DATABASE_NAME);
 	}
 
 	public synchronized Level createLevel(String name, String author, int countEasy, int countMedium, int countHard, long addedTs, long installedTs, boolean isDefault, long apiId) {

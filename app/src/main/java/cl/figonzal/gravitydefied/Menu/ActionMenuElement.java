@@ -10,6 +10,7 @@ import cl.figonzal.gravitydefied.R;
 
 import static cl.figonzal.gravitydefied.Helpers.getDp;
 import static cl.figonzal.gravitydefied.Helpers.getGDActivity;
+import static cl.figonzal.gravitydefied.Helpers.getGameMenu;
 
 public class ActionMenuElement
 		extends ClickableMenuElement
@@ -99,11 +100,19 @@ public class ActionMenuElement
 		updateViewText();
 	}
 
+	// KEY_LEFT/KEY_RIGHT are otherwise unused here, so they fall back to the D-pad's
+	// back/select role (see MenuScreen.KEY_LEFT/RIGHT doc); rows that give left/right a
+	// meaning of their own (OptionsMenuElement, SliderMenuElement) keep that meaning instead.
 	@Override
 	public void performAction(int k) {
+		if (k == MenuScreen.KEY_LEFT) {
+			getGameMenu().back();
+			return;
+		}
+
 		if (disabled || handler == null) return;
 
-		if (k == MenuScreen.KEY_FIRE) {
+		if (k == MenuScreen.KEY_FIRE || k == MenuScreen.KEY_RIGHT) {
 			handler.handleAction(this);
 		}
 	}

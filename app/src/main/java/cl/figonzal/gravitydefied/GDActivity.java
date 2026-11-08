@@ -13,6 +13,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -29,6 +31,7 @@ import cl.figonzal.gravitydefied.Menu.Views.MenuLinearLayout;
 import cl.figonzal.gravitydefied.Menu.Views.MenuTextView;
 import cl.figonzal.gravitydefied.Menu.Views.MenuTitleLinearLayout;
 import cl.figonzal.gravitydefied.Menu.Views.ObservableScrollView;
+import cl.figonzal.gravitydefied.Storage.LevelsDataSource;
 import cl.figonzal.gravitydefied.Storage.LevelsManager;
 import cl.figonzal.gravitydefied.Settings;
 import org.json.JSONObject;
@@ -93,8 +96,12 @@ public class GDActivity extends Activity implements Runnable {
 	private boolean menuReady = false;
 	private ArrayList<Command> commands = new ArrayList<Command>();
 	private MenuLinearLayout keyboardLayout;
+	private MenuLinearLayout gamepadLayout;
+	private TiltController tiltController;
 	private MenuTextView portedTextView;
+	private MenuTextView whatsNewHintView;
 	private int buttonHeight = 60;
+	private int baseButtonHeight = 60;
 	public LevelsManager levelsManager;
 
 	// android.window.OnBackInvokedCallback when registered on API 33+, null otherwise.
@@ -169,50 +176,36 @@ public class GDActivity extends Activity implements Runnable {
 			scrollView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT, 1));
 
 			// Keyboard
-			int[] buttonResources = {
-					R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
-					R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
-					R.drawable.btn_r, R.drawable.btn_r, R.drawable.btn_n
-			};
 			if (getString(R.string.screen_type).equals("tablet")) {
-				buttonHeight = 85;
+				baseButtonHeight = 85;
 			} else if (getResources().getDisplayMetrics().density < 1.5) {
-				buttonHeight = 55;
+				baseButtonHeight = 55;
 			}
+			buttonHeight = scaledButtonHeight();
 
-			keyboardLayout = new MenuLinearLayout(this, true);
-			keyboardLayout.setOrientation(LinearLayout.VERTICAL);
+			keyboardLayout = buildKeypadLayout(night);
+			gamepadLayout = buildGamepadLayout(night);
+			tiltController = new TiltController(this);
 
-			keyboardController = new KeyboardController(this);
-
-			for (int i = 0; i < 3; i++) {
-				LinearLayout row = new LinearLayout(this);
-				row.setPadding(Helpers.getDp(KeyboardController.PADDING), i == 0 ? Helpers.getDp(KeyboardController.PADDING) : 0, Helpers.getDp(KeyboardController.PADDING), 0);
-				row.setOrientation(LinearLayout.HORIZONTAL);
-				row.setBackgroundColor(getResources().getColor(night ? R.color.keyboard_background_night : R.color.keyboard_background));
-				for (int j = 0; j < 3; j++) {
-					LinearLayout btn = new LinearLayout(this);
-					TextView btnText = new TextView(this);
-					btnText.setText(String.valueOf(i * 3 + j + 1));
-					btnText.setTextColor(getResources().getColor(night ? R.color.keyboard_button_text_night : R.color.keyboard_button_text));
-					btnText.setTextSize(17);
-					btn.setBackgroundResource(buttonResources[i * 3 + j]);
-					btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-					btn.setGravity(Gravity.CENTER);
-					btn.setWeightSum(1);
-
-					row.addView(btn, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, Helpers.getDp(buttonHeight), 1));
-
-					keyboardController.addButton(btn, j, i);
+			// Blinking "What's New" hint, shown only on the launch right after an update (see
+			// maybeShowWhatsNew()); tapping it opens the screen. Vertically centered between the
+			// menu content and the keyboard/gamepad bar — setWhatsNewHintVisible() positions it
+			// once actually shown, since that space depends on the current keyboard height.
+			whatsNewHintView = new MenuTextView(this);
+			whatsNewHintView.setTextSize(15);
+			// Version included so the hint itself explains why it's here — "there's a new
+			// release" — matching the screen's own title (see Menu's whatsNewScreen).
+			whatsNewHintView.setText("<< " + getString(R.string.whats_new) + " v" + Helpers.getAppVersion() + " >>");
+			whatsNewHintView.setTextColor(getResources().getColor(R.color.menu_highlight));
+			whatsNewHintView.setGravity(Gravity.CENTER);
+			whatsNewHintView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.TOP));
+			whatsNewHintView.setVisibility(android.view.View.GONE);
+			whatsNewHintView.setOnClickListener(new android.view.View.OnClickListener() {
+				@Override
+				public void onClick(android.view.View v) {
+					if (menu != null) menu.openWhatsNew();
 				}
-
-				keyboardLayout.addView(row);
-			}
-
-			keyboardLayout.setGravity(Gravity.BOTTOM);
-			keyboardLayout.setPadding(0, 0, 0, Helpers.getDp(KeyboardController.PADDING));
-			keyboardLayout.setOnTouchListener(keyboardController);
-			keyboardLayout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+			});
 
 			hideKeyboardLayout();
 
@@ -248,8 +241,10 @@ public class GDActivity extends Activity implements Runnable {
 
 			frame.addView(menuLayout);
 			frame.addView(keyboardLayout);
+			frame.addView(gamepadLayout);
 			frame.addView(menuBtn);
 			frame.addView(portedTextView);
+			frame.addView(whatsNewHintView);
 
 			gameView.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT, 1));
 			frame.addView(gameView, 0);
@@ -409,10 +404,17 @@ public class GDActivity extends Activity implements Runnable {
 
 				MenuHelmetView.clearStaticFields();
 
-				levelsManager = new LevelsManager();
+				try {
+					levelsManager = new LevelsManager();
+				} catch (android.database.SQLException e) {
+					e.printStackTrace();
+					showDatabaseCorruptedDialog();
+					return; // init aborted; user decides via the dialog
+				}
+
 				try {
 					levelLoader = new Loader(levelsManager.getCurrentLevelsFile());
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 					// logDebug("Reset level id now");
 					levelsManager.resetId();
@@ -499,7 +501,7 @@ public class GDActivity extends Activity implements Runnable {
 					Helpers.logDebug("run(): init aborted, this activity was replaced");
 					return;
 				}
-				throw new RuntimeException(_ex);
+				throw new RuntimeException("init failed: " + _ex, _ex);
 			}
 		}
 
@@ -507,6 +509,8 @@ public class GDActivity extends Activity implements Runnable {
 
 		restart(false);
 		// logDebug("showMenu() now");
+
+		maybeShowWhatsNew();
 
 		/*if (menu != null) */
 		menu.showMenu(0);
@@ -634,6 +638,7 @@ public class GDActivity extends Activity implements Runnable {
 		Helpers.logDebug("@@@ [GDActivity \"+hashCode()+\"] onResume()");
 		super.onResume();
 		applyImmersiveMode();
+		if (tiltController != null) tiltController.onResume();
 		Helpers.logDebug("[GDActivity \"+hashCode()+\"] onResume(), inited = " + inited);
 		if (wasPaused && wasStarted) {
 			// logDebug("onResume(): wasPaused && wasResumed");
@@ -676,6 +681,8 @@ public class GDActivity extends Activity implements Runnable {
 		super.onPause();
 
 		Helpers.logDebug("@@@ [GDActivity " + hashCode() + "] onPause()");
+
+		if (tiltController != null) tiltController.onPause();
 
 		wasPaused = true;
 		m_cZ = true;
@@ -898,12 +905,231 @@ public class GDActivity extends Activity implements Runnable {
 		return buttonHeight * 3 + KeyboardController.PADDING * 2;
 	}
 
+	// Device-only variant (ignores the user's keyboard-size preference) so the in-game
+	// camera offset doesn't shift when the user changes Options > Keyboard size.
+	public int getButtonsLayoutHeightBase() {
+		return baseButtonHeight * 3 + KeyboardController.PADDING * 2;
+	}
+
+	private int scaledButtonHeight() {
+		return baseButtonHeight * Settings.getKeyboardScale() / 100;
+	}
+
+	private MenuLinearLayout buildKeypadLayout(boolean night) {
+		int[] buttonResources = {
+				R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
+				R.drawable.btn_br, R.drawable.btn_br, R.drawable.btn_b,
+				R.drawable.btn_r, R.drawable.btn_r, R.drawable.btn_n
+		};
+
+		MenuLinearLayout layout = new MenuLinearLayout(this, true);
+		layout.setOrientation(LinearLayout.VERTICAL);
+
+		keyboardController = new KeyboardController(this);
+
+		for (int i = 0; i < 3; i++) {
+			LinearLayout row = new LinearLayout(this);
+			row.setPadding(Helpers.getDp(KeyboardController.PADDING), i == 0 ? Helpers.getDp(KeyboardController.PADDING) : 0, Helpers.getDp(KeyboardController.PADDING), 0);
+			row.setOrientation(LinearLayout.HORIZONTAL);
+			row.setBackgroundColor(getResources().getColor(night ? R.color.keyboard_background_night : R.color.keyboard_background));
+			for (int j = 0; j < 3; j++) {
+				LinearLayout btn = new LinearLayout(this);
+				TextView btnText = new TextView(this);
+				btnText.setText(String.valueOf(i * 3 + j + 1));
+				btnText.setTextColor(getResources().getColor(night ? R.color.keyboard_button_text_night : R.color.keyboard_button_text));
+				btnText.setTextSize(17);
+				btn.setBackgroundResource(buttonResources[i * 3 + j]);
+				btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+				btn.setGravity(Gravity.CENTER);
+				btn.setWeightSum(1);
+
+				row.addView(btn, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, Helpers.getDp(buttonHeight), 1));
+
+				keyboardController.addButton(btn, j, i);
+			}
+
+			layout.addView(row);
+		}
+
+		layout.setGravity(Gravity.BOTTOM);
+		layout.setPadding(0, 0, 0, Helpers.getDp(KeyboardController.PADDING));
+		layout.setOnTouchListener(keyboardController);
+		layout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+
+		return layout;
+	}
+
+	// Button control scheme: lean left/right and gas/brake pedals — identical bar in menus and
+	// in-game. Emits the same ASCII key codes as keypad cells '2'/'4'/'6'/'8' (Keyset 1's
+	// accelerate/lean/brake mapping and the menu's UP/LEFT/RIGHT/DOWN), so it needs no changes
+	// below GameView.keyPressed/keyReleased. No OK button: tapping a menu row already fires
+	// KEY_FIRE (ClickableMenuElement), and NameInputMenuScreen is confirmed via the back button.
+	//
+	// The tilt scheme reuses this same bar for its pedals: full-width GAS/FRENO in-game (tilting
+	// the device leans the bike, see TiltController), the usual four buttons in menus (tilting
+	// can't navigate a menu without changing values by accident) — see rebuildGamepadBar().
+	private MenuLinearLayout buildGamepadLayout(boolean night) {
+		MenuLinearLayout layout = new MenuLinearLayout(this, false);
+		layout.setOrientation(LinearLayout.HORIZONTAL);
+
+		fillGamepadLayout(layout, night, false, false);
+
+		layout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.BOTTOM));
+
+		return layout;
+	}
+
+	// pedalsOnly drops the lean buttons and stretches the pedals to full width (tilt scheme,
+	// in-game). Otherwise Settings.getButtonLayout() decides which side gets the arrows vs. the
+	// pedals. inGame swaps the pedal labels: GAS/FRENO while driving, up/down arrows while they're
+	// really just moving the menu selection. Called again (after removeAllViews) whenever any of
+	// this changes, so the bar updates immediately.
+	private void fillGamepadLayout(MenuLinearLayout layout, boolean night, boolean pedalsOnly, boolean inGame) {
+		int rowsHeightDp = Helpers.getDp(buttonHeight * 3);
+		int pad = Helpers.getDp(KeyboardController.PADDING);
+		layout.setPadding(pad, pad, pad, pad);
+
+		int gasRes = inGame ? R.string.ctrl_gas : R.string.ctrl_nav_up;
+		int brakeRes = inGame ? R.string.ctrl_brake : R.string.ctrl_nav_down;
+
+		LinearLayout pedalContainer = new LinearLayout(this);
+		pedalContainer.setOrientation(LinearLayout.VERTICAL);
+		pedalContainer.addView(buildControlButton(night, gasRes, '2'), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+		pedalContainer.addView(buildControlButton(night, brakeRes, '8'), new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1));
+
+		if (pedalsOnly) {
+			layout.addView(pedalContainer, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, rowsHeightDp));
+			return;
+		}
+
+		View leanBack = buildControlButton(night, R.string.ctrl_nav_left, '4');
+		View leanForward = buildControlButton(night, R.string.ctrl_nav_right, '6');
+
+		boolean arrowsRight = Settings.getButtonLayout() == Settings.BUTTON_LAYOUT_ARROWS_RIGHT;
+		if (arrowsRight) layout.addView(pedalContainer, new LinearLayout.LayoutParams(0, rowsHeightDp, 2));
+		layout.addView(leanBack, new LinearLayout.LayoutParams(0, rowsHeightDp, 1.5f));
+		layout.addView(leanForward, new LinearLayout.LayoutParams(0, rowsHeightDp, 1.5f));
+		if (!arrowsRight) layout.addView(pedalContainer, new LinearLayout.LayoutParams(0, rowsHeightDp, 2));
+	}
+
+	private LinearLayout buildControlButton(boolean night, int textRes, int keyCode) {
+		LinearLayout btn = new LinearLayout(this);
+		TextView btnText = new TextView(this);
+		btnText.setText(getString(textRes));
+		btnText.setTextColor(getResources().getColor(night ? R.color.keyboard_button_text_night : R.color.keyboard_button_text));
+		btnText.setTextSize(17);
+		btn.setBackgroundResource(R.drawable.btn_br);
+		btn.addView(btnText, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+		btn.setGravity(Gravity.CENTER);
+		btn.setOnTouchListener(new KeyControlListener(this, keyCode));
+		return btn;
+	}
+
+	// @UiThread
+	// updateMenuMargin: false while the user is still dragging the slider — the pad rescales
+	// live for preview, but the scrollView's bottom margin (and thus its content) only jumps
+	// to match once the drag ends, so the slider itself doesn't move under the finger.
+	public void applyKeyboardSize(final boolean updateMenuMargin) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (!Helpers.isActivityAlive()) return;
+
+				buttonHeight = scaledButtonHeight();
+
+				for (int i = 0; i < keyboardLayout.getChildCount(); i++) {
+					LinearLayout row = (LinearLayout) keyboardLayout.getChildAt(i);
+					for (int j = 0; j < row.getChildCount(); j++) {
+						View btn = row.getChildAt(j);
+						ViewGroup.LayoutParams params = btn.getLayoutParams();
+						params.height = Helpers.getDp(buttonHeight);
+						btn.setLayoutParams(params);
+					}
+				}
+
+				if (updateMenuMargin && (keyboardLayout.getVisibility() == android.view.View.VISIBLE
+						|| gamepadLayout.getVisibility() == android.view.View.VISIBLE))
+					showKeyboardLayout();
+				else
+					rebuildGamepadBar(); // live preview during the drag: resizes without touching the margin
+			}
+		});
+	}
+
+	// @UiThread
+	public void setWhatsNewHintVisible(final boolean visible) {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (!Helpers.isActivityAlive()) return;
+
+				if (!visible) {
+					whatsNewHintView.clearAnimation();
+					whatsNewHintView.setVisibility(android.view.View.GONE);
+					return;
+				}
+
+				whatsNewHintView.setVisibility(android.view.View.VISIBLE);
+				AlphaAnimation blink = new AlphaAnimation(1f, 0.15f);
+				blink.setDuration(600);
+				blink.setRepeatMode(Animation.REVERSE);
+				blink.setRepeatCount(Animation.INFINITE);
+				whatsNewHintView.startAnimation(blink);
+
+				// Center it in the actual empty gap: from the bottom of the menu's item list
+				// down to the keyboard/gamepad bar — not the whole scrollView band, which
+				// starts above the list, right under the title. A few other UI updates
+				// (scrollView's content/visibility, the keyboard margin) are still queued on
+				// this same thread at this point, so wait for the layout pass that applies all
+				// of them before reading these views' actual bounds.
+				frame.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+					@Override
+					public void onGlobalLayout() {
+						frame.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+						if (!Helpers.isActivityAlive() || whatsNewHintView.getVisibility() != android.view.View.VISIBLE)
+							return;
+
+						// scrollView.setFillViewport(true) stretches its child (MenuScreen.layout)
+						// to the full viewport height, so that child's own getBottom() doesn't
+						// mark the end of the list — the last non-GONE row does.
+						android.view.View content = scrollView.getChildCount() > 0 ? scrollView.getChildAt(0) : null;
+						int listBottom = 0;
+						if (content instanceof ViewGroup) {
+							ViewGroup rows = (ViewGroup) content;
+							for (int i = rows.getChildCount() - 1; i >= 0; i--) {
+								View row = rows.getChildAt(i);
+								if (row.getVisibility() != android.view.View.GONE) {
+									listBottom = row.getBottom();
+									break;
+								}
+							}
+						}
+
+						int gapTop = scrollView.getTop() + listBottom - scrollView.getScrollY();
+						int gapBottom = scrollView.getBottom(); // already sits at the keyboard's top edge
+						int hintHeight = whatsNewHintView.getHeight();
+
+						int top = (gapTop + gapBottom - hintHeight) / 2;
+						if (top > gapBottom - hintHeight)
+							top = gapBottom - hintHeight; // list fills the gap: rest right above the bar
+
+						FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) whatsNewHintView.getLayoutParams();
+						params.gravity = Gravity.TOP;
+						params.topMargin = top;
+						whatsNewHintView.setLayoutParams(params);
+					}
+				});
+			}
+		});
+	}
+
 	// @UiThread
 	public void hideKeyboardLayout() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				keyboardLayout.setVisibility(android.view.View.GONE);
+				gamepadLayout.setVisibility(android.view.View.GONE);
 
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
 				params.setMargins(0, 0, 0, 0);
@@ -913,15 +1139,64 @@ public class GDActivity extends Activity implements Runnable {
 	}
 
 	// @UiThread
+	// Button/Tilt schemes: same bar (lean buttons + pedals, or just pedals) in menus and
+	// in-game — no context switching for the button scheme; the tilt scheme is the one
+	// exception, see rebuildGamepadBar(). NameInputMenuScreen (letter entry, key-only — see its
+	// performAction) works unmodified either way.
 	public void showKeyboardLayout() {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				keyboardLayout.setVisibility(android.view.View.VISIBLE);
+				rebuildGamepadBar();
+
+				boolean gamepad = Settings.getControlScheme() != Settings.CONTROL_SCHEME_KEYPAD;
+
+				keyboardLayout.setVisibility(gamepad ? android.view.View.GONE : android.view.View.VISIBLE);
+				gamepadLayout.setVisibility(gamepad ? android.view.View.VISIBLE : android.view.View.GONE);
 
 				LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) scrollView.getLayoutParams();
 				params.setMargins(0, 0, 0, Helpers.getDp(getButtonsLayoutHeight()));
 				scrollView.setLayoutParams(params);
+			}
+		});
+	}
+
+	// Clears latched keys before rebuilding: a finger resting on a button that's about to
+	// disappear never gets an ACTION_UP, which would otherwise leave the key stuck down. Tilt
+	// can't navigate a menu (it would change values by accident while just looking around), so
+	// pedalsOnly (full-width pedals, no lean buttons) is only true for tilt, in-game.
+	private void rebuildGamepadBar() {
+		boolean pedalsOnly = Settings.getControlScheme() == Settings.CONTROL_SCHEME_TILT
+				&& !menuShown && tiltController.isAvailable();
+
+		gameView._avV();
+		physEngine._nullvV();
+		gamepadLayout.removeAllViews();
+		fillGamepadLayout(gamepadLayout, Settings.isNightModeEnabled(), pedalsOnly, !menuShown);
+	}
+
+	// @UiThread
+	// Button/Tilt schemes emit Keyset 1's codes, so switching to either forces inputOption to 0
+	// (and back to the user's keyset otherwise); also clears keys latched by the previous scheme.
+	public void applyControlScheme() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				if (!Helpers.isActivityAlive()) return;
+
+				int scheme = Settings.getControlScheme();
+				boolean isKeypad = scheme == Settings.CONTROL_SCHEME_KEYPAD;
+				gameView.setInputOption(isKeypad ? Settings.getInputOption() : 0);
+				tiltController.setEnabled(scheme == Settings.CONTROL_SCHEME_TILT);
+
+				rebuildGamepadBar();
+
+				// Not reachable before the boot splash finishes (inited==false the first time
+				// Menu.load(3) calls this) — skip so the splash never gets a controls bar.
+				if (!inited) return;
+
+				if (menuShown && !Settings.isKeyboardInMenuEnabled()) hideKeyboardLayout();
+				else showKeyboardLayout();
 			}
 		});
 	}
@@ -1092,6 +1367,46 @@ public class GDActivity extends Activity implements Runnable {
 			destroyApp(true);
 			restartingStarted = true;
 		}
+	}
+
+	// @UiThread
+	private void showDatabaseCorruptedDialog() {
+		runOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				Helpers.showConfirm(
+						getString(R.string.e_database_damaged_title),
+						getString(R.string.e_database_damaged_message),
+						new Runnable() { // OK: delete the db and restart
+							@Override
+							public void run() {
+								LevelsDataSource.deleteDatabase(GDActivity.this);
+								restartApp();
+							}
+						},
+						new Runnable() { // Cancel: close
+							@Override
+							public void run() {
+								finish();
+							}
+						});
+			}
+		});
+	}
+
+	private void maybeShowWhatsNew() {
+		String current = Helpers.getAppVersion();
+		String seen = Settings.getLastSeenVersion();
+		if (seen.equals(current)) return;
+
+		// The hint is a one-launch nudge, not a persistent nag: mark the version seen right
+		// away, whether or not the player ever taps it.
+		Settings.setLastSeenVersion(current);
+
+		// fresh install, or a release not worth announcing: stay quiet
+		if (seen.length() == 0 || !getResources().getBoolean(R.bool.whats_new_announce)) return;
+
+		menu.setPendingWhatsNew(true);
 	}
 
 	private void doRestartApp() {

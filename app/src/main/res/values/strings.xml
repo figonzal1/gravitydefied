@@ -16,6 +16,7 @@
 	<string name="options">Options</string>
 	<string name="help">Help</string>
 	<string name="about">About</string>
+	<string name="whats_new">What\'s New</string>
 
 	<string name="play">Play</string>
 	<string name="start">Start</string>
@@ -41,11 +42,23 @@
 	<string name="shadows">Shadows</string>
 	<string name="driver_sprite">Driver sprite</string>
 	<string name="bike_sprite">Bike sprite</string>
+	<string name="control_type">Control type</string>
 	<string name="input">Input</string>
+	<string name="button_layout">Layout</string>
+	<string name="tilt_sensitivity">Sensitivity</string>
 	<string name="look_ahead">Look ahead</string>
 	<string name="vibrate_on_touch">Vibrate on touch</string>
+	<string name="keyboard_size">Keyboard size</string>
 	<string name="keyboard_in_menu">Keyboard in menu</string>
+	<string name="ctrl_gas">GAS</string>
+	<string name="ctrl_brake">BRAKE</string>
+	<string name="ctrl_nav_left">&#9664;</string>
+	<string name="ctrl_nav_right">&#9654;</string>
+	<string name="ctrl_nav_up">&#9650;</string>
+	<string name="ctrl_nav_down">&#9660;</string>
 	<string name="night_mode">Night mode</string>
+	<string name="options_display">Display</string>
+	<string name="options_controls">Controls</string>
 	<string name="clear_highscore">Clear highscore</string>
 	<string name="full_reset">Full Reset</string>
 	<string name="reset">Reset</string>
@@ -81,7 +94,7 @@
 	<string name="highscore_text">The three best times on every track are saved for each league. When beating a time on a track you will be asked to enter your name. The highscores can be viewed from the Play Menu. By pressing left and right in the highscore view you can view the highscore for a specific league. The highscore can be cleared from the options menu.</string>
 	<string name="no_highscores">No Highscores</string>
 
-	<string name="options_text"><![CDATA[
+	<string name="options_display_text"><![CDATA[
 		<b>Perspective: On/Off</b><br/>
 		Default: &lt;On&gt;<br/>
 		Turns on and off the perspective view of the tracks.<br/><br/>
@@ -92,31 +105,61 @@
 
 		<b>Driver Sprite: On / Off</b><br/>
 		Default: &lt;On&gt;<br/>
-		&lt;On&gt; uses a texture for the driver. &lt;.Off&gt; uses line graphics.<br/><br/>
+		&lt;On&gt; uses a texture for the driver. &lt;Off&gt; uses line graphics.<br/><br/>
 
 		<b>Bike Sprite: On / Off</b><br/>
 		Default: &lt;On&gt;<br/>
 		&lt;On&gt; uses a texture for the bike. &lt;Off&gt; uses line graphics.<br/><br/>
 
-		<b>Input: Keyset 1,2,3</b><br/>
-		Default: &lt;1&gt;<br/>
-		Determines which type of input should be used when playing. See "Keys" in the help menu for more info.<br/><br/>
-
 		<b>Look ahead: On/Off</b><br/>
 		Default: &lt;On&gt;<br/>
 		Turns on and off smart camera movement.<br/><br/>
 
-		<b>Vibrate on touch: On/Off</b><br/>
-		Default: &lt;On&gt;<br/>
-		Enables haptic feedback when you press control keys.<br/><br/>
+		<b>Night mode: On/Off</b><br/>
+		Default: &lt;Off&gt;<br/>
+		Darkens the menus and the in-game view for low-light play.
+	]]></string>
+
+	<string name="options_controls_text"><![CDATA[
+		<b>Control type: Numeric keypad/Buttons/Tilt</b><br/>
+		Default: &lt;Numeric keypad&gt;<br/>
+		Switches between the classic numeric keypad, four buttons (left/right lean and go back / enter a screen or change value on an option row, gas/brake pedals and move the selection up/down — identical bar in menus and in-game), and tilt (roll the device to lean the bike, gas/brake as full-width pedals in-game; the usual four buttons appear in menus, since tilting cannot navigate a menu without changing values by accident).<br/><br/>
+
+		<b>Input</b><br/>
+		Default: &lt;Keyset 1&gt;<br/>
+		With the numeric keypad, picks the keyset used when playing — see "Keys" in the help menu for more info. With buttons, picks which side the lean buttons are on: left (gas/brake on the right) or right (gas/brake on the left). With tilt, picks how far you need to roll the device before the bike leans.<br/><br/>
+
+		<b>Keyboard size: 50%-200%</b><br/>
+		Default: &lt;100%&gt;<br/>
+		Changes the size of the on-screen control keys.<br/><br/>
 
 		<b>Keyboard in menu: On/Off</b><br/>
 		Default: &lt;On&gt;<br/>
 		Turns on and off keyboard in menu.<br/><br/>
 
+		<b>Vibrate on touch: On/Off</b><br/>
+		Default: &lt;On&gt;<br/>
+		Enables haptic feedback when you press control keys.
+	]]></string>
+
+	<string name="clear_highscore_text"><![CDATA[
 		<b>Clear highscore</b><br/>
 		Lets you clear the highscores. Here you can also do a "Full Reset" which will reset the game to original state (clear settings, highscores, unlocked levels and leagues).
 	]]></string>
+
+	<!-- What's New — mirror of fastlane/metadata/android/en-US/changelogs/default.txt -->
+	<string name="whats_new_text"><![CDATA[
+		&#8226; New controls: on-screen buttons mode and device tilt mode<br/>
+		&#8226; Adjustable on-screen keyboard size, and Options reorganized into Display, Controls and Clear highscore<br/>
+		&#8226; New "What's New" screen, with a hint on the main menu<br/>
+		&#8226; Fixed unexpected crashes and better recovery from corrupted game data<br/>
+		&#8226; Improved keypad navigation on text screens
+	]]></string>
+	<!-- Announce this release on first launch after updating? Set it to false for pure fix /
+	     stability releases: the text above still updates and stays readable under Help, but the
+	     game won't interrupt the player with it. -->
+	<bool name="whats_new_announce">true</bool>
+	<string name="whats_new_replay">Replay on next launch</string>
 
 	<!-- About screen credits — one string per entry, chronological order newest first -->
 	<string name="about_credit_figonzal"><![CDATA[
@@ -169,6 +212,23 @@
 		<item>Keyset 1</item>
 		<item>Keyset 2</item>
 		<item>Keyset 3</item>
+	</string-array>
+
+	<string-array name="control_scheme">
+		<item>Numeric keypad</item>
+		<item>Buttons</item>
+		<item>Tilt</item>
+	</string-array>
+
+	<string-array name="button_layout_options">
+		<item>Arrows left</item>
+		<item>Arrows right</item>
+	</string-array>
+
+	<string-array name="tilt_sensitivity_options">
+		<item>Low</item>
+		<item>Medium</item>
+		<item>High</item>
 	</string-array>
 
 	<string-array name="leagues">
@@ -231,5 +291,7 @@
 	<string name="e_cannot_save_level">Cannot save level into database</string>
 	<string name="e_no_network_connection">No network connection.</string>
 	<string name="e_level_damaged">Looks like this level is damaged.\nYou can skip it and unlock next level.</string>
+	<string name="e_database_damaged_title">Damaged data</string>
+	<string name="e_database_damaged_message">The levels and high scores database is damaged and cannot be opened. Delete it and restart the game? Your high scores will be lost; installed level packs will stay on disk.</string>
 
 </resources>

@@ -55,6 +55,10 @@ public class Menu
 	private MenuScreen mainMenu;
 	private MenuScreen playMenu;
 	private MenuScreen optionsMenu;
+	private MenuScreen displayOptionsMenu;
+	private MenuScreen controlsOptionsMenu;
+	private SimpleMenuElementNew displayOptionsItem;
+	private SimpleMenuElementNew controlsOptionsItem;
 	private MenuScreen aboutScreen;
 	private MenuScreen helpMenu;
 	private MenuScreen eraseScreen;
@@ -77,8 +81,10 @@ public class Menu
 	private OptionsMenuElement shadowsOptionItem;
 	private OptionsMenuElement driverSpriteOptionItem;
 	private OptionsMenuElement bikeSpriteOptionItem;
+	private OptionsMenuElement controlSchemeItem;
 	private OptionsMenuElement inputOptionItem;
 	private OptionsMenuElement lookAheadOptionItem;
+	private SliderMenuElement keyboardSizeSlider;
 	private OptionsMenuElement keyboardInMenuOptionItem;
 	private OptionsMenuElement vibrateOnTouchOptionItem;
 	private OptionsMenuElement nightModeOptionItem;
@@ -87,6 +93,9 @@ public class Menu
 	// private ActionMenuElement yesAction;
 	// private ActionMenuElement noAction;
 	private SimpleMenuElementNew aboutMenuItem;
+	private MenuScreen whatsNewScreen;
+	private SimpleMenuElementNew whatsNewItem;
+	private ActionMenuElement whatsNewReplayItem;
 	private MenuScreen objectiveHelpScreen;
 	private SimpleMenuElementNew objectiveHelpItem;
 	private MenuScreen keysHelpScreen;
@@ -97,6 +106,9 @@ public class Menu
 	private SimpleMenuElementNew highscoreHelpItem;
 	private MenuScreen optionsHelpScreen;
 	private SimpleMenuElementNew optionsHelpItem;
+	private MenuScreen optionsDisplayHelpScreen;
+	private MenuScreen optionsControlsHelpScreen;
+	private MenuScreen optionsClearHelpScreen;
 	private NameInputMenuScreen nameScreen;
 	private ActionMenuElement continueAction;
 	// private ActionMenuElement goToMainAction;
@@ -118,6 +130,7 @@ public class Menu
 	private int track = 0;
 	private boolean leagueCompleted = false;
 	private boolean m_SZ = false;
+	private boolean pendingWhatsNew = false;
 	private Object m_BObject;
 	private String[] difficultyLevels = null; /* {
 			"Easy", "Medium", "Hard"
@@ -138,6 +151,9 @@ public class Menu
 	// private byte m_arB = 0;
 	private String[] onOffStrings = null;
 	private String[] keysetStrings = null;
+	private String[] controlSchemeStrings = null;
+	private String[] buttonLayoutStrings = null;
+	private String[] tiltSensitivityStrings = null;
 	// private EmptyLineMenuElement emptyLine;
 	// private EmptyLineMenuElement emptyLineBeforeAction;
 	// private AlertDialog alertDialog = null;
@@ -175,6 +191,9 @@ public class Menu
 				};
 				onOffStrings = getStringArray(R.array.on_off);
 				keysetStrings = getStringArray(R.array.keyset);
+				controlSchemeStrings = getStringArray(R.array.control_scheme);
+				buttonLayoutStrings = getStringArray(R.array.button_layout_options);
+				tiltSensitivityStrings = getStringArray(R.array.tilt_sensitivity_options);
 				difficultyLevels = getStringArray(R.array.difficulty);
 
 				// saveManager = new SaveManager();
@@ -301,7 +320,7 @@ public class Menu
 				getLevelLoader().setPerspectiveEnabled(Settings.isPerspectiveEnabled());
 				getLevelLoader().setShadowsEnabled(Settings.isShadowsEnabled());
 				activity.physEngine._ifZV(Settings.isLookAheadEnabled());
-				getGDView().setInputOption(Settings.getInputOption());
+				activity.applyControlScheme();
 				// getGDView()._aZV(m_aTB == 0);
 				getGDView()._aZV(true);
 				String[] leaguesList = getStringArray(R.array.leagues);
@@ -332,6 +351,8 @@ public class Menu
 				playMenu = new MenuScreen(getString(R.string.play), mainMenu);
 				managerScreen = new MenuScreen(getString(R.string.mods), mainMenu);
 				optionsMenu = new MenuScreen(getString(R.string.options), mainMenu);
+				displayOptionsMenu = new MenuScreen(getString(R.string.options_display), optionsMenu);
+				controlsOptionsMenu = new MenuScreen(getString(R.string.options_controls), optionsMenu);
 				aboutScreen = new MenuScreen(getString(R.string.about) + " v" + getAppVersion(), mainMenu);
 				helpMenu = new MenuScreen(getString(R.string.help), mainMenu);
 
@@ -354,6 +375,8 @@ public class Menu
 				gameMenuItem = new SimpleMenuElementNew(getString(R.string.play_menu), playMenu, this);
 				managerMenuItem = new SimpleMenuElementNew(getString(R.string.mods), managerScreen, this);
 				aboutMenuItem = new SimpleMenuElementNew(getString(R.string.about), aboutScreen, this);
+				displayOptionsItem = new SimpleMenuElementNew(getString(R.string.options_display), displayOptionsMenu, this);
+				controlsOptionsItem = new SimpleMenuElementNew(getString(R.string.options_controls), controlsOptionsMenu, this);
 
 				mainMenu.addItem(gameMenuItem);
 				//if (ENABLE_MANAGER)
@@ -384,30 +407,41 @@ public class Menu
 				playMenu.addItem(createAction(ActionMenuElement.GO_TO_MAIN));
 				// if (hasPointer)
 				// 	softwareJoystickOptionItem = new ActionMenuElement("Software Joystick", m_aTB, this, onOffStrings, true, activity, optionsMenu, false);
-				perspectiveOptionItem = new OptionsMenuElement(getString(R.string.perspective), Settings.isPerspectiveEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				shadowsOptionItem = new OptionsMenuElement(getString(R.string.shadows), Settings.isShadowsEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				driverSpriteOptionItem = new OptionsMenuElement(getString(R.string.driver_sprite), Settings.isDriverSpriteEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				bikeSpriteOptionItem = new OptionsMenuElement(getString(R.string.bike_sprite), Settings.isBikeSpriteEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				inputOptionItem = new OptionsMenuElement(getString(R.string.input), Settings.getInputOption(), this, keysetStrings, false, optionsMenu);
-				lookAheadOptionItem = new OptionsMenuElement(getString(R.string.look_ahead), Settings.isLookAheadEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
-				nightModeOptionItem = new OptionsMenuElement(getString(R.string.night_mode), Settings.isNightModeEnabled() ? 0 : 1, this, onOffStrings, true, optionsMenu);
+				perspectiveOptionItem = new OptionsMenuElement(getString(R.string.perspective), Settings.isPerspectiveEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				shadowsOptionItem = new OptionsMenuElement(getString(R.string.shadows), Settings.isShadowsEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				driverSpriteOptionItem = new OptionsMenuElement(getString(R.string.driver_sprite), Settings.isDriverSpriteEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				bikeSpriteOptionItem = new OptionsMenuElement(getString(R.string.bike_sprite), Settings.isBikeSpriteEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				lookAheadOptionItem = new OptionsMenuElement(getString(R.string.look_ahead), Settings.isLookAheadEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				nightModeOptionItem = new OptionsMenuElement(getString(R.string.night_mode), Settings.isNightModeEnabled() ? 0 : 1, this, onOffStrings, true, displayOptionsMenu);
+				controlSchemeItem = new OptionsMenuElement(getString(R.string.control_type), Settings.getControlScheme(), this, controlSchemeStrings, false, controlsOptionsMenu);
+				inputOptionItem = new OptionsMenuElement(getString(R.string.input), Settings.getInputOption(), this, keysetStrings, false, controlsOptionsMenu);
+				updateInputOptionItem();
+				keyboardSizeSlider = new SliderMenuElement(getString(R.string.keyboard_size), Settings.getKeyboardScale(), Settings.KEYBOARD_SCALE_MIN, Settings.KEYBOARD_SCALE_MAX, 5, this);
+				keyboardInMenuOptionItem = new OptionsMenuElement(getString(R.string.keyboard_in_menu), Settings.isKeyboardInMenuEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
+				vibrateOnTouchOptionItem = new OptionsMenuElement(getString(R.string.vibrate_on_touch), Settings.isVibrateOnTouchEnabled() ? 0 : 1, this, onOffStrings, true, controlsOptionsMenu);
 				clearHighscoreOptionItem = new SimpleMenuElementNew(getString(R.string.clear_highscore), eraseScreen, this);
 
 				// if (hasPointer)
 				//	optionsMenu.addItem(softwareJoystickOptionItem);
-				optionsMenu.addItem(perspectiveOptionItem);
-				optionsMenu.addItem(shadowsOptionItem);
-				optionsMenu.addItem(driverSpriteOptionItem);
-				optionsMenu.addItem(bikeSpriteOptionItem);
-				optionsMenu.addItem(inputOptionItem);
-				optionsMenu.addItem(lookAheadOptionItem);
-				optionsMenu.addItem(vibrateOnTouchOptionItem);
-				optionsMenu.addItem(keyboardInMenuOptionItem);
-				optionsMenu.addItem(nightModeOptionItem);
+				optionsMenu.addItem(displayOptionsItem);
+				optionsMenu.addItem(controlsOptionsItem);
 				optionsMenu.addItem(clearHighscoreOptionItem);
 				optionsMenu.addItem(createAction(ActionMenuElement.BACK));
+
+				displayOptionsMenu.addItem(perspectiveOptionItem);
+				displayOptionsMenu.addItem(shadowsOptionItem);
+				displayOptionsMenu.addItem(driverSpriteOptionItem);
+				displayOptionsMenu.addItem(bikeSpriteOptionItem);
+				displayOptionsMenu.addItem(lookAheadOptionItem);
+				displayOptionsMenu.addItem(nightModeOptionItem);
+				displayOptionsMenu.addItem(createAction(ActionMenuElement.BACK));
+
+				controlsOptionsMenu.addItem(controlSchemeItem);
+				controlsOptionsMenu.addItem(inputOptionItem);
+				controlsOptionsMenu.addItem(keyboardSizeSlider);
+				controlsOptionsMenu.addItem(keyboardInMenuOptionItem);
+				controlsOptionsMenu.addItem(vibrateOnTouchOptionItem);
+				controlsOptionsMenu.addItem(createAction(ActionMenuElement.BACK));
 
 				// noAction = new ActionMenuElement(getString(R.string.no), 0, this, null, false, mainMenu, true);
 				// yesAction = new ActionMenuElement(getString(R.string.yes), 0, this, null, false, mainMenu, true);
@@ -423,6 +457,22 @@ public class Menu
 				resetScreen.addItem(createEmptyLine(true));
 				resetScreen.addItem(createAction(ActionMenuElement.NO));
 				resetScreen.addItem(createAction(ActionMenuElement.YES));
+
+				whatsNewScreen = new MenuScreen(getString(R.string.whats_new) + " v" + getAppVersion(), helpMenu);
+				whatsNewScreen.setIsTextScreen(true);
+				whatsNewItem = new SimpleMenuElementNew(getString(R.string.whats_new), whatsNewScreen, this);
+				whatsNewScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.whats_new_text))));
+				if (isDebugBuild()) {
+					whatsNewReplayItem = new ActionMenuElement(getString(R.string.whats_new_replay), 0, this);
+					whatsNewScreen.addItem(whatsNewReplayItem);
+				}
+				// "Ok" label, BACK action: reads better than "Back" for a one-way announcement
+				// screen, but keeps BACK's actual navigation (ActionMenuElement.OK is hard-wired
+				// to saveCompletedTrack() for the finished-race screen — wrong handler here)
+				whatsNewScreen.addItem(new ActionMenuElement(getString(R.string.ok), ActionMenuElement.BACK, this));
+				// default the highlight to Ok, not the debug replay row: the first FIRE press
+				// should dismiss the screen, not restart the app
+				whatsNewScreen.setSelected(whatsNewScreen.menuItems.size() - 1);
 
 				objectiveHelpScreen = new MenuScreen(getString(R.string.objective), helpMenu);
 				objectiveHelpScreen.setIsTextScreen(true);
@@ -449,11 +499,29 @@ public class Menu
 				highscoreHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
 				optionsHelpScreen = new MenuScreen(getString(R.string.options), helpMenu);
-				optionsHelpScreen.setIsTextScreen(true);
 				optionsHelpItem = new SimpleMenuElementNew(getString(R.string.options), optionsHelpScreen, this);
-				optionsHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.options_text))));
+
+				optionsDisplayHelpScreen = new MenuScreen(getString(R.string.options_display), optionsHelpScreen);
+				optionsDisplayHelpScreen.setIsTextScreen(true);
+				optionsDisplayHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.options_display_text))));
+				optionsDisplayHelpScreen.addItem(createAction(ActionMenuElement.BACK));
+
+				optionsControlsHelpScreen = new MenuScreen(getString(R.string.options_controls), optionsHelpScreen);
+				optionsControlsHelpScreen.setIsTextScreen(true);
+				optionsControlsHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.options_controls_text))));
+				optionsControlsHelpScreen.addItem(createAction(ActionMenuElement.BACK));
+
+				optionsClearHelpScreen = new MenuScreen(getString(R.string.clear_highscore), optionsHelpScreen);
+				optionsClearHelpScreen.setIsTextScreen(true);
+				optionsClearHelpScreen.addItem(new TextMenuElement(fromHtml(getString(R.string.clear_highscore_text))));
+				optionsClearHelpScreen.addItem(createAction(ActionMenuElement.BACK));
+
+				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.options_display), optionsDisplayHelpScreen, this));
+				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.options_controls), optionsControlsHelpScreen, this));
+				optionsHelpScreen.addItem(new SimpleMenuElementNew(getString(R.string.clear_highscore), optionsClearHelpScreen, this));
 				optionsHelpScreen.addItem(createAction(ActionMenuElement.BACK));
 
+				helpMenu.addItem(whatsNewItem);
 				helpMenu.addItem(objectiveHelpItem);
 				helpMenu.addItem(keysHelpItem);
 				helpMenu.addItem(unlockingHelpItem);
@@ -767,11 +835,22 @@ public class Menu
 		return getGDView().getScaledWidth();
 	} */
 
+	public void setPendingWhatsNew(boolean pending) {
+		pendingWhatsNew = pending;
+	}
+
+	// Called from the blinking hint on the main menu (GDActivity.whatsNewHintView).
+	public void openWhatsNew() {
+		whatsNewScreen.setNavTarget(currentMenu); // Back → wherever this was tapped from
+		setCurrentMenu(whatsNewScreen, false);
+	}
+
 	public void showMenu(int k) {
 		logDebug("[Menu] showMenu()");
 		// k = 2;
 
 		GDActivity gd = getGDActivity();
+		if (gd == null || gd.menu != this) return; // orphaned: another activity owns the game now
 		GameView view = getGDView();
 		Loader loader = getLevelLoader();
 
@@ -840,6 +919,8 @@ public class Menu
 		gd.gameToMenu();
 
 		do {
+			if (getGDActivity() != gd) return; // activity was replaced mid-loop; don't touch the new one
+
 			if (!gd.isMenuShown() || !gd.alive || currentMenu == null)
 				break;
 
@@ -1023,9 +1104,13 @@ public class Menu
 			}
 			trackSelector.setUnlockedCount(level.getUnlocked(levelSelector.getSelectedOption()));
 			trackSelector.setSelectedOption(selectedTrack[levelSelector.getSelectedOption()]);
+		} else if (newMenu == whatsNewScreen) {
+			pendingWhatsNew = false; // read: the main-menu hint won't come back this launch
 		}
-		if (newMenu == mainMenu || newMenu == playMenu && gd.physEngine != null)
+		if ((newMenu == mainMenu || newMenu == playMenu) && gd.physEngine != null)
 			gd.physEngine._casevV();
+
+		gd.setWhatsNewHintVisible(newMenu == mainMenu && pendingWhatsNew);
 
 		if (currentMenu != null)
 			currentMenu.onHide(newMenu);
@@ -1111,6 +1196,40 @@ public class Menu
 		}
 	}
 
+	// The "Input" row means different things per control scheme: keysets for the numeric keypad
+	// (nine cells to map), a left/right button layout for the button scheme (only 4 buttons, no
+	// keyset to pick), a lean sensitivity for the tilt scheme. setUnlockedCount must follow
+	// setOptions — OptionsMenuElement.setOptions() only ever shrinks it, so switching to a
+	// shorter array without restoring it would leave a lock icon on a valid option (e.g. Keyset
+	// 3 while set to a 2- or 3-item array).
+	private void updateInputOptionItem() {
+		int scheme = Settings.getControlScheme();
+
+		String[] options;
+		int labelRes;
+		int selected;
+		if (scheme == Settings.CONTROL_SCHEME_GAMEPAD) {
+			options = buttonLayoutStrings;
+			labelRes = R.string.button_layout;
+			selected = Settings.getButtonLayout();
+		} else if (scheme == Settings.CONTROL_SCHEME_TILT) {
+			options = tiltSensitivityStrings;
+			labelRes = R.string.tilt_sensitivity;
+			selected = Settings.getTiltSensitivity();
+		} else {
+			options = keysetStrings;
+			labelRes = R.string.input;
+			selected = Settings.getInputOption();
+		}
+
+		inputOptionItem.setText(getString(labelRes));
+		// update=false: nothing navigates into inputOptionItem's own optionsScreen, and
+		// MenuHelmetView.lastActive is static (one "active" helmet for the whole app).
+		inputOptionItem.setOptions(options, false);
+		inputOptionItem.setUnlockedCount(options.length - 1);
+		inputOptionItem.setSelectedOption(selected);
+	}
+
 	public void handleAction(MenuElement item) {
 		final GDActivity gd = getGDActivity();
 
@@ -1131,6 +1250,11 @@ public class Menu
 				return;
 			}
 
+		if (item == keyboardSizeSlider) {
+			Settings.setKeyboardScale(keyboardSizeSlider.getValue());
+			gd.applyKeyboardSize(!keyboardSizeSlider.isDragging());
+			return;
+		}
 		if (item == vibrateOnTouchOptionItem) {
 			Settings.setVibrateOnTouchEnabled(((OptionsMenuElement) item).getSelectedOption() == 0);
 		}
@@ -1142,6 +1266,11 @@ public class Menu
 		}
 		if (item == nightModeOptionItem) {
 			Settings.setNightModeEnabled(nightModeOptionItem.getSelectedOption() == 0);
+			gd.restartApp();
+			return;
+		}
+		if (item == whatsNewReplayItem) {
+			Settings.setLastSeenVersion("0"); // non-empty and != current, so the next launch replays it
 			gd.restartApp();
 			return;
 		}
@@ -1167,11 +1296,28 @@ public class Menu
 			}
 			Settings.setBikeSpriteEnabled(bikeSpriteOptionItem.getSelectedOption() == 0);
 		} else {
+			if (item == controlSchemeItem) {
+				if (controlSchemeItem._charvZ())
+					controlSchemeItem.setSelectedOption(controlSchemeItem.getSelectedOption() + 1);
+				Settings.setControlScheme(controlSchemeItem.getSelectedOption());
+				updateInputOptionItem();
+				gd.applyControlScheme();
+				return;
+			}
 			if (item == inputOptionItem) {
 				if (inputOptionItem._charvZ())
 					inputOptionItem.setSelectedOption(inputOptionItem.getSelectedOption() + 1);
-				getGDView().setInputOption(inputOptionItem.getSelectedOption());
-				Settings.setInputOption(inputOptionItem.getSelectedOption());
+				int scheme = Settings.getControlScheme();
+				if (scheme == Settings.CONTROL_SCHEME_GAMEPAD) {
+					Settings.setButtonLayout(inputOptionItem.getSelectedOption());
+					gd.applyControlScheme();
+				} else if (scheme == Settings.CONTROL_SCHEME_TILT) {
+					// TiltController reads the threshold on every sensor event, no rebuild needed.
+					Settings.setTiltSensitivity(inputOptionItem.getSelectedOption());
+				} else {
+					getGDView().setInputOption(inputOptionItem.getSelectedOption());
+					Settings.setInputOption(inputOptionItem.getSelectedOption());
+				}
 				return;
 			}
 			if (item == lookAheadOptionItem) {

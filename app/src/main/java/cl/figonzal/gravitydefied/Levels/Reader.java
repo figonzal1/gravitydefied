@@ -17,7 +17,7 @@ public class Reader {
 		String tmp;
 		for (int i = 0; i < 3; i++) {
 			int tCount = din.readInt();
-			if (tCount > MAX_VALID_TRACKS) {
+			if (tCount < 0 || tCount > MAX_VALID_TRACKS) {
 				din.close();
 				throw new IOException("Level file is not valid");
 			}

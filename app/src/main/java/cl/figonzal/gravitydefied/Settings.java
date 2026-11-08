@@ -26,6 +26,26 @@ public class Settings {
 	private static final String INPUT_OPTION = "input_option";
 	private static final int INPUT_OPTION_DEFAULT = 0;
 
+	private static final String KEYBOARD_SCALE = "keyboard_scale";
+	private static final int KEYBOARD_SCALE_DEFAULT = 100;
+	public static final int KEYBOARD_SCALE_MIN = 50;
+	public static final int KEYBOARD_SCALE_MAX = 200;
+
+	private static final String CONTROL_SCHEME = "control_scheme";
+	public static final int CONTROL_SCHEME_KEYPAD = 0;
+	public static final int CONTROL_SCHEME_GAMEPAD = 1;
+	public static final int CONTROL_SCHEME_TILT = 2;
+	private static final int CONTROL_SCHEME_DEFAULT = CONTROL_SCHEME_KEYPAD;
+
+	private static final String BUTTON_LAYOUT = "button_layout";
+	public static final int BUTTON_LAYOUT_ARROWS_LEFT = 0;
+	public static final int BUTTON_LAYOUT_ARROWS_RIGHT = 1;
+	private static final int BUTTON_LAYOUT_DEFAULT = BUTTON_LAYOUT_ARROWS_LEFT;
+
+	private static final String TILT_SENSITIVITY = "tilt_sensitivity";
+	public static final int TILT_SENSITIVITY_MEDIUM = 1;
+	private static final int TILT_SENSITIVITY_DEFAULT = TILT_SENSITIVITY_MEDIUM;
+
 	private static final String LOOK_AHEAD_ENABLED = "look_ahead_enabled";
 	private static final boolean LOOK_AHEAD_ENABLED_DEFAULT = true;
 
@@ -45,6 +65,9 @@ public class Settings {
 	private static final String NIGHT_MODE_ENABLED = "night_mode";
 	private static final boolean NIGHT_MODE_ENABLED_DEFAULT = false;
 
+	private static final String LAST_SEEN_VERSION = "last_seen_version";
+	private static final String LAST_SEEN_VERSION_DEFAULT = "";
+
 	private static SharedPreferences preferences;
 
 	static {
@@ -60,6 +83,10 @@ public class Settings {
 		setVibrateOnTouchEnabled(VIBRATE_ENABLED_DEFAULT);
 		setKeyboardInMenuEnabled(KEYBOARD_IN_MENU_ENABLED_DEFAULT);
 		setInputOption(INPUT_OPTION_DEFAULT);
+		setKeyboardScale(KEYBOARD_SCALE_DEFAULT);
+		setControlScheme(CONTROL_SCHEME_DEFAULT);
+		setButtonLayout(BUTTON_LAYOUT_DEFAULT);
+		setTiltSensitivity(TILT_SENSITIVITY_DEFAULT);
 		setLevelsSort(LEVELS_SORT_DEFAULT);
 		setName(NAME_CHARS_DEFALUT);
 		setNightModeEnabled(NIGHT_MODE_ENABLED_DEFAULT);
@@ -137,6 +164,41 @@ public class Settings {
 		setInt(INPUT_OPTION, value);
 	}
 
+	public static int getKeyboardScale() {
+		int value = preferences.getInt(KEYBOARD_SCALE, KEYBOARD_SCALE_DEFAULT);
+		if (value < KEYBOARD_SCALE_MIN) return KEYBOARD_SCALE_MIN;
+		if (value > KEYBOARD_SCALE_MAX) return KEYBOARD_SCALE_MAX;
+		return value;
+	}
+
+	public static void setKeyboardScale(int value) {
+		setInt(KEYBOARD_SCALE, value);
+	}
+
+	public static int getControlScheme() {
+		return preferences.getInt(CONTROL_SCHEME, CONTROL_SCHEME_DEFAULT);
+	}
+
+	public static void setControlScheme(int value) {
+		setInt(CONTROL_SCHEME, value);
+	}
+
+	public static int getButtonLayout() {
+		return preferences.getInt(BUTTON_LAYOUT, BUTTON_LAYOUT_DEFAULT);
+	}
+
+	public static void setButtonLayout(int value) {
+		setInt(BUTTON_LAYOUT, value);
+	}
+
+	public static int getTiltSensitivity() {
+		return preferences.getInt(TILT_SENSITIVITY, TILT_SENSITIVITY_DEFAULT);
+	}
+
+	public static void setTiltSensitivity(int value) {
+		setInt(TILT_SENSITIVITY, value);
+	}
+
 	public static API.LevelsSortType getLevelsSort() {
 		return API.getSortTypeById(preferences.getInt(LEVELS_SORT, LEVELS_SORT_DEFAULT));
 	}
@@ -179,6 +241,14 @@ public class Settings {
 
 	public static void setNightModeEnabled(boolean enabled) {
 		setBoolean(NIGHT_MODE_ENABLED, enabled);
+	}
+
+	public static String getLastSeenVersion() {
+		return preferences.getString(LAST_SEEN_VERSION, LAST_SEEN_VERSION_DEFAULT);
+	}
+
+	public static void setLastSeenVersion(String version) {
+		setString(LAST_SEEN_VERSION, version);
 	}
 
 	private static void setLong(String key, long value) {
